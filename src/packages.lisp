@@ -5,6 +5,13 @@
   (:use :common-lisp :cxml :arnesi :iterate)
   (:export))
 
+(defpackage :net.acceleration.xhtml
+	 (:nicknames :xhtml)
+  (:use )
+  (:export
+	#:div
+))
+
 (defpackage :net.acceleration.xul
 	 (:nicknames :xul)
   (:use )
