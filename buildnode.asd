@@ -11,6 +11,7 @@
   :description "Tool for building up an xml dom nicely."
   :components ((:module :src
 								:components ((:file "packages")
+												 (:file "buildnode" :depends-on ("packages"))
 												 (:file "xul" :depends-on ("packages"))
 												 (:file "xultags" :depends-on ("packages" "xul")))))
-  :depends-on (:cxml :iterate :yaclml))
+  :depends-on (:cxml :iterate :yaclml :flexi-streams :arnesi))

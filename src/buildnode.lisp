@@ -7,6 +7,9 @@
 				  "The root location to output XUL files.
 Must be addressable by the lisp system. Read from command line as input parameter?")
 
+(defparameter +HTML-Namespace+ "http://www.w3.org/1999/xhtml")
+
+
 (defvar *common-javascript*
   '((:JSHelper "/JSControls/JSHelper.js")))
 
@@ -14,7 +17,7 @@ Must be addressable by the lisp system. Read from command line as input paramete
 (defun create-complete-element (document namespace tagname attributes children)
   (let ((e (dom:create-element-ns document namespace tagname)))
 	 (iterate (for (name . value) in attributes)
-				 (dom:set-attribute e (string name) (string value)))
+				 (dom:set-attribute e (string-downcase name) (string value)))
 	 (iterate (for child in children)
 				 (dom:append-child e
 										 (if (stringp child)
@@ -25,28 +28,32 @@ Must be addressable by the lisp system. Read from command line as input paramete
 ;(create-complete-element *document* +xul-namespace+ "box" '(("id" "asdf")) '())
 
 
-(defun write-document (document &optional (out-stream *standard-output*))
-  "Write the document to the designated out-stream, or *standard-ouput* by default."
-  (eswitch ((stream-element-type out-stream))
-	 ('character (write-document-to-character-stream document out-stream))
-	 ('octet (write-document-to-octet-stream document out-stream))))
+
 
 (defun write-document-to-character-stream (document char-stream)
-  (let ((buf (with-output-to-sequence (stream)
+  (let ((buf (flex:with-output-to-sequence (stream)
 					(write-document-to-octet-stream document stream))))
 	 
 	 (flex:with-input-from-sequence (input buf)
 		;;echo the flexi stream to output
-		(with-open-stream (echo (make-echo-stream (make-flexi-stream input)
+		(with-open-stream (echo (make-echo-stream (flex:make-flexi-stream input)
 																char-stream))
 		  (loop for line = (read-line echo nil)
 				  while line)))))
 
+
 (defun write-document-to-octet-stream (document octet-stream)
-  (dom:map-document (make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream))
+  (dom:map-document (cxml:make-octet-stream-sink octet-stream)
 						  document
 						  :include-doctype :canonical-notations
 						  :include-xmlns-attributes T))
+
+(defun write-document (document &optional (out-stream *standard-output*))
+  "Write the document to the designated out-stream, or *standard-ouput* by default."
+  (case (stream-element-type out-stream) 
+	 ('character (write-document-to-character-stream document out-stream))
+	 ('octet (write-document-to-octet-stream document out-stream))))
+
 
 
 
