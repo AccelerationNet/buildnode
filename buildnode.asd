@@ -14,5 +14,5 @@
 												 (:file "buildnode" :depends-on ("packages"))
 												 (:file "xul" :depends-on ("packages" "buildnode"))
 												 (:file "xul-tags" :depends-on ("packages" "xul"))
-												 (:file "html-tags" :depends-on ("packages" "xul")))))
+												 (:file "xhtml-tags" :depends-on ("packages" "xul")))))
   :depends-on (:cxml :iterate :flexi-streams :arnesi))
