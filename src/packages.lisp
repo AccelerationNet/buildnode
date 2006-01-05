@@ -3,7 +3,11 @@
 (defpackage :net.acceleration.buildnode
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
-  (:export))
+  (:export
+	#:<?xml-stylesheet
+	#:create-complete-element
+	#:write-document
+	#:with-xul-document))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)

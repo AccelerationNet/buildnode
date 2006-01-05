@@ -14,13 +14,16 @@ Must be addressable by the lisp system. Read from command line as input paramete
 
 (defun create-complete-element (document namespace tagname attributes children)
   (let ((e (dom:create-element-ns document namespace tagname)))
-	 (iterate (for (name . value) in attributes)
+	 (when (oddp (length attributes))
+		(error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
+	 (iterate (for name = (pop attributes))
+				 (for value = (pop attributes))
+				 (while name)
 				 (dom:set-attribute e (string-downcase name) (string value)))
 	 (iterate (for child in children)
-				 (dom:append-child e
-										 (if (stringp child)
-											  (dom:create-text-node document child)
-											  child)))
+				 (dom:append-child e (if (stringp child)
+												 (dom:create-text-node document child)
+												 child)))
 	 e))
 ;(create-complete-element *document* +xul-namespace+ "box" '(("id" "asdf")) '())
 

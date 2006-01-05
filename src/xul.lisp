@@ -17,6 +17,18 @@
 ;				"sortResource" "sortResource2" "statustext" "style" "template" 
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
 
+(defmacro def-tag-node (package name prefix namespace doc  )
+  (let* ((evaled-name (eval name))
+			(name (intern (string-upcase evaled-name) (eval package)))
+			(tagname (string-downcase (concatenate 'string prefix ":" evaled-name))))
+	 `(CL:defun ,name (&optional attributes &rest children )
+		,doc
+		(declare (special *document*))
+		(create-complete-element *document*
+		 ,namespace
+		 ,tagname
+		 attributes
+		 children))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   (declare (ignore attributes))
@@ -27,18 +39,6 @@
 
 ;(def-html-tag "a" "Defines an anchor")
 
-(defmacro def-tag-node (package name prefix namespace doc  )
-  (let* ((evaled-name (eval name))
-			(name (intern (string-upcase evaled-name) (eval package)))
-			(tagname (string-downcase (concatenate 'string prefix ":" evaled-name))))
-	 `(CL:defun ,name (attributes &rest children )
-		,doc
-		(declare (special *document*))
-		(create-complete-element *document*
-		 ,namespace
-		 ,tagname
-		 attributes
-		 children))))
 
 (defmacro with-xul-document ( &body chillins)
   `(let ((*document*  (cxml-dom:create-document)))
