@@ -1,22 +1,5 @@
 (in-package :net.acceleration.buildnode)
 
-
-(DEFUN NET.ACCELERATION.xhtml:div (&REST CHILDREN)
-  "Should be contained within a rule element. It is used to specify the generated  content for each matched node. Within the action, attributes are parsed for   resource and variable references .
-
-link:http://www.xulplanet.com/tutorials/xultu/advrules.html
-src:http://www.xulplanet.com/reference/elemref/ref_action.html"
-  (DECLARE (SPECIAL *DOCUMENT*))
-
-   
-   ARGUMENTS
-   (CREATE-COMPLETE-ELEMENT *DOCUMENT*
-                            +HTML-Namespace+
-                            "div"
-                            '()
-                            CHILDREN))
-
-
 (DEF-XUL-ELEMENT "action"
                  "Should be contained within a rule element. It is used to specify the generated  content for each matched node. Within the action, attributes are parsed for   resource and variable references .
 

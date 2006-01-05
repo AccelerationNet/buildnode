@@ -1,3 +1,5 @@
+(in-package :net.acceleration.buildnode)
+
 ;(def-html-tag "!--" "Defines a comment")
 ;(def-html-tag "!doctype" "Defines the document type")
 (def-html-tag "a" "Defines an anchor")

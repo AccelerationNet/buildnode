@@ -1,13 +1,11 @@
 (in-package :net.acceleration.buildnode)
 
-(declaim (optimize (debug 3)))
+;(declaim (optimize (debug 3)))
 
 
 (defparameter +buildnode-output-directory+ #P"/var/local/lisp/xul/"
 				  "The root location to output XUL files.
 Must be addressable by the lisp system. Read from command line as input parameter?")
-
-(defparameter +HTML-Namespace+ "http://www.w3.org/1999/xhtml")
 
 
 (defvar *common-javascript*
@@ -24,9 +22,12 @@ Must be addressable by the lisp system. Read from command line as input paramete
 											  (dom:create-text-node document child)
 											  child)))
 	 e))
-
 ;(create-complete-element *document* +xul-namespace+ "box" '(("id" "asdf")) '())
 
+(defun <?xml-stylesheet (href &optional (type "txt/css" ))
+  (declare (special *document*))
+  (let (( attrib-string (format nil " type=~s href=~s  " type href)))
+	 (dom:create-processing-instruction *document*  "xml-stylesheet" attrib-string)))
 
 
 
@@ -43,10 +44,10 @@ Must be addressable by the lisp system. Read from command line as input paramete
 
 
 (defun write-document-to-octet-stream (document octet-stream)
-  (dom:map-document (cxml:make-octet-stream-sink octet-stream)
+  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream))
 						  document
 						  :include-doctype :canonical-notations
-						  :include-xmlns-attributes T))
+						  :include-xmlns-attributes nil))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."

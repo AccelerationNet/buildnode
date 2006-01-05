@@ -1,44 +1,44 @@
 (in-package :net.acceleration.buildnode)
 
-(declaim (optimize (debug 3)))
+;(declaim (optimize (debug 2)))
 
 (defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
+(defparameter +xhtml-namespace+ "http://www.w3.org/1999/xhtml")
 
-(defparameter +xul-core-attributes+
-  (mapcar #'(lambda (s) (intern (string-upcase s)))
-			 '("align" "allowevents" "allownegativeassertions" "class" 
-				"coalesceduplicatearcs" "collapsed" "container" "containment" 
-				"context" "contextmenu" "datasources" "dir" "empty" "equalsize" 
-				"flags" "flex" "height" "hidden" "id" "insertafter" "insertbefore" 
-				"left" "maxheight" "maxwidth" "menu" "minheight" "minwidth" 
-				"mousethrough" "observes" "ordinal" "orient" "pack" "persist" "popup" 
-				"position" "preference-editable" "ref" "removeelement" "sortDirection" 
-				"sortResource" "sortResource2" "statustext" "style" "template" 
-				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
+;(defparameter +xul-core-attributes+
+;  (mapcar #'(lambda (s) (intern (string-upcase s)))
+;			 '("align" "allowevents" "allownegativeassertions" "class" 
+;				"coalesceduplicatearcs" "collapsed" "container" "containment" 
+;				"context" "contextmenu" "datasources" "dir" "empty" "equalsize" 
+;				"flags" "flex" "height" "hidden" "id" "insertafter" "insertbefore" 
+;				"left" "maxheight" "maxwidth" "menu" "minheight" "minwidth" 
+;				"mousethrough" "observes" "ordinal" "orient" "pack" "persist" "popup" 
+;				"position" "preference-editable" "ref" "removeelement" "sortDirection" 
+;				"sortResource" "sortResource2" "statustext" "style" "template" 
+;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
 
 
-(defmacro def-xul-element (sname documentation &rest attributes  )
-  (let* ((name (intern (string-upcase sname) :net.acceleration.xul))
-			(attributes (append +xul-core-attributes+
-									  (iterate (for (entry _) in attributes)
-												  (unless (find (string-upcase entry)
-																	 +xul-core-attributes+
-																	 :test #'string=)
-													 (collect (intern (string-upcase entry))))))))
-	 
-	 `(CL:defun ,name (&rest arguments )
-		,documentation
+(defmacro def-xul-element (name doc &rest attributes)
+  (declare (ignore attributes))
+  `(def-tag-node :net.acceleration.xul ,name "xul" +xul-namespace+ ,doc))
+
+(defmacro def-html-tag (name doc)
+  `(def-tag-node :net.acceleration.xhtml ,name "xhtml" +xhtml-namespace+ ,doc))
+
+;(def-html-tag "a" "Defines an anchor")
+
+(defmacro def-tag-node (package name prefix namespace doc  )
+  (let* ((evaled-name (eval name))
+			(name (intern (string-upcase evaled-name) (eval package)))
+			(tagname (string-downcase (concatenate 'string prefix ":" evaled-name))))
+	 `(CL:defun ,name (attributes &rest children )
+		,doc
 		(declare (special *document*))
-		(yaclml::attribute-bind (&attribute attributes ,@attributes &body children) arguments
-			 (create-complete-element *document*
-											  +xul-namespace+
-											  ,sname
-											  (CL:append attributes
-															 (iterate (for key in '(,@attributes))
-																		 (for value in (list ,@attributes))
-																		 (when value
-																			(collect (cons key value)))))
-											  children)))))
+		(create-complete-element *document*
+		 ,namespace
+		 ,tagname
+		 attributes
+		 children))))
 
 (defmacro with-xul-document ( &body chillins)
   `(let ((*document*  (cxml-dom:create-document)))
@@ -46,29 +46,6 @@
 	 (iterate (for child in (list ,@chillins))
 				 (dom:append-child *document* child))
 	 *document*))
-
-(defun <?xml-stylesheet (href &optional (type "txt/css" ))
-  (declare (special *document*))
-  (let (( attrib-string (format nil " type=~s href=~s  " type href)))
-	 (dom:create-processing-instruction *document*  "xml-stylesheet" attrib-string)))
-
-(setf test-doc
-		(with-xul-document
-		  (<?xml-stylesheet "chrome://global/skin/" )
-		  (<?xml-stylesheet "/css/MC.css" )
-		  (dom:create-element-ns *document* uri qname)
-		  (xul:window
-			:title "MC Administration"
-			(xhtml:div (xhtml:div))
-			(xul:script  :type "text/javascript" :src "/JSControls/JSHelper.js")
-			(xul:label :class "h1" "MobileCampus Administration"))
-		  (xul:vbox :flex "1"
-						(xul:hbox :flex "1"))))
-
-(buildnode::write-document
- test-doc
- *standard-output*)
-
 
 ;<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 ;<?xml-stylesheet href="/css/MC.css" type="text/css"?>
@@ -100,5 +77,3 @@
    
 ;   <vbox flex="1">
 ;      <hbox flex="1">
-
-
