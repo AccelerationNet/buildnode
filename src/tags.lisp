@@ -17,6 +17,17 @@
 ;				"sortResource" "sortResource2" "statustext" "style" "template" 
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
 
+(defun flatten (list)
+  (labels ((helper (list &optional result)				 
+				 (if (null list) result
+					  (helper (cdr list)
+								 (nconc result
+										  (if (listp (car list))
+												(helper (car list))
+												(list (car list))))))))
+	 (helper list)))
+
+
 (defmacro def-tag-node (package name prefix namespace doc  )
   (let* ((evaled-name (eval name))
 			(name (intern (string-upcase evaled-name) (eval package)))
@@ -28,7 +39,7 @@
 		 ,namespace
 		 ,tagname
 		 attributes
-		 children))))
+		 (flatten children)))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   (declare (ignore attributes))
@@ -39,12 +50,13 @@
 
 
 
-(defmacro with-document ( &body chillins)
+(defmacro with-document (&body chillins)
   `(let ((*document*  (cxml-dom:create-document)))
 	 (declare (special *document*))
-	 (iterate (for child in (list ,@chillins))
-				 (dom:append-child *document* child))
-	 *document*))
+	 (let ((children (flatten (list ,@chillins))))
+		(iterate (for child in children)
+					(dom:append-child *document* child))
+		*document*)))
 
 
 (defmacro with-document-to-file (filename &body chillins)
