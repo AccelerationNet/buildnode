@@ -3,6 +3,7 @@
 (defpackage :net.acceleration.buildnode
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
+  (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:?xml-stylesheet
 	#:create-complete-element

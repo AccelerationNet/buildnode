@@ -2,12 +2,6 @@
 
 ;(declaim (optimize (debug 3)))
 
-
-(defparameter +buildnode-output-directory+ #P"/var/local/lisp/xul/"
-				  "The root location to output XUL files.
-Must be addressable by the lisp system. Read from command line as input parameter?")
-
-
 (defvar *common-javascript*
   '((:JSHelper "/JSControls/JSHelper.js")))
 
@@ -64,7 +58,7 @@ must be the document on which they were created.  At the end of the form, the
 complete document is returned"
   `(let ((*document*  (cxml-dom:create-document)))
 	 (declare (special *document*))
-	 (let ((children (flatten (list ,@chillins))))
+	 (let ((children (kmrcl:flatten (list ,@chillins))))
 		(iterate (for child in children)
 					(dom:append-child *document* child))
 		*document*)))

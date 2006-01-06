@@ -1,8 +1,8 @@
 (in-package :buildnode)
 
 (with-document-to-file "foo.xul"
-  (<?xml-stylesheet "chrome://global/skin/" )
-  (<?xml-stylesheet "/css/MC.css" )
+  (?xml-stylesheet "chrome://global/skin/" )
+  (?xml-stylesheet "/css/MC.css" )
 		  (xul:window '(:title "MC Administration"
 							 :onload "asdf")
 						  (xhtml:div '()  (xhtml:div))

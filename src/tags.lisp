@@ -16,17 +16,6 @@
 ;				"sortResource" "sortResource2" "statustext" "style" "template" 
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
 
-(defun flatten (list)
-  "flattens a list
-ex: (a (b (c d))) -> (a b c d)"
-  (labels ((helper (list &optional result)				 
-				 (if (null list) result
-					  (helper (cdr list)
-								 (nconc result
-										  (if (listp (car list))
-												(helper (car list))
-												(list (car list))))))))
-	 (helper list)))
 
 (defmacro def-tag-node (package name prefix namespace doc  )
   "Defines a tag function in the package with the name and prefix specified
@@ -42,7 +31,7 @@ lisp namespace. When this function is called it wil create a 'xul:box' node in t
 		 ,namespace
 		 ,tagname
 		 attributes
-		 (flatten children)))))
+		 (kmrcl:flatten children)))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
