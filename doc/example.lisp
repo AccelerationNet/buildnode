@@ -1,15 +1,4 @@
 (in-package :buildnode)
-(setf test-doc
-		(with-xul-document
-		  (<?xml-stylesheet "chrome://global/skin/" )
-		  (<?xml-stylesheet "/css/MC.css" )
-		  (xul:window '(:title "MC Administration"
-									 :onload "asdf")
-						  (xhtml:div '()  (xhtml:div))
-						  (xul:script  '(:type "text/javascript" :src "/JSControls/JSHelper.js"))
-						  (xul:label '(:class "h1") "MobileCampus Administration")
-						  (xul:vbox '(:flex "1")
-										(xul:hbox '(:flex "1"))))))
 
 (with-document-to-file "foo.xul"
   (<?xml-stylesheet "chrome://global/skin/" )
