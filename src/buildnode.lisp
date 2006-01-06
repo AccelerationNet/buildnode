@@ -13,9 +13,11 @@ Must be addressable by the lisp system. Read from command line as input paramete
 
 
 (defun create-complete-element (document namespace tagname attributes children)
+  "Creates a fully qualified xml element"
   (let ((e (dom:create-element-ns document namespace tagname)))
 	 (when (oddp (length attributes))
 		(error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
+	 
 	 (iterate (for name = (pop attributes))
 				 (for value = (pop attributes))
 				 (while name)
@@ -25,16 +27,11 @@ Must be addressable by the lisp system. Read from command line as input paramete
 												 (dom:create-text-node document child)
 												 child)))
 	 e))
-;(create-complete-element *document* +xul-namespace+ "box" '(("id" "asdf")) '())
-
-(defun <?xml-stylesheet (href &optional (type "txt/css" ))
-  (declare (special *document*))
-  (let (( attrib-string (format nil " type=~s href=~s  " type href)))
-	 (dom:create-processing-instruction *document*  "xml-stylesheet" attrib-string)))
 
 
 
 (defun write-document-to-character-stream (document char-stream)
+  "writes a cxml:dom document to a character stream"
   (let ((buf (flex:with-output-to-sequence (stream)
 					(write-document-to-octet-stream document stream))))
 	 
@@ -47,6 +44,7 @@ Must be addressable by the lisp system. Read from command line as input paramete
 
 
 (defun write-document-to-octet-stream (document octet-stream)
+    "writes a cxml:dom document to a character stream"
   (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream))
 						  document
 						  :include-doctype :canonical-notations
@@ -58,6 +56,24 @@ Must be addressable by the lisp system. Read from command line as input paramete
 	 ('character (write-document-to-character-stream document out-stream))
 	 ('octet (write-document-to-octet-stream document out-stream))))
 
+(defmacro with-document (&body chillins)
+  "(with-document ( a bunch of child nodes of the document )) --> cxml:dom document
+Creates an environment in which the special variable *document* is available
+a document is necessary to create dom nodes and the document the nodes end up on
+must be the document on which they were created.  At the end of the form, the
+complete document is returned"
+  `(let ((*document*  (cxml-dom:create-document)))
+	 (declare (special *document*))
+	 (let ((children (flatten (list ,@chillins))))
+		(iterate (for child in children)
+					(dom:append-child *document* child))
+		*document*)))
+
+(defmacro with-document-to-file (filename &body chillins)
+  "Creates a document block with-document upon which to add the chillins
+(southern for children).  When the document is complete, it is written out to the specified file."
+  `(with-output-to-file (stream ,filename :if-exists :supersede)
+	 (write-document (with-document ,@chillins) stream)))
 
 
 

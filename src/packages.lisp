@@ -4,7 +4,7 @@
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
   (:export
-	#:<?xml-stylesheet
+	#:?xml-stylesheet
 	#:create-complete-element
 	#:write-document
 	#:with-xul-document))
@@ -105,6 +105,7 @@
 	 (:nicknames :xul)
   (:use )
   (:export
+	#:groupbox-with-caption
 	#:action
 	#:arrowscrollbox
 	#:bbox

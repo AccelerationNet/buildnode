@@ -1,5 +1,7 @@
 (in-package :net.acceleration.buildnode)
 
+;;;THIS DOCUMENT CONTAINS THE GENERATED DEFINITIONS OF ALL THE XUL elements pulled from XULPlanet
+
 (DEF-XUL-ELEMENT "action"
                  "Should be contained within a rule element. It is used to specify the generated  content for each matched node. Within the action, attributes are parsed for   resource and variable references .
 
