@@ -55,10 +55,18 @@ special variable *document*"
 					 (append (list (xul:caption (list :label caption-label)))
 								children)))
 
-(defun script-block (list-of-urls)
-  "given a list of urls, will build a list of xul:script nodes pointing to the appropriate urls"
+(defun script-block (fn list-of-urls)
+  "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"
   (mapcar
 	(lambda (url)
-	  (xul:script (list :language "javascript" :type "text/javascript" :src url )))
+	  (funcall fn (list :language "javascript" :type "text/javascript" :src url )))
+	list-of-urls))
+
+(defun stylesheet-block (list &optional (type "text/css"))
+  "given a list of urls, will build a list of ?xml-stylesheet nodes pointing to the appropriate urls"
+  (mapcar
+	(lambda (sheet)
+	  (?xml-stylesheet sheet type))
 	list))
+
 
