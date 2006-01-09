@@ -9,6 +9,8 @@
 	#:create-complete-element
 	#:write-document
 	#:with-xul-document
+	#:with-document
+	#:with-document-to-file
 	#:script-block))
 
 (defpackage :net.acceleration.xhtml
