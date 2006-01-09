@@ -8,7 +8,8 @@
 	#:?xml-stylesheet
 	#:create-complete-element
 	#:write-document
-	#:with-xul-document))
+	#:with-xul-document
+	#:script-block))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)
