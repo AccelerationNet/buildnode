@@ -63,6 +63,7 @@ complete document is returned"
 					(dom:append-child *document* child))
 		*document*)))
 
+
 (defmacro with-document-to-file (filename &body chillins)
   "Creates a document block with-document upon which to add the chillins
 (southern for children).  When the document is complete, it is written out to the specified file."
@@ -70,6 +71,9 @@ complete document is returned"
 	 (write-document (with-document ,@chillins) stream)))
 
 
+(defun make-attribute-list (&rest attributes)
+  "Create an attribute list out of a plist of attributes passed in."
+  attributes)
 
 ;;creating a xul file
 ;(write-dom-to-file "Admin-main.xul"

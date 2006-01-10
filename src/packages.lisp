@@ -11,7 +11,8 @@
 	#:with-xul-document
 	#:with-document
 	#:with-document-to-file
-	#:script-block))
+	#:script-block
+	#:make-attribute-list))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :js :javascript)
