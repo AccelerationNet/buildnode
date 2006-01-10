@@ -1,4 +1,6 @@
 
+;;;; this code was used to build up the html-tags.lisp file,
+;;;; it doesn't have much purpose beyond that.
 
 (defun create-html-tags ()
   (with-open-file (str "buildnode/src/html-tags.lisp"  :direction :output :if-exists :supersede )
