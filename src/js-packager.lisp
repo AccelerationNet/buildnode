@@ -20,7 +20,7 @@
 (defun find-graph-node (key js-dependency-graph)
   (gethash key (js-dependency-graph-hash js-dependency-graph) ))
 
-(defun (setf find-graph-node) (val key js-dependency-graph)
+(defun add-graph-node (key val js-dependency-graph)
   (setf (gethash key (js-dependency-graph-hash js-dependency-graph)) val))
 
 
@@ -62,20 +62,16 @@ that is designated by the key (either a keyword in the *global-js-dependency-gra
 
 (defun def-js-file (js-name url &key depends-on)
   "defines a named (using a keyword) javascript file and its dependencies"
-	 (print js::*global-js-dependency-graph*)
-	 (setf (find-graph-node js-name js::*global-js-dependency-graph*) (make-js-graph-node :url url :dependency-list depends-on))
-	 (setf (find-graph-node url js::*global-js-dependency-graph*) (make-js-graph-node :url url :dependency-list depends-on)))
+	 (add-graph-node js-name (make-js-graph-node :url url :dependency-list depends-on) *global-js-dependency-graph* )
+	 (add-graph-node url (make-js-graph-node :url url :dependency-list depends-on) *global-js-dependency-graph* ))
 
 (defun def-anon-js-file (js-name url &key depends-on)
   "defines an js file and its dependencies using only a url"
- 
-	 (setf (find-graph-node url *global-js-dependency-graph*) (make-js-graph-node :url url :dependency-list depends-on)))
+	 (add-graph-node (make-js-graph-node :url url :dependency-list depends-on) *global-js-dependency-graph*))
 
 (defun js-defined-p (js-key-or-url)
   "has a js-file been defined either with or without a name"
- 
-	
-	 (nth-value 1 (gethash js-key-or-url *global-js-dependency-graph*)))
+	 (nth-value 1 (find-graph-node js-key-or-url *global-js-dependency-graph*)))
 
 (defun use-js-file (js-collector url-or-key &key depends-on)
   (unless (js-defined-p url-or-key)
@@ -84,11 +80,14 @@ that is designated by the key (either a keyword in the *global-js-dependency-gra
 		  (error (format nil "js-file with name ~s is not defined" url-or-key))))
   (if (stringp url-or-key)
 		(setf (gethash url-or-key (url-hash js-collector)) T)
-		(setf (gethash 
-				 (car (gethash url-or-key *global-js-dependency-graph*))
+		(setf (gethash
+				 ;; Get the url for the name out of *global-js-dependency-graph*
+				 (js-graph-node-url (find-graph-node url-or-key *global-js-dependency-graph*))
 				 (url-hash js-collector)) T)))
 
-(defmacro with-javascript-collector ((variable &optional (js-collector (make-js-collector))) &body body)
+(defmacro with-javascript-collector (&body body)
+  "returnst a list of js file urls.  There is a special-symbol use-js-file that is a function to add a js file to the collection.
+ (use-js-file (url-or-JsName :depends-on '(a dependency list of urls and keyword names)) => has the side effect of adding a js-file to the js-collection"
   `(let ((,variable ,js-collector)
 			(use-js-file))
 	 (declare (special ,variable))
