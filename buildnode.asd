@@ -12,7 +12,11 @@
   :components ((:module :src
 								:components ((:file "packages")
 												 (:file "buildnode" :depends-on ("packages"))
-												 (:file "tags" :depends-on ("packages" "buildnode"))
-												 (:file "xul-tags" :depends-on ("packages" "tags"))
-												 (:file "xhtml-tags" :depends-on ("packages" "tags")))))
+												 (:module :tags
+															 :components ((:file "tags" )
+																			  (:file "xul-tags" )
+																			  (:file "custom-xul" :depends-on ( "xul-tags"))
+																			  (:file "xhtml-tags" )
+																			  (:file "custom-html" :depends-on ("xhtml-tags")))
+															 :depends-on ("packages" "buildnode")))))
   :depends-on (:cxml :iterate :flexi-streams :arnesi :kmrcl))

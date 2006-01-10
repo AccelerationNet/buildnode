@@ -20,7 +20,7 @@
 (defmacro def-tag-node (package name prefix namespace doc  )
   "Defines a tag function in the package with the name and prefix specified
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
-lisp namespace. When this function is called it wil create a 'xul:box' node in the xmlns provided in the namespace param"
+lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
   (let* ((evaled-name (eval name))
 			(name (intern (string-upcase evaled-name) (eval package)))
 			(tagname (string-downcase (concatenate 'string prefix ":" evaled-name))))
@@ -48,12 +48,6 @@ special variable *document*"
   (declare (special *document*))
   (let (( attrib-string (format nil " type=~s href=~s  " type href)))
 	 (dom:create-processing-instruction *document*  "xml-stylesheet" attrib-string)))
-
-(defun net.acceleration.xul:groupbox-with-caption (caption-label &optional attributes &rest children)
-  "creates a group box that contains a caption element with the appropriate label"
-  (xul:groupbox attributes
-					 (append (list (xul:caption (list :label caption-label)))
-								children)))
 
 (defun script-block (fn list-of-urls)
   "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"
