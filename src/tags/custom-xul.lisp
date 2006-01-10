@@ -3,5 +3,5 @@
 (defun net.acceleration.xul:groupbox-with-caption (caption-label &optional attributes &rest children)
   "creates a group box that contains a caption element with the appropriate label"
   (xul:groupbox attributes
-					 (append (list (xul:caption (make-attribute-list :label caption-label)))
+					 (append (list (xul:caption (list :label caption-label)))
 								children)))

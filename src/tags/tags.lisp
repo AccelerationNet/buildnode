@@ -53,7 +53,7 @@ special variable *document*"
   "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"
   (mapcar
 	(lambda (url)
-	  (funcall fn (make-attribute-list :language "javascript" :type "text/javascript" :src url)))
+	  (funcall fn (list :language "javascript" :type "text/javascript" :src url )))
 	list-of-urls))
 
 (defun stylesheet-block (list &optional (type "text/css"))
