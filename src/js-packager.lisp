@@ -88,14 +88,15 @@ that is designated by the key (either a keyword in the *global-js-dependency-gra
 (defmacro with-javascript-collector (&body body)
   "returnst a list of js file urls.  There is a special-symbol use-js-file that is a function to add a js file to the collection.
  (use-js-file (url-or-JsName :depends-on '(a dependency list of urls and keyword names)) => has the side effect of adding a js-file to the js-collection"
-  `(let ((,variable ,js-collector)
+  (kmrcl:with-gensyms (variable)
+  `(let ((,variable (make-js-collector))
 			(use-js-file))
 	 (declare (special ,variable))
 	 (declare (special use-js-file))
 	 (setf (symbol-function 'use-js-file)
 	  (lambda (url-or-key &key depends-on )
 		 (funcall #'net.acceleration.javascript::use-js-file ,variable url-or-key depends-on))
-	 ,@body)))
+	 ,@body))))
 
 
 
