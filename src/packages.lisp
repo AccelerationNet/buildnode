@@ -13,6 +13,16 @@
 	#:with-document-to-file
 	#:script-block))
 
+(defpackage :net.acceleration.javascript
+	 (:nicknames :js :javascript)
+  
+  (:export
+	#:with-javascript-collector
+	#:js-defined-p
+	#:def-js-file
+	#:def-anon-js-file
+	))
+
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)
   (:use )
