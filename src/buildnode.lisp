@@ -1,7 +1,5 @@
 (in-package :net.acceleration.buildnode)
 
-;(declaim (optimize (debug 3)))
-
 (defvar *common-javascript*
   '((:JSHelper "/JSControls/JSHelper.js")))
 
@@ -26,7 +24,6 @@
   (let ((e (dom:create-element-ns document namespace tagname)))
 	 (when (oddp (length attributes))
 		(error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-	 
 	 (iterate (for name = (pop attributes))
 				 (for value = (pop attributes))
 				 (while name)
