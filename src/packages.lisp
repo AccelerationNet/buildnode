@@ -11,6 +11,7 @@
 	#:with-xul-document
 	#:with-document
 	#:with-document-to-file
+	#:append-nodes
 	#:script-block))
 
 (defpackage :net.acceleration.javascript
