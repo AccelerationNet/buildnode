@@ -12,6 +12,7 @@
   :components ((:module :src
 								:components ((:file "packages")
 												 (:file "buildnode" :depends-on ("packages"))
+												 (:file "js-packager" :depends-on ("packages"))
 												 (:module :tags
 															 :components ((:file "tags" )
 																			  (:file "xul-tags" )
