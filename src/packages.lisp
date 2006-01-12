@@ -3,7 +3,6 @@
 (defpackage :net.acceleration.buildnode
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
-  (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:?xml-stylesheet
 	#:create-complete-element
@@ -16,7 +15,8 @@
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :js :javascript)
-  
+  (:use :common-lisp :kmrcl)
+  (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:with-javascript-collector
 	#:js-defined-p
