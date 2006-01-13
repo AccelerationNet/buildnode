@@ -11,11 +11,12 @@
 	#:with-document
 	#:with-document-to-file
 	#:append-nodes
-	#:script-block))
+	#:script-block
+	#:*document*))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :js :javascript)
-  (:use :common-lisp :kmrcl)
+  (:use :common-lisp :kmrcl :buildnode)
   (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:with-javascript-collector
