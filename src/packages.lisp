@@ -12,6 +12,7 @@
 	#:with-document-to-file
 	#:append-nodes
 	#:script-block
+	#:stylesheet-block
 	#:*document*))
 
 (defpackage :net.acceleration.javascript
