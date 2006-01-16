@@ -16,7 +16,7 @@
 	#:*document*))
 
 (defpackage :net.acceleration.javascript
-	 (:nicknames :js :javascript)
+	 (:nicknames :javascript)
   (:use :common-lisp :kmrcl :buildnode)
   (:shadowing-import-from :cl-user ::quit)
   (:export
