@@ -121,6 +121,7 @@
 	 (:nicknames :xul)
   (:use )
   (:export
+	#:radiogroup-with-options
 	#:groupbox-with-caption
 	#:action
 	#:arrowscrollbox

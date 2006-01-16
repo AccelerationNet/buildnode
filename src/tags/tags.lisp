@@ -42,7 +42,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
   "defines a function that will build an xhtml node (on *document*) when called"
   `(def-tag-node :net.acceleration.xhtml ,name "xhtml" +xhtml-namespace+ ,doc))
 
-(defun ?xml-stylesheet (href &optional (type "txt/css" ))
+(defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
 special variable *document*"
   (declare (special *document*))
