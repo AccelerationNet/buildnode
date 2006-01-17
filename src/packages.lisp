@@ -5,6 +5,7 @@
   (:use :common-lisp :cxml :arnesi :iterate)
   (:export
 	#:?xml-stylesheet
+	#:?processing-instruction
 	#:create-complete-element
 	#:write-document
 	#:with-xul-document

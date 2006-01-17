@@ -45,9 +45,12 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 (defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
 special variable *document*"
-  (declare (special *document*))
   (let (( attrib-string (format nil " type=~s href=~s  " type href)))
-	 (dom:create-processing-instruction *document*  "xml-stylesheet" attrib-string)))
+	 (?processing-instruction "xml-stylesheet" attrib-string)))
+
+(defun ?processing-instruction (target data)
+  (declare (special *document*))
+  (dom:create-processing-instruction *document* target data))
 
 (defun script-block (fn list-of-urls)
   "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"

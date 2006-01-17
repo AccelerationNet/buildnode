@@ -48,10 +48,10 @@
 
 (defun write-document-to-octet-stream (document octet-stream)
     "writes a cxml:dom document to a character stream"
-  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream))
+  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream :canonical nil))
 						  document
-						  :include-doctype :canonical-notations
-						  :include-xmlns-attributes nil))
+						  :include-doctype nil
+						  ))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
@@ -68,7 +68,8 @@ must be the document on which they were created.  At the end of the form, the
 complete document is returned"
   `(let ((*document*  (cxml-dom:create-document)))
 	 (declare (special *document*))
-	 (append-nodes *document* ,@chillins)))
+	 (append-nodes *document* ,@chillins)
+	 *document*))
 
 (defmacro with-document-to-file (filename &body chillins)
   "Creates a document block with-document upon which to add the chillins
