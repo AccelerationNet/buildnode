@@ -48,7 +48,10 @@
 
 (defun write-document-to-octet-stream (document octet-stream)
     "writes a cxml:dom document to a character stream"
-  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink octet-stream :canonical nil))
+  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink
+																	  octet-stream
+																	  :canonical nil
+																	  :indentation 2))
 						  document
 						  :include-doctype nil
 						  ))
