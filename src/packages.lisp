@@ -27,6 +27,20 @@
 	#:def-js-file
 	#:def-anon-js-file
 	#:use-js-file
+	#:JsHelper
+	#:Control
+	#:ADWSoap
+	#:Data
+	#:DetailObject
+	#:DHTMLHelper
+	#:PartialPostBack
+	#:Http
+	#:Grid
+	#:Collections
+	#:Hashtable
+	#:Behaviour
+	#:Tables
+	#:Xul
 	))
 
 (defpackage :net.acceleration.xhtml
