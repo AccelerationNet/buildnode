@@ -21,10 +21,12 @@
   (:use :common-lisp :kmrcl :buildnode)
   (:shadowing-import-from :cl-user ::quit)
   (:export
+	#:js-insertion-block
 	#:with-javascript-collector
 	#:js-defined-p
 	#:def-js-file
 	#:def-anon-js-file
+	#:use-js-file
 	))
 
 (defpackage :net.acceleration.xhtml
