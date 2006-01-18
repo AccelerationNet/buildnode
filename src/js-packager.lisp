@@ -154,13 +154,13 @@ With js-collector also appends all (non-nil) elements in body to the document"
 						  (substitute ,script-tags ,replacement-node ,chillins ))))))))
 
 (defun xhtml-script-tag (url)
-  (xhtml:script (list :href url :lang "javascript" :language "javascript" :type "text/javascript")))
+  (make-script-fn #'xhtml:script url))
 
 (defun xul-script-tag (url)  
-  (xul:script (list :src url :lang "javascript" :language "javascript" :type "text/javascript")))
+  (make-script-fn #'xul:script url))
 
-(defun make-script-fn (fn-script &key (attributes '(:lang "javascript" :language "javascript" :type "text/javascript")))
-  (lambda (url) (funcall fn-script (append (list :url url) attributes))))
+(defun make-script-fn (fn-script url)
+  (funcall fn-script (list :src url :lang "javascript" :language "javascript" :type "text/javascript") ))
 
 (def-js-file 'JsHelper "/jscontrols/jshelper.js" :depends-on '())
 (def-js-file 'Control "/jscontrols/Control.js" :depends-on '(JsHelper))
