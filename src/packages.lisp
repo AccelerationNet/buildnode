@@ -123,6 +123,7 @@
 	 (:nicknames :xul)
   (:use )
   (:export
+	#:tabbox-with-tabs
 	#:radiogroup-with-options
 	#:groupbox-with-caption
 	#:action
