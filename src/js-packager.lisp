@@ -157,7 +157,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
   (xhtml:script (list :href url :lang "javascript" :language "javascript" :type "text/javascript")))
 
 (defun xul-script-tag (url)  
-  (xul:script (list :href url :lang "javascript" :language "javascript" :type "text/javascript")))
+  (xul:script (list :src url :lang "javascript" :language "javascript" :type "text/javascript")))
 
 (defun make-script-fn (fn-script &key (attributes '(:lang "javascript" :language "javascript" :type "text/javascript")))
   (lambda (url) (funcall fn-script (append (list :url url) attributes))))
