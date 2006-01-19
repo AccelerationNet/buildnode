@@ -1,9 +1,5 @@
 (in-package :net.acceleration.buildnode)
 
-(defvar *common-javascript*
-  '((:JSHelper "/JSControls/JSHelper.js")))
-
-
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
   (let ((children (kmrcl:flatten chillins))
