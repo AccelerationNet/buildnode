@@ -9,19 +9,8 @@
 
 (defun net.acceleration.xul:radiogroup-with-options (attributes options &optional selected-key)
   "takes a list of attributes for the radiogroup and then a list of options.  Options are specified as an alist (label . value) or string to use for both"
-  (flet ((make-radio-attrs (label value)
-			  (append
-				(list :label label :value value)
-				(if (equal label selected-key)
-					 '(:selected "true")))))
-	 (xul:radiogroup attributes
-						  (mapcar
-							(lambda (option)
-							  (xul:radio 
-								(if (consp option)
-									 (make-radio-attrs (car option) (cdr option))
-									 (make-radio-attrs option option))))
-							options))))
+  (xul:radiogroup attributes
+						  (xul:label-value-list #'xul:radio options selected-key)))
 
 (defun net.acceleration.xul::_tabbox-with-tabs (&rest tab-defs)
   "creates the tabbox, tabs, tabpanels from a rest of ('title' body)  Usages:
@@ -49,3 +38,24 @@
 	  (lambda (elem)
 		 (append (list 'list) elem))
 	  tab-defs)))
+
+(defun net.acceleration.xul:label-value-list (xul-elem-fn items &optional selected-key)
+  "takes a xul element function, and generates a list of them, one for each item.  An item is a string or a (label . value) cons"
+  (flet ((make-attrs (label &optional value)
+			  (append (list :label label)
+						 (if (not (null value))
+							  (list :value value))
+						 (if (equal label selected-key)
+							  '(:selected "true")))))
+	 (mapcar
+	  (lambda (item)
+		 (funcall xul-elem-fn (if (consp item)
+										  (make-attrs (car item) (cdr item))
+										  (make-attrs item))))
+	  items)))
+
+(defun net.acceleration.xul:menulist-with-items (attributes items &optional selected-key)
+  "Adds a menulist with the given items.  Items can be a list of labels, or a cons list of (label.value)"
+  (xul:menulist attributes
+					 (xul:menupopup nil
+										 (xul:label-value-list #'xul:menuitem items selected-key))))

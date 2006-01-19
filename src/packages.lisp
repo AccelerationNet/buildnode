@@ -142,6 +142,8 @@
 	 (:nicknames :xul)
   (:use )
   (:export
+	#:menulist-with-items
+	#:label-value-list
 	#:tabbox-with-tabs
 	#:radiogroup-with-options
 	#:groupbox-with-caption
