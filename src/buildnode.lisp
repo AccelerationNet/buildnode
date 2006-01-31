@@ -21,7 +21,7 @@
 	 (when (oddp (length attributes))
 		(error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
 	 (iterate (for name = (pop attributes))
-				 (for value = (pop attributes))
+				 (for value = (format nil "~a" (pop attributes)))
 				 (while name)
 				 (dom:set-attribute e (string-downcase name) (string value)))
 	 (apply #'append-nodes (append (list e) children))

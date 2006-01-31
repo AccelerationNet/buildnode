@@ -162,8 +162,9 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (defun make-script-fn (fn-script url)
   (funcall fn-script (list :src url :lang "javascript" :language "javascript" :type "text/javascript") ))
 
-(def-js-file 'JsHelper "/jscontrols/jshelper.js" :depends-on '())
+(def-js-file 'JsHelper "/jscontrols/JSHelper.js" :depends-on '())
 (def-js-file 'Control "/jscontrols/Control.js" :depends-on '(JsHelper))
+(def-js-file 'Cookies "/jscontrols/Cookies.js" :depends-on '(JsHelper))
 (def-js-file 'ADWSoap "/jscontrols/ADWSoap.js" :depends-on '(JsHelper))
 (def-js-file 'Data "/jscontrols/Data.js" :depends-on '(JsHelper))
 (def-js-file 'DetailObject "/jscontrols/DetailObject.js" :depends-on '(JsHelper))
