@@ -22,11 +22,11 @@
 							 tab-defs))
 		  (tabpanels (mapcar (lambda (tab-def)
 									  (let ((tab-contents (cdr tab-def)))
-										 (xul:tabpanel '(:orient "vertical") (list tab-contents))))
+										 (xul:tabpanel '(:orient "vertical" :style "overflow:auto;" :flex 1 :align "stretch") (list tab-contents))))
 									tab-defs)))
-	 (xul:tabbox nil
+	 (xul:tabbox '(:flex 1 :align "stretch")
 					 (xul:tabs nil tabs)
-					 (xul:tabpanels nil tabpanels))))
+					 (xul:tabpanels '(:flex 1 :align "stretch") tabpanels))))
 
 (defmacro net.acceleration.xul:tabbox-with-tabs (&rest tab-defs)
   "creates the tabbox, tabs, tabpanels from a rest of ('title' body)  Usages:
