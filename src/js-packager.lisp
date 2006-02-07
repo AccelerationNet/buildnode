@@ -159,8 +159,19 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (defun xul-script-tag (url)  
   (make-script-fn #'xul:script url))
 
+(defun xhtml-script-block (js)
+  (make-script-block-fn #'xhtml:script js))
+(defun xul-script-block (js)
+  (make-script-block-fn #'xul:script js))
+
 (defun make-script-fn (fn-script url)
   (funcall fn-script (list :src url :lang "javascript" :language "javascript" :type "text/javascript") ))
+
+(defun make-script-block-fn (fn-script js)
+  (declare (special buildnode:*document*))
+  (funcall fn-script
+			  (list :lang "javascript" :language "javascript" :type "text/javascript")
+			  (dom:create-cdata-section buildnode:*document* js)))
 
 (def-js-file 'JsHelper "/jscontrols/JSHelper.js" :depends-on '())
 (def-js-file 'Control "/jscontrols/Control.js" :depends-on '(JsHelper))

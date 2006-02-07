@@ -24,6 +24,8 @@
 	#:js-insertion-block
 	#:xhtml-script-tag
 	#:xul-script-tag
+	#:xhtml-script-block
+	#:xul-script-block
 	#:insert-script-here
 	#:with-javascript-collector
 	#:js-defined-p
