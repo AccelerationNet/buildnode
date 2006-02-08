@@ -14,7 +14,8 @@
 	#:append-nodes
 	#:script-block
 	#:stylesheet-block
-	#:*document*))
+	#:*document*
+	#:*namespace-prefix-map*))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)

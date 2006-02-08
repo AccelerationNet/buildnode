@@ -15,7 +15,7 @@
 						  child))))
 	 to-location))
 
-(setf *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
+(defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 											("http://www.w3.org/1999/xhtml" . "x")))
 
 (defun create-complete-element (document namespace tagname attributes children
@@ -87,3 +87,4 @@ complete document is returned"
 (southern for children).  When the document is complete, it is written out to the specified file."
   `(with-output-to-file (stream ,filename :if-exists :supersede)
 	 (write-document (with-document ,@chillins) stream)))
+
