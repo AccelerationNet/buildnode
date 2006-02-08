@@ -17,13 +17,13 @@
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
 
 
-(defmacro def-tag-node (package name prefix namespace doc  )
+(defmacro def-tag-node (package name  namespace doc  )
   "Defines a tag function in the package with the name and prefix specified
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
   (let* ((evaled-name (eval name))
 			(name (intern (string-upcase evaled-name) (eval package)))
-			(tagname (string-downcase (concatenate 'string prefix ":" evaled-name))))
+			(tagname (string-downcase evaled-name)))
 	 `(CL:defun ,name (&optional attributes &rest children )
 		,doc
 		(declare (special *document*))
@@ -36,11 +36,11 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
   (declare (ignore attributes))
-  `(def-tag-node :net.acceleration.xul ,name "xul" +xul-namespace+ ,doc))
+  `(def-tag-node :net.acceleration.xul ,name  +xul-namespace+ ,doc))
 
 (defmacro def-html-tag (name doc)
   "defines a function that will build an xhtml node (on *document*) when called"
-  `(def-tag-node :net.acceleration.xhtml ,name "xhtml" +xhtml-namespace+ ,doc))
+  `(def-tag-node :net.acceleration.xhtml ,name  +xhtml-namespace+ ,doc))
 
 (defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
