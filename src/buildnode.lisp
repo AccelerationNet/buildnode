@@ -16,7 +16,7 @@
 	 to-location))
 
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
-				 ("http://www.w3.org/1999/xhtml" . "x")))
+				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
 
 (defun create-complete-element (document namespace tagname attributes children
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
@@ -26,7 +26,9 @@ If the tagname does not contain a prefix, then one is added based on the namespa
   (let* ((tagname (aif (and (not (cxml::split-qname tagname))
 			    (and (assoc namespace namespace-prefix-map :test #'string=)
 				 (cdr (assoc namespace namespace-prefix-map :test #'string=))))
-		       (concatenate 'string it ":"tagname)
+		       (if (string= it "")
+			   tagname
+			   (concatenate 'string it ":" tagname))
 		       tagname))
 	 (elem (dom:create-element-ns document namespace tagname)))
     (when (oddp (length attributes))
