@@ -24,20 +24,20 @@
 If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
   ;;if we don't already have a prefix and we do find one in the map.
   (let* ((tagname (aif (and (not (cxml::split-qname tagname))
-									 (and (assoc namespace namespace-prefix-map :test #'string=)
-											(cdr (assoc namespace namespace-prefix-map :test #'string=))))
-							  (concatenate 'string it ":"tagname)
-							  tagname))
-			(elem (dom:create-element-ns document namespace tagname)))
-	 (when (oddp (length attributes))
-		(error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-	 (iterate (for name = (pop attributes))
-				 (for value = (format nil "~a" (pop attributes)))
-				 (while name)
-				 (dom:set-attribute elem (string-downcase name) (string value)))
-	 ;;append the children to the element.
-	 (apply #'append-nodes (append (list elem) children))
-	 elem))
+			    (and (assoc namespace namespace-prefix-map :test #'string=)
+				 (cdr (assoc namespace namespace-prefix-map :test #'string=))))
+		       (concatenate 'string it ":"tagname)
+		       tagname))
+	 (elem (dom:create-element-ns document namespace tagname)))
+    (when (oddp (length attributes))
+      (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
+    (iterate (for name = (pop attributes))
+	     (for value = (format nil "~a" (pop attributes)))
+	     (while name)
+	     (dom:set-attribute elem (string-downcase name) (string value)))
+    ;;append the children to the element.
+    (apply #'append-nodes (append (list elem) children))
+    elem))
 
 
 
