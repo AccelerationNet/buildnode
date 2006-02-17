@@ -167,11 +167,15 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (defun make-script-fn (fn-script url)
   (funcall fn-script (list :src url :lang "javascript" :language "javascript" :type "text/javascript") ))
 
+(defvar *cdata-script-blocks* T "Should script blocks have a cdata?")
+
 (defun make-script-block-fn (fn-script js)
   (declare (special buildnode:*document*))
   (funcall fn-script
-			  (list :lang "javascript" :language "javascript" :type "text/javascript")
-			  (dom:create-cdata-section buildnode:*document* js)))
+	   (list :lang "javascript" :language "javascript" :type "text/javascript")
+	   (if *cdata-script-blocks*
+	       (dom:create-cdata-section buildnode:*document* (format nil "~%~a~%" js))
+	       (dom:create-text-node buildnode:*document* (format nil "~%~a~%" js)))))
 
 (def-js-file 'JsHelper "/jscontrols/JSHelper.js" :depends-on '())
 (def-js-file 'Control "/jscontrols/Control.js" :depends-on '(JsHelper))

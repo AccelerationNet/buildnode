@@ -47,6 +47,7 @@
 	#:Behaviour
 	#:Tables
 	#:Xul
+	#:*cdata-script-blocks*
 	))
 
 (defpackage :net.acceleration.xhtml
