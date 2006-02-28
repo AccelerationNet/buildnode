@@ -15,9 +15,9 @@
 				     (:file "js-packager" :depends-on ("packages" :tags ))
 				     (:module :tags
 					      :components ((:file "tags" )
-							   (:file "xul-tags" )
+							   (:file "xul-tags" :depends-on ("tags"))
 							   (:file "custom-xul" :depends-on ( "xul-tags"))
-							   (:file "xhtml-tags" )
+							   (:file "xhtml-tags" :depends-on ("tags"))
 							   (:file "custom-html" :depends-on ("xhtml-tags")))
 					      :depends-on ("packages" "buildnode")))))
   :depends-on (:cxml :iterate :flexi-streams :arnesi :kmrcl))
