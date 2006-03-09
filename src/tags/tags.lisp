@@ -52,7 +52,7 @@ special variable *document*"
   (declare (special *document*))
   (dom:create-processing-instruction *document* target data))
 
-(defun CDATA ( data )
+(defun net.acceleration.buildnode:CDATA ( data )
   (declare (special *document*))
   (dom:create-cdata-section *document* data))
 
