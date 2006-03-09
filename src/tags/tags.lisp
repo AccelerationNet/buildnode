@@ -52,7 +52,7 @@ special variable *document*"
   (declare (special *document*))
   (dom:create-processing-instruction *document* target data))
 
-(defun CDDATA ( data )
+(defun CDATA ( data )
   (declare (special *document*))
   (dom:create-cdata-section *document* data))
 
