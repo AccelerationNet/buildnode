@@ -3,9 +3,11 @@
 (defpackage :net.acceleration.buildnode
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
+  (:shadow cdata)
   (:export
 	#:?xml-stylesheet
 	#:?processing-instruction
+	#:CDATA
 	#:create-complete-element
 	#:write-document
 	#:with-xul-document

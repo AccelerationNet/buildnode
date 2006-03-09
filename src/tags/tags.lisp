@@ -52,6 +52,10 @@ special variable *document*"
   (declare (special *document*))
   (dom:create-processing-instruction *document* target data))
 
+(defun CDDATA ( data )
+  (declare (special *document*))
+  (dom:create-cdata-section *document* data))
+
 (defun script-block (fn list-of-urls)
   "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"
   (mapcar
