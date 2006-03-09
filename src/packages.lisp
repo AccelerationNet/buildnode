@@ -3,7 +3,7 @@
 (defpackage :net.acceleration.buildnode
 	 (:nicknames :buildnode)
   (:use :common-lisp :cxml :arnesi :iterate)
-  (:shadow cdata)
+  (:shadow #:cdata)
   (:export
 	#:?xml-stylesheet
 	#:?processing-instruction
