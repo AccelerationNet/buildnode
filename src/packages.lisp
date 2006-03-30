@@ -22,7 +22,7 @@
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
   (:use :common-lisp :kmrcl :buildnode)
-  (:shadowing-import-from :cl-user ::quit)
+;  (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:js-insertion-block
 	#:xhtml-script-tag
