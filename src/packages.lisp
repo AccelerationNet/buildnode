@@ -56,6 +56,10 @@
 	 (:nicknames :xhtml)
   (:use )
   (:export
+	#:tab-container
+	#:tab-title
+	#:tab
+	#:iframe-tab
 	#:a
 	#:abbr
 	#:acronym
