@@ -178,7 +178,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 	       (dom:create-text-node buildnode:*document* (format nil "~%~a~%" js)))))
 
 (def-js-file 'JsHelper "/jscontrols/JSHelper.js" :depends-on '())
-(def-js-file 'Control "/jscontrols/Control.js" :depends-on '(JsHelper))
+(def-js-file 'Controls "/jscontrols/Controls.js" :depends-on '(JsHelper))
 (def-js-file 'Cookies "/jscontrols/Cookies.js" :depends-on '(JsHelper))
 (def-js-file 'ADWSoap "/jscontrols/ADWSoap.js" :depends-on '(JsHelper))
 (def-js-file 'Data "/jscontrols/Data.js" :depends-on '(JsHelper))
@@ -186,7 +186,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (def-js-file 'DHTMLHelper "/jscontrols/DHTMLHelper.js" :depends-on '(JsHelper))
 (def-js-file 'PartialPostBack "/jscontrols/PartialPostBack.js" :depends-on '(JsHelper Http))
 (def-js-file 'Http "/jscontrols/Http.js" :depends-on '(JsHelper))
-(def-js-file 'Grid "/jscontrols/Grid/grid.js" :depends-on '(JsHelper Data Http Control Hashtable))
+(def-js-file 'Grid "/jscontrols/Grid/grid.js" :depends-on '(JsHelper Data Http Controls Hashtable))
 (def-js-file 'Collections "/jscontrols/Collections.js" :depends-on '(JsHelper))
 (def-js-file 'Hashtable "/jscontrols/Collections.Hashtable.js" :depends-on '(JsHelper Collections))
 (def-js-file 'Behaviour "/jscontrols/Behaviour.js" :depends-on '(Hashtable))
