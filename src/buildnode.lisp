@@ -43,7 +43,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
     (iterate (for (name value . rest) first attributes then rest)
-	     (when (and name value)
+	     (when (and name)
 	       (dom:set-attribute elem (string-downcase name) (format nil "~a" value)))
 	     (while rest))
     ;;append the children to the element.
