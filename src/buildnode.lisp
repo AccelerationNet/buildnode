@@ -2,43 +2,53 @@
 
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
-  (let ((children (kmrcl:flatten chillins))
-	(doc (if (subtypep (type-of to-location) 'rune-dom::document)
+  (let ((doc (if (typep to-location 'rune-dom::document)
 		 to-location
 		 (dom:owner-document to-location))))
-    (iterate (for child in children)
-	     (when child
-	       (dom:append-child
-		to-location
-		(if (stringp child)
-		    (dom:create-text-node doc child)
-		    child))))
+    (labels ((map-tree (children)
+	       (when children
+		 (iterate (for child in children)
+			  (if (listp child)
+			      (map-tree child)
+			      (dom:append-child
+			       to-location
+			       (if (stringp child)
+				   (dom:create-text-node doc child)
+				   child)))))))
+      (map-tree chillins)
+    )
     to-location))
+
 
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
+
+
+(defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
+  (aif (and (not (cxml::split-qname base-tag))
+	    (and (assoc namespace namespace-prefix-map :test #'string=)
+		 (cdr (assoc namespace namespace-prefix-map :test #'string=))))
+       (if (string= it "")
+	   base-tag
+	   (concatenate 'string it ":" base-tag))
+       base-tag))
 
 (defun create-complete-element (document namespace tagname attributes children
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
   "Creates an xml element out of all the necessary components.
 If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
   ;;if we don't already have a prefix and we do find one in the map.
-  (let* ((tagname (aif (and (not (cxml::split-qname tagname))
-			    (and (assoc namespace namespace-prefix-map :test #'string=)
-				 (cdr (assoc namespace namespace-prefix-map :test #'string=))))
-		       (if (string= it "")
-			   tagname
-			   (concatenate 'string it ":" tagname))
-		       tagname))
+  (let* ((tagname (calc-complete-tagname namespace tagname namespace-prefix-map))
 	 (elem (dom:create-element-ns document namespace tagname)))
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-    (iterate (for name = (pop attributes))
-	     (for value = (format nil "~a" (pop attributes)))
-	     (while name)
-	     (dom:set-attribute elem (string-downcase name) (string value)))
+    (iterate (for (name value . rest) first attributes then rest)
+	     (when (and name value)
+	       (dom:set-attribute elem (string-downcase name) (format nil "~a" value)))
+	     (while rest))
     ;;append the children to the element.
-    (apply #'append-nodes (append (list elem) children))
+    (append-nodes elem children)
+
     elem))
 
 
