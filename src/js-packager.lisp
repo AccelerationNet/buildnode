@@ -248,5 +248,3 @@ With js-collector also appends all (non-nil) elements in body to the document"
 		     insert-script-here
 		     (xul:button '(:label "you"))
 		     (use-js-file "js/fuck your mom in her dirty ass")))))))
-
-		
