@@ -35,6 +35,7 @@
 	#:def-js-file
 	#:def-anon-js-file
 	#:use-js-file
+	#:add-js-snippet
 	#:JsHelper
 	#:Control
 	#:ADWSoap

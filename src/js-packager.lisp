@@ -69,7 +69,7 @@
        (pushnew (get-url-from-key key-or-url *global-js-dependency-graph*)
 		return-list :test #'string=))
      (urls js))
-    return-list))
+    (nreverse return-list)))
 
 (defun get-dependency-list (key)
   "gets a list of all the files required for proper execution  of a javascript file
@@ -113,17 +113,28 @@ be in scope inside of with-javascript-collector"
     (setf (urls *js-collector*) (nconc (urls *js-collector*) (list url-or-key))))
   '())
 
-(defmacro with-javascript-collector (&body body)
-  "returnst a list of js file urls.
+(defun add-js-snippet (snippet)
+  "Add a snippet of javascript to the current *js-collector*"
+  (declare (special *js-collector*))
+  (push snippet (snippets *js-collector*)))
+
+(defmacro with-javascript-collector (script-tag-fn script-block-fn &body body)
+  "Returns the list of body evaluated, as well as the list of script-elements
  There is a special-symbol use-js-file that is a function to add a js file to the collection.
- (use-js-file (url-or-JsName :depends-on '(a dependency list of urls and keyword names)) => has the side effect of adding a js-file to the js-collection
+ (use-js-file (url-or-JsName :depends-on '(a dependency list of urls and keyword names))
+	=> has the side effect of adding a js-file to the js-collection
 With js-collector also appends all (non-nil) elements in body to the document"
   `(let* ((*js-collector* (make-js-collector)))
     (declare (special *js-collector*))
     (let ((body-rtn-list (list ,@body)))
       (values
        body-rtn-list
-       (js-list *js-collector*)))))
+       (append (make-script-tags-from-list
+		,script-tag-fn
+		(js-list *js-collector*))
+	       (when (snippets *js-collector*)
+		 (list (funcall ,script-block-fn
+				(format nil "~{~a~%~}" (snippets *js-collector*))))))))))
 
 (defun make-script-tags-from-list (script-tag-function url-list)
   "script tag function is a function that accepts a url and creates script tags out of them"
@@ -132,21 +143,31 @@ With js-collector also appends all (non-nil) elements in body to the document"
      (funcall script-tag-function url))
    url-list))
 
-(defmacro js-insertion-block ((make-script-fn &key (insertion-point-symbol 'insert-script-here)) &body body)
-  "creates an environment in which there are a function: (use-js-file url &key depends-on) which will declare your usage of a script file and a symbol-macro: as defined by the keyword argument insertion-point-symbol (defaults to 'insert-script-here) that will be the final location of all of the collected script tags in the body"
-  (arnesi:with-unique-names (chillins js-url-list script-tags replacement-node parent )
+(defmacro js-insertion-block ((&key (script-tag-fn 'xhtml-script-tag)
+				    (script-block-fn 'xhtml-script-block)
+				    (insertion-point-symbol 'insert-script-here))
+			      &body body)
+  "creates an environment in which there are a function:
+	(use-js-file url &key depends-on)
+   which will declare your usage of a script file and a symbol-macro:
+   as defined by the keyword argument insertion-point-symbol
+   (defaults to 'insert-script-here) that will be the final location of all
+   of the collected script tags in the body"
+  (arnesi:with-unique-names (chillins script-tags replacement-node parent )
     `(let ((,replacement-node)) 
       (symbol-macrolet ((,insertion-point-symbol 
 			 (if ,replacement-node
 			     (error "More than one script tag insertion point in a document is not allowed")
-			     (setf ,replacement-node (create-complete-element *document* "adw" "adw:replacement-node" '() '())))))
-	(multiple-value-bind (,chillins ,js-url-list)
-	    (with-javascript-collector
+			     (setf ,replacement-node
+				   (create-complete-element *document*
+							    "adw"
+							    "adw:replacement-node"
+							    '()
+							    '())))))
+	(multiple-value-bind (,chillins ,script-tags)
+	    (with-javascript-collector #',script-tag-fn #',script-block-fn
 	      ,@body)
-	  (let ((,script-tags (reverse
-			       (make-script-tags-from-list
-				,make-script-fn
-				,js-url-list))))
+ 
 	    (arnesi:if-bind ,parent (dom:parent-node ,replacement-node)
 	      (progn
 		(mapc
@@ -155,7 +176,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 		 ,script-tags)
 		(dom:remove-child ,parent ,replacement-node)
 		,chillins)
-	      (substitute ,script-tags ,replacement-node ,chillins ))))))))
+	      (substitute ,script-tags ,replacement-node ,chillins )))))))
 
 (defun xhtml-script-tag (url)
   (make-script-fn #'xhtml:script url))
