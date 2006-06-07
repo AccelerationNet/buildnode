@@ -100,3 +100,22 @@ complete document is returned"
   `(with-output-to-file (stream ,filename :if-exists :supersede)
 	 (write-document (with-document ,@chillins) stream)))
 
+
+(defmacro with-xhtml-document (&body chillins)
+  "(with-xhtml-document ( a bunch of child nodes of the document )) --> cxml:dom document
+Creates an environment in which the special variable *document* is available
+a document is necessary to create dom nodes and the document the nodes end up on
+must be the document on which they were created.  At the end of the form, the
+complete document is returned.
+This sets the doctype to be xhtml transitional."
+  `(let ((*document* (dom:create-document
+		      'rune-dom:implementation
+		      nil nil
+		      (dom:create-document-type
+		       'rune-dom:implementation
+		       "html"
+		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"))))   
+    (declare (special *document*))
+    (append-nodes *document* ,@chillins)
+    *document*))

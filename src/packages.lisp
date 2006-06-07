@@ -12,6 +12,7 @@
 	#:write-document
 	#:with-xul-document
 	#:with-document
+	#:with-xhtml-document
 	#:with-document-to-file
 	#:append-nodes
 	#:script-block
