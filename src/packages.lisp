@@ -220,6 +220,7 @@
 	#:radio
 	#:radiogroup
 	#:resizer
+	#:richlistbox
 	#:row
 	#:rows
 	#:rule
