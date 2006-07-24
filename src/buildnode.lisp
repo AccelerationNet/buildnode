@@ -119,3 +119,9 @@ This sets the doctype to be xhtml transitional."
     (declare (special *document*))
     (append-nodes *document* ,@chillins)
     *document*))
+
+(defmacro with-xhtml-document-to-file (filename &body chillins)
+  "Creates a document block with-document upon which to add the chillins
+(southern for children).  When the document is complete, it is written out to the specified file."
+  `(with-output-to-file (stream ,filename :if-exists :supersede)
+	 (write-document (with-xhtml-document ,@chillins) stream)))
