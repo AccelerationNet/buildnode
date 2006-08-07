@@ -75,7 +75,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 						     :canonical nil
 						     :indentation 2))
 		    document
-		    :include-doctype nil
+		    :include-doctype :canonical-notations
 		    ))
 
 (defun write-document (document &optional (out-stream *standard-output*))
