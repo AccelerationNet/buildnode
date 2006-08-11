@@ -106,7 +106,8 @@ complete document is returned"
   (with-open-stream (fd (open filename :direction :output :element-type '(unsigned-byte 8)
 			      :if-does-not-exist :create
 			      :if-exists :supersede))
-    (write-document doc fd)))
+    (write-document doc fd)
+    doc))
 
 
 (defmacro with-xhtml-document (&body chillins)
@@ -129,7 +130,5 @@ This sets the doctype to be xhtml transitional."
     *document*))
 
 (defmacro with-xhtml-document-to-file (filename &body chillins)
-  "Creates a document block with-document upon which to add the chillins
-(southern for children).  When the document is complete, it is written out to the specified file."
-  `(with-output-to-file (stream ,filename :if-exists :supersede)
-	 (write-document (with-xhtml-document ,@chillins) stream)))
+  "Creates a document block with-document upon which to add the chillins (southern for children).  When the document is complete, it is written out to the specified file."
+  `(write-doc-to-file (with-xhtml-document ,@chillins) ,filename))
