@@ -82,7 +82,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
   "Write the document to the designated out-stream, or *standard-ouput* by default."
   (case (stream-element-type out-stream) 
     ('character (write-document-to-character-stream document out-stream))
-    ('octet (write-document-to-octet-stream document out-stream))))
+    (otherwise (write-document-to-octet-stream document out-stream))))
 
 
 (defmacro with-document (&body chillins)
@@ -97,10 +97,16 @@ complete document is returned"
     *document*))
 
 (defmacro with-document-to-file (filename &body chillins)
-  "Creates a document block with-document upon which to add the chillins
-(southern for children).  When the document is complete, it is written out to the specified file."
-  `(with-output-to-file (stream ,filename :if-exists :supersede)
-	 (write-document (with-document ,@chillins) stream)))
+  "Creates a document block with-document upon which to add the chillins (southern for children).
+  When the document is complete, it is written out to the specified file."
+  `(write-doc-to-file (with-document ,@chillins) ,filename))
+
+(defun write-doc-to-file (doc filename)
+  "Binary write-out a document. will create/overwrite any existing file named the same."
+  (with-open-stream (fd (open filename :direction :output :element-type '(unsigned-byte 8)
+			      :if-does-not-exist :create
+			      :if-exists :supersede))
+    (write-document doc fd)))
 
 
 (defmacro with-xhtml-document (&body chillins)
