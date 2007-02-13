@@ -58,3 +58,12 @@
   (xul:menulist attributes
 		(xul:menupopup nil
 			       (xul:label-value-list #'xul:menuitem items selected-key))))
+
+
+(defun net.acceleration.xul:boolean-radio (attributes &key selected null-label (true-label "Yes") (false-label "No"))
+  "Adds a menulist with the given items.  Items can be a list of labels, or a cons list of (label.value)"
+  (xul:radiogroup attributes
+		  (xul:radio (list :label true-label :value "true"))
+		  (xul:radio (list :label false-label :value "false"))
+		  (when null-label
+		    (xul:radio (list :label null-label :value "null")))))

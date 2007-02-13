@@ -160,6 +160,7 @@
 	 (:nicknames :xul)
   (:use )
   (:export
+        #:boolean-radio
 	#:menulist-with-items
 	#:label-value-list
 	#:tabbox-with-tabs
