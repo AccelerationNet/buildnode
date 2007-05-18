@@ -26,9 +26,9 @@
 
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
   (aif (and (not (cxml::split-qname base-tag))
-	    (and (assoc namespace namespace-prefix-map :test #'string=)
-		 (cdr (assoc namespace namespace-prefix-map :test #'string=))))
-       (if (string= it "")
+	    (when-bind namespace-entry (assoc namespace namespace-prefix-map :test #'string=)
+		 (cdr namespace-entry)))
+       (if (= (length it) 0)
 	   base-tag
 	   (concatenate 'string it ":" base-tag))
        base-tag))
