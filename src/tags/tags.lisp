@@ -6,15 +6,15 @@
 
 ;(defparameter +xul-core-attributes+
 ;  (mapcar #'(lambda (s) (intern (string-upcase s)))
-;			 '("align" "allowevents" "allownegativeassertions" "class" 
-;				"coalesceduplicatearcs" "collapsed" "container" "containment" 
-;				"context" "contextmenu" "datasources" "dir" "empty" "equalsize" 
-;				"flags" "flex" "height" "hidden" "id" "insertafter" "insertbefore" 
-;				"left" "maxheight" "maxwidth" "menu" "minheight" "minwidth" 
-;				"mousethrough" "observes" "ordinal" "orient" "pack" "persist" "popup" 
-;				"position" "preference-editable" "ref" "removeelement" "sortDirection" 
-;				"sortResource" "sortResource2" "statustext" "style" "template" 
-;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width"))) 
+;			 '("align" "allowevents" "allownegativeassertions" "class"
+;				"coalesceduplicatearcs" "collapsed" "container" "containment"
+;				"context" "contextmenu" "datasources" "dir" "empty" "equalsize"
+;				"flags" "flex" "height" "hidden" "id" "insertafter" "insertbefore"
+;				"left" "maxheight" "maxwidth" "menu" "minheight" "minwidth"
+;				"mousethrough" "observes" "ordinal" "orient" "pack" "persist" "popup"
+;				"position" "preference-editable" "ref" "removeelement" "sortDirection"
+;				"sortResource" "sortResource2" "statustext" "style" "template"
+;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width")))
 
 
 (defmacro def-tag-node (package name  namespace doc  )
@@ -22,16 +22,16 @@
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
   (let* ((evaled-name (eval name))
-			(name (intern (string-upcase evaled-name) (eval package)))
-			(tagname (string-downcase evaled-name)))
-	 `(CL:defun ,name (&optional attributes &rest children )
-		,doc
-		(declare (special *document*))
-		(create-complete-element *document*
-		 ,namespace
-		 ,tagname
-		 attributes
-		 (kmrcl:flatten children)))))
+	 (name (intern (string-upcase evaled-name) (eval package)))
+	 (tagname (string-downcase evaled-name)))
+    `(CL:defun ,name (&optional attributes &rest children )
+      ,doc
+      (declare (special *document*))
+      (create-complete-element *document*
+       ,namespace
+       ,tagname
+       attributes
+       (kmrcl:flatten children)))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
@@ -46,7 +46,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
 special variable *document*"
   (let (( attrib-string (format nil " type=~s href=~s  " type href)))
-	 (?processing-instruction "xml-stylesheet" attrib-string)))
+    (?processing-instruction "xml-stylesheet" attrib-string)))
 
 (defun ?processing-instruction (target data)
   (declare (special *document*))
@@ -57,17 +57,14 @@ special variable *document*"
   (dom:create-cdata-section *document* data))
 
 (defun script-block (fn list-of-urls)
-  "given a list of urls, will build a list of script nodes pointing to the appropriate urls.  Pass in #'xul:script or #'xhtml:script as the first argument"
-  (mapcar
-	(lambda (url)
-	  (funcall fn (list :language "javascript" :type "text/javascript" :src url )))
-	list-of-urls))
+  "given a list of urls, will build a list of script nodes pointing to the appropriate urls.
+Pass in #'xul:script or #'xhtml:script as the first argument"
+  (mapcar #'(lambda (url)
+	      (funcall fn (list :language "javascript" :type "text/javascript" :src url )))
+	  list-of-urls))
 
 (defun stylesheet-block (list &optional (type "text/css"))
   "given a list of urls, will build a list of ?xml-stylesheet nodes pointing to the appropriate urls"
-  (mapcar
-	(lambda (sheet)
-	  (?xml-stylesheet sheet type))
-	list))
-
-
+  (mapcar #'(lambda (sheet)
+	      (?xml-stylesheet sheet type))
+	  list))
