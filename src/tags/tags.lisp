@@ -15,6 +15,21 @@
 ;				"sortResource" "sortResource2" "statustext" "style" "template"
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width")))
 
+(defvar *symbol-indentation-tag-cache* (make-hash-table :test #'eq)
+  "Hash table to hold indenation information for swank for tags.")
+
+;;get a ref to the swank::symbol-indentation in such a way that if this file
+;; gets evaled multiple times, we always have a ref to the original function,
+;; not one of our overrides
+(defvar +old-swank-symbol-indentation+ nil)
+(unless +old-swank-symbol-indentation+
+  (setf +old-swank-symbol-indentation+ #'swank::symbol-indentation))
+
+(defun swank::symbol-indentation (sym)
+  (aif (gethash sym *symbol-indentation-tag-cache*)
+       it
+       (funcall +old-swank-symbol-indentation+ sym)))
+
 
 (defmacro def-tag-node (package name  namespace doc  )
   "Defines a tag function in the package with the name and prefix specified
@@ -23,14 +38,16 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
   (let* ((evaled-name (eval name))
 	 (name (intern (string-upcase evaled-name) (eval package)))
 	 (tagname (string-downcase evaled-name)))
-    `(CL:defun ,name (&optional attributes &rest children )
-      ,doc
-      (declare (special *document*))
-      (create-complete-element *document*
-       ,namespace
-       ,tagname
-       attributes
-       (kmrcl:flatten children)))))
+    `(progn
+      (CL:defun ,name (&optional attributes &rest children )
+	,doc
+	(declare (special *document*))
+	(create-complete-element *document*
+				 ,namespace
+				 ,tagname
+				 attributes
+				 (kmrcl:flatten children)))
+      (setf (gethash ',name *symbol-indentation-tag-cache*) 1))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
