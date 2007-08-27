@@ -134,7 +134,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 		(js-list *js-collector*))
 	       (when (snippets *js-collector*)
 		 (list (funcall ,script-block-fn
-				(format nil "~{~a~%~}" (snippets *js-collector*))))))))))
+				(format nil "~{~a~%~}" (reverse (snippets *js-collector*)))))))))))
 
 (defun make-script-tags-from-list (script-tag-function url-list)
   "script tag function is a function that accepts a url and creates script tags out of them"
