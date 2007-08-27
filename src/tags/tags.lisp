@@ -1,5 +1,4 @@
 (in-package :net.acceleration.buildnode)
-;(declaim (optimize (debug 2)))
 
 (defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
 (defparameter +xhtml-namespace+ "http://www.w3.org/1999/xhtml")
