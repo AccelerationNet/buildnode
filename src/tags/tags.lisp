@@ -15,8 +15,6 @@
 ;				"sortResource" "sortResource2" "statustext" "style" "template"
 ;				"tooltip" "tooltiptext" "top" "uri" "wait-cursor" "width")))
 
-(defvar *symbol-indentation-tag-cache* (make-hash-table :test #'eq)
-  "Hash table to hold indenation information for swank for tags.")
 
 ;;get a ref to the swank::symbol-indentation in such a way that if this file
 ;; gets evaled multiple times, we always have a ref to the original function,
@@ -26,7 +24,7 @@
   (setf +old-swank-symbol-indentation+ #'swank::symbol-indentation))
 
 (defun swank::symbol-indentation (sym)
-  (aif (gethash sym *symbol-indentation-tag-cache*)
+  (aif (get sym 'swank::symbol-indentation)
        it
        (funcall +old-swank-symbol-indentation+ sym)))
 
@@ -47,7 +45,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 				 ,tagname
 				 attributes
 				 (kmrcl:flatten children)))
-      (setf (gethash ',name *symbol-indentation-tag-cache*) 1))))
+      (setf (get ',name 'swank::symbol-indentation) 1))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
