@@ -1,5 +1,7 @@
 (in-package :net.acceleration.buildnode)
 
+(cl-interpol:enable-interpol-syntax)
+
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
   (let ((doc (if (typep to-location 'rune-dom::document)
@@ -25,13 +27,16 @@
 
 
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
-  (aif (and (not (cxml::split-qname base-tag))
-	    (when-bind namespace-entry (assoc namespace namespace-prefix-map :test #'string=)
-		 (cdr namespace-entry)))
-       (if (= (length it) 0)
-	   base-tag
-	   (concatenate 'string it ":" base-tag))
-       base-tag))
+  (let ((prefix (and (not (cxml::split-qname base-tag)) ;not already a prefix
+		     (when-bind namespace-entry (assoc namespace namespace-prefix-map :test #'string=)
+		       ;;found the given namespace in the map
+		       (let ((prefix (cdr namespace-entry)))
+			 (declare (type string prefix))
+			 (when (> (length prefix) 0)
+			   prefix))))))
+    (if prefix
+	#?"${prefix}:${base-tag}"
+	base-tag)))
 
 (defun create-complete-element (document namespace tagname attributes children
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
@@ -59,7 +64,6 @@ If the tagname does not contain a prefix, then one is added based on the namespa
   "writes a cxml:dom document to a character stream"
   (let ((buf (flex:with-output-to-sequence (stream)
 	       (write-document-to-octet-stream document stream))))
-	 
     (flex:with-input-from-sequence (input buf)
       ;;echo the flexi stream to output
       (with-open-stream (echo (make-echo-stream (flex:make-flexi-stream input)

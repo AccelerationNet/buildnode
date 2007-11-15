@@ -20,4 +20,4 @@
 							   (:file "xhtml-tags" :depends-on ("tags"))
 							   (:file "custom-html" :depends-on ("xhtml-tags")))
 					      :depends-on ("packages" "buildnode")))))
-  :depends-on (:cxml :iterate :flexi-streams :arnesi :kmrcl :swank))
+  :depends-on (:cxml :iterate :flexi-streams :arnesi :kmrcl :swank :adwcodebase :cl-interpol))
