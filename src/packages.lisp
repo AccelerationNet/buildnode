@@ -114,6 +114,7 @@
 	#:isindex
 	#:kbd
 	#:label
+	#:legend
 	#:li
 	#:link
 	#:map
