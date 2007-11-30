@@ -14,9 +14,14 @@
 			      (map-tree child)
 			      (dom:append-child
 			       to-location
-			       (if (stringp child)
-				   (dom:create-text-node doc child)
-				   child)))))))
+			       (cond
+				 ((stringp child)
+				  (dom:create-text-node doc child))
+				 ((numberp child)
+				  (dom:create-text-node doc
+							#?"${child}"))
+				 (T child)
+				 )))))))
       (map-tree chillins)
     )
     to-location))
