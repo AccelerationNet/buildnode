@@ -23,7 +23,7 @@
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
-  (:use :common-lisp :kmrcl :buildnode)
+  (:use :common-lisp :buildnode :arnesi :adwutils)
 ;  (:shadowing-import-from :cl-user ::quit)
   (:export
 	#:js-insertion-block
