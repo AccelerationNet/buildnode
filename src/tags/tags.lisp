@@ -29,7 +29,7 @@
        (funcall +old-swank-symbol-indentation+ sym)))
 
 
-(defmacro def-tag-node (package name  namespace doc  )
+(defmacro def-tag-node (package name  namespace docstring  )
   "Defines a tag function in the package with the name and prefix specified
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
@@ -38,7 +38,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 	 (tagname (string-downcase evaled-name)))
     `(progn
       (CL:defun ,name (&optional attributes &rest children )
-	,doc
+	,docstring
 	(declare (special *document*))
 	(create-complete-element *document*
 				 ,namespace
