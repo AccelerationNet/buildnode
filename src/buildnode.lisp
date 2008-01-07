@@ -70,14 +70,14 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 
 (defun write-document-to-character-stream (document char-stream)
   "writes a cxml:dom document to a character stream"
-  (let ((buf (flex:with-output-to-sequence (stream)
-	       (write-document-to-octet-stream document stream))))
-    (flex:with-input-from-sequence (input buf)
-      ;;echo the flexi stream to output
-      (with-open-stream (echo (make-echo-stream (flex:make-flexi-stream input)
-						char-stream))
-	(loop for line = (read-line echo nil)
-	      while line)))))
+  (dom:map-document (cxml:make-namespace-normalizer
+		     (cxml:make-character-stream-sink
+						     char-stream
+						     :canonical nil
+						     :indentation nil))
+		    document
+		    :include-doctype :canonical-notations
+		    ))
 
 
 (defun write-document-to-octet-stream (document octet-stream)
