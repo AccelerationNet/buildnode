@@ -44,7 +44,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 				 ,namespace
 				 ,tagname
 				 attributes
-				 (flatten children)))
+				 children))
       (setf (get ',name 'swank::symbol-indentation) 1))))
 
 (defmacro def-xul-element (name doc &rest attributes)
