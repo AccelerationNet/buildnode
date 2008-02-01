@@ -43,54 +43,29 @@
 	#?"${prefix}:${base-tag}"
 	base-tag)))
 
-;; (defun create-complete-element (document namespace tagname attributes children
-;; 					 &optional (namespace-prefix-map *namespace-prefix-map*))
-;;   "Creates an xml element out of all the necessary components.
-;; If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
-;;   (declare (type (or null list) attributes))
-;;   ;;if we don't already have a prefix and we do find one in the map.
-;;   (let ((tagname (calc-complete-tagname namespace tagname namespace-prefix-map))
-;; 	 (elem (dom:create-element-ns document namespace tagname)))
-;;     (when (oddp (length attributes))
-;;       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-;;     (iterate (for (name value . rest) first attributes then rest)
-;; 	     (when (and name)
-;; 	       (dom:set-attribute-ns elem namespace
-;; 				     (etypecase name
-;; 					 (symbol (princ-to-string (string-downcase name)))
-;; 					 (string name))
-;; 				  (if (stringp value)
-;; 				      value
-;; 				      (format nil "~a" value))))
-;; 	     (while rest))
-;;     ;;append the children to the element.
-;;     (append-nodes elem children)
+(defun create-complete-element (document namespace tagname attributes children
+					 &optional (namespace-prefix-map *namespace-prefix-map*))
+  "Creates an xml element out of all the necessary components.
+If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
+  ;;if we don't already have a prefix and we do find one in the map.
+  (let* ((tagname (calc-complete-tagname namespace tagname namespace-prefix-map))
+	 (elem (dom:create-element-ns document namespace tagname)))
+    (when (oddp (length attributes))
+      (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
+    (iterate (for (name value . rest) first attributes then rest)
+	     (when (and name)
+	       (dom:set-attribute elem (etypecase name
+					 (symbol (string-downcase name))
+					 (string name))
+				  (if (stringp value)
+				      value
+				      (format nil "~a" value))))
+	     (while rest))
+    ;;append the children to the element.
+    (append-nodes elem children)
 
-;;     elem))
+    elem))
 
-
-
-(defun create-complete-element (document namespace tagname attributes children)
-  (let ((args-alist (do ((alist '())
-			 (pl attributes (cddr pl)))
-			((null pl) alist)
-		      (push (list (string-downcase (car pl))
-				  (princ-to-string (cadr pl)))
-			    alist)))
-	(1-level-flattened-children
-	 (iterate (for child in children)
-		  (cond
-		    ((null child))
-		    ((atom child)
-		     (collect (princ-to-string child)))
-		    ((atom (first child))
-		     (collect child))
-			
-		    (t (appending child))))))
-    (cxml-xmls:make-node :name tagname
-			 :ns nil
-			 :attrs args-alist
-			 :children 1-level-flattened-children)))
 
 
 (defun write-document-to-character-stream (document char-stream)
@@ -99,7 +74,7 @@
 		     (cxml:make-character-stream-sink
 						     char-stream
 						     :canonical nil
-						     :indentation 2))
+						     :indentation nil))
 		    document
 		    :include-doctype :canonical-notations
 		    ))
@@ -163,10 +138,8 @@ This sets the doctype to be xhtml transitional."
 		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"))))   
     (declare (special *document*))
-    ;(append-nodes *document* ,@chillins)
-    *document*
-    (list ,@chillins)
-    ))
+    (append-nodes *document* ,@chillins)
+    *document*))
 
 (defmacro with-xhtml-document-to-file (filename &body chillins)
   "Creates a document block with-document upon which to add the chillins (southern for children).  When the document is complete, it is written out to the specified file."
