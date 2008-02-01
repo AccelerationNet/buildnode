@@ -2,6 +2,33 @@
 
 (cl-interpol:enable-interpol-syntax)
 
+ 
+(defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
+  (declare (special *document*))
+  (etypecase sxml
+    (string sxml)
+    (list (destructuring-bind (tagname attr . kids) sxml
+	    (create-complete-element
+	     *document* namespace
+	     tagname attr
+	     (loop for node in kids
+		   collecting
+		   (xmls-to-dom-snippet node :namespace namespace)))))))
+
+(defparameter *xhtml1-transitional-extid*
+  (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		   (puri:uri #?|file://${(merge-pathnames "xhtml1-transitional.dtd" *load-truename* )}|)))
+
+(defun inner-html (string &optional (tag "div"))
+  "Will wrap the input in a tag (which is neccessary from CXMLs perspective)"
+  (let* ((new-kids (handler-bind ((warning #'(lambda (condition)
+					       (declare (ignore condition))
+					       (muffle-warning))))
+		     (xmls-to-dom-snippet
+		      (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-xmls:make-xmls-builder)
+				  :dtd *xhtml1-transitional-extid*)))))
+    new-kids))
+
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
   (let ((doc (if (typep to-location 'rune-dom::document)

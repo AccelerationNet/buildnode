@@ -10,6 +10,7 @@
 	#:CDATA
 	#:create-complete-element
 	#:write-document
+	#:inner-html
 	#:with-xul-document
 	#:with-document
 	#:with-xhtml-document
