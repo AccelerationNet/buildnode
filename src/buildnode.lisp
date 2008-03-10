@@ -7,10 +7,11 @@
   (declare (special *document*))
   (etypecase sxml
     (string sxml)
-    (list (destructuring-bind (tagname attr . kids) sxml
+    (list (destructuring-bind (tagname attrs . kids) sxml
 	    (create-complete-element
 	     *document* namespace
-	     tagname attr
+	     tagname
+	     (flatten attrs)
 	     (loop for node in kids
 		   collecting
 		   (xmls-to-dom-snippet node :namespace namespace)))))))
