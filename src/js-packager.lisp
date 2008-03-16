@@ -190,7 +190,10 @@ With js-collector also appends all (non-nil) elements in body to the document"
   (make-script-block-fn #'xul:script js))
 
 (defun make-script-fn (fn-script url)
-  (funcall fn-script (list :src url :lang "javascript" :language "javascript" :type "text/javascript") ))
+  (funcall fn-script `(:src ,url
+			    :lang "javascript"
+			    :language "javascript"
+			    :type "text/javascript")))
 
 (defvar *cdata-script-blocks* T "Should script blocks have a cdata?")
 

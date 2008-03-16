@@ -1,7 +1,6 @@
 (in-package :net.acceleration.buildnode)
 
 (cl-interpol:enable-interpol-syntax)
-
  
 (defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
   (declare (special *document*))
@@ -22,13 +21,12 @@
 
 (defun inner-html (string &optional (tag "div"))
   "Will wrap the input in a tag (which is neccessary from CXMLs perspective)"
-  (let* ((new-kids (handler-bind ((warning #'(lambda (condition)
-					       (declare (ignore condition))
-					       (muffle-warning))))
-		     (xmls-to-dom-snippet
-		      (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-xmls:make-xmls-builder)
-				  :dtd *xhtml1-transitional-extid*)))))
-    new-kids))
+  (handler-bind ((warning #'(lambda (condition)
+			      (declare (ignore condition))
+			      (muffle-warning))))
+    (xmls-to-dom-snippet
+     (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-xmls:make-xmls-builder)
+		 :dtd *xhtml1-transitional-extid*))))
 
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
@@ -87,11 +85,10 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 					 (string name))
 				  (if (stringp value)
 				      value
-				      (format nil "~a" value))))
+				      (princ-to-string value))))
 	     (while rest))
     ;;append the children to the element.
     (append-nodes elem children)
-
     elem))
 
 
@@ -124,7 +121,6 @@ If the tagname does not contain a prefix, then one is added based on the namespa
     ('character (write-document-to-character-stream document out-stream))
     (otherwise (write-document-to-octet-stream document out-stream))))
 
-
 (defmacro with-document (&body chillins)
   "(with-document ( a bunch of child nodes of the document )) --> cxml:dom document
 Creates an environment in which the special variable *document* is available
@@ -148,7 +144,6 @@ complete document is returned"
 			      :if-exists :supersede))
     (write-document doc fd)
     doc))
-
 
 (defmacro with-xhtml-document (&body chillins)
   "(with-xhtml-document ( a bunch of child nodes of the document )) --> cxml:dom document
