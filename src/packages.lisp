@@ -20,7 +20,8 @@
 	#:script-block
 	#:stylesheet-block
 	#:*document*
-	#:*namespace-prefix-map*))
+	#:*namespace-prefix-map*
+	#:*html-compatibility-mode*))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)

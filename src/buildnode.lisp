@@ -63,7 +63,8 @@
 		       ;;found the given namespace in the map
 		       (let ((prefix (cdr namespace-entry)))
 			 (declare (type string prefix))
-			 (when (> (length prefix) 0)
+			 (when (and (not *html-compatibility-mode*)
+				    (> (length prefix) 0))
 			   prefix))))))
     (if prefix
 	#?"${prefix}:${base-tag}"
@@ -92,28 +93,33 @@ If the tagname does not contain a prefix, then one is added based on the namespa
     elem))
 
 
+(defun write-normalized-document-to-sink (document stream-sink)
+  "writes a cxml:dom document to the given stream-sink,
+passing the document through a namespace normalizer first, and
+possibly a html-compatibility-sink if *html-compatibility-mode* is set"
+  (dom:map-document
+   (cxml:make-namespace-normalizer
+    (if *html-compatibility-mode*
+	(make-html-compatibility-sink stream-sink)
+	stream-sink))
+   document
+   :include-doctype :canonical-notations))
 
 (defun write-document-to-character-stream (document char-stream)
   "writes a cxml:dom document to a character stream"
-  (dom:map-document (cxml:make-namespace-normalizer
-		     (cxml:make-character-stream-sink
-						     char-stream
-						     :canonical nil
-						     :indentation nil))
-		    document
-		    :include-doctype :canonical-notations
-		    ))
-
+  (write-normalized-document-to-sink
+   document
+   (cxml:make-character-stream-sink char-stream
+				    :canonical nil
+				    :indentation nil)))
 
 (defun write-document-to-octet-stream (document octet-stream)
   "writes a cxml:dom document to a character stream"
-  (dom:map-document (cxml:make-namespace-normalizer (cxml:make-octet-stream-sink
-						     octet-stream
-						     :canonical nil
-						     :indentation 2))
-		    document
-		    :include-doctype :canonical-notations
-		    ))
+  (write-normalized-document-to-sink
+   document
+   (cxml:make-octet-stream-sink octet-stream
+				:canonical nil
+				:indentation 2)))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
