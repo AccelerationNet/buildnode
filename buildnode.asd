@@ -11,8 +11,7 @@
   :description "Tool for building up an xml dom nicely."
   :components ((:module :src
 			:components ((:file "packages")
-				     (:file "html-compat" :depends-on ("packages"))
-				     (:file "buildnode" :depends-on ("html-compat"))
+				     (:file "buildnode" :depends-on ("packages"))
 				     (:file "js-packager" :depends-on ("packages" :tags ))
 				     (:module :tags
 					      :components ((:file "tags" )
@@ -21,4 +20,4 @@
 							   (:file "xhtml-tags" :depends-on ("tags"))
 							   (:file "custom-html" :depends-on ("xhtml-tags")))
 					      :depends-on ("packages" "buildnode")))))
-  :depends-on (:cxml :iterate :flexi-streams :arnesi :swank :adwcodebase :cl-interpol))
+  :depends-on (:cxml :iterate :flexi-streams :arnesi :swank :adwcodebase :cl-interpol :closure-html))

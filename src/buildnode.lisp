@@ -63,8 +63,7 @@
 		       ;;found the given namespace in the map
 		       (let ((prefix (cdr namespace-entry)))
 			 (declare (type string prefix))
-			 (when (and (not *html-compatibility-mode*)
-				    (> (length prefix) 0))
+			 (when (> (length prefix) 0)
 			   prefix))))))
     (if prefix
 	#?"${prefix}:${base-tag}"
@@ -80,13 +79,18 @@ If the tagname does not contain a prefix, then one is added based on the namespa
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
     (iterate (for (name value . rest) first attributes then rest)
-	     (when (and name)
-	       (dom:set-attribute elem (etypecase name
-					 (symbol (string-downcase name))
-					 (string name))
-				  (if (stringp value)
-				      value
-				      (princ-to-string value))))
+	     (when name
+	       (let ((attr-name
+		      (calc-complete-tagname namespace
+					     (etypecase name
+					       (symbol (string-downcase name))
+					       (string name))
+					     namespace-prefix-map)))
+	       (dom:set-attribute-ns elem namespace
+				     attr-name
+				     (if (stringp value)
+					 value
+					 (princ-to-string value)))))
 	     (while rest))
     ;;append the children to the element.
     (append-nodes elem children)
@@ -98,10 +102,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 passing the document through a namespace normalizer first, and
 possibly a html-compatibility-sink if *html-compatibility-mode* is set"
   (dom:map-document
-   (cxml:make-namespace-normalizer
-    (if *html-compatibility-mode*
-	(make-html-compatibility-sink stream-sink)
-	stream-sink))
+   (cxml:make-namespace-normalizer stream-sink)
    document
    :include-doctype :canonical-notations))
 
@@ -109,17 +110,21 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
   "writes a cxml:dom document to a character stream"
   (write-normalized-document-to-sink
    document
-   (cxml:make-character-stream-sink char-stream
+      (if *html-compatibility-mode*
+       (chtml:make-character-stream-sink char-stream)
+       (cxml:make-character-stream-sink char-stream
 				    :canonical nil
-				    :indentation nil)))
+				    :indentation nil))))
 
 (defun write-document-to-octet-stream (document octet-stream)
   "writes a cxml:dom document to a character stream"
   (write-normalized-document-to-sink
    document
-   (cxml:make-octet-stream-sink octet-stream
-				:canonical nil
-				:indentation 2)))
+   (if *html-compatibility-mode*
+       (chtml:make-octet-stream-sink octet-stream)
+       (cxml:make-octet-stream-sink octet-stream
+				    :canonical nil
+				    :indentation 2))))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
@@ -173,3 +178,30 @@ This sets the doctype to be xhtml transitional."
 (defmacro with-xhtml-document-to-file (filename &body chillins)
   "Creates a document block with-document upon which to add the chillins (southern for children).  When the document is complete, it is written out to the specified file."
   `(write-doc-to-file (with-xhtml-document ,@chillins) ,filename))
+
+
+(defmacro with-html-document-to-file ((filename) &body body)
+  "Creates an html-document, writes out the results to filename"
+  `(let ((*html-compatibility-mode* T))
+    (write-doc-to-file (with-html-document ,@body)
+		      ,filename)))
+
+(defmacro with-html-document (&body body)
+  "(with-html-document ( a bunch of child nodes of the document )) --> cxml:dom document
+Creates an environment in which the special variable *document* is available
+a document is necessary to create dom nodes and the document the nodes end up on
+must be the document on which they were created.  At the end of the form, the
+complete document is returned.
+This sets the doctype to be xhtml transitional."
+  `(let ((*document* (dom:create-document
+		      'rune-dom:implementation
+		      nil nil
+		      (dom:create-document-type
+		       'rune-dom:implementation
+		       "html"
+		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")))
+	 (*html-compatibility-mode* T))
+    (declare (special *document*))
+    (append-nodes *document* ,@body)
+    *document*))

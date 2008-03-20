@@ -13,15 +13,16 @@
 	#:inner-html
 	#:with-xul-document
 	#:with-document
+	#:with-document-to-file
 	#:with-xhtml-document
 	#:with-xhtml-document-to-file
-	#:with-document-to-file
+	#:with-html-document
+	#:with-html-document-to-file
 	#:append-nodes
 	#:script-block
 	#:stylesheet-block
 	#:*document*
-	#:*namespace-prefix-map*
-	#:*html-compatibility-mode*))
+	#:*namespace-prefix-map*))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
