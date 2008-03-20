@@ -58,7 +58,8 @@
 
 
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
-  (let ((prefix (and (not (cxml::split-qname base-tag)) ;not already a prefix
+  (let ((prefix (and namespace-prefix-map
+		     (not (cxml::split-qname base-tag)) ;not already a prefix
 		     (when-bind namespace-entry (assoc namespace namespace-prefix-map :test #'string=)
 		       ;;found the given namespace in the map
 		       (let ((prefix (cdr namespace-entry)))
