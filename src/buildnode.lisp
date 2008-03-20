@@ -151,11 +151,12 @@ complete document is returned"
 
 (defun write-doc-to-file (doc filename)
   "Binary write-out a document. will create/overwrite any existing file named the same."
-  (with-open-stream (fd (open filename :direction :output :element-type '(unsigned-byte 8)
-			      :if-does-not-exist :create
-			      :if-exists :supersede))
-    (write-document doc fd)
-    doc))
+  (let ((filename (merge-pathnames filename)) )
+    (with-open-stream (fd (open filename :direction :output :element-type '(unsigned-byte 8)
+							    :if-does-not-exist :create
+							    :if-exists :supersede))
+      (write-document doc fd))
+    (values doc filename)))
 
 (defmacro with-xhtml-document (&body chillins)
   "(with-xhtml-document ( a bunch of child nodes of the document )) --> cxml:dom document
