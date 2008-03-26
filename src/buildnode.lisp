@@ -52,7 +52,7 @@
     )
     to-location))
 
-
+(defvar *html-compatibility-mode* nil)
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
 
@@ -80,18 +80,15 @@ If the tagname does not contain a prefix, then one is added based on the namespa
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
     (iterate (for (name value . rest) first attributes then rest)
-	     (when name
-	       (let ((attr-name
-		      (calc-complete-tagname namespace
-					     (etypecase name
-					       (symbol (string-downcase name))
-					       (string name))
-					     namespace-prefix-map)))
-	       (dom:set-attribute-ns elem namespace
-				     attr-name
+	     (when name 
+	       (dom:set-attribute-ns elem nil
+				     (etypecase name
+				       (symbol (coerce (string-downcase name)
+						       '(simple-array character (*))))
+				       (string name))
 				     (if (stringp value)
 					 value
-					 (princ-to-string value)))))
+					 (princ-to-string value))))
 	     (while rest))
     ;;append the children to the element.
     (append-nodes elem children)
