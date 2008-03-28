@@ -56,6 +56,7 @@
 	#:Tables
 	#:Xul
 	#:*cdata-script-blocks*
+	#:table-sorter
 	))
 
 (defpackage :net.acceleration.xhtml

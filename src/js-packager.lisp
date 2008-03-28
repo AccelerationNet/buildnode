@@ -221,6 +221,15 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (def-js-file 'Tables "/jscontrols/Tables.js" :depends-on '(JsHelper))
 (def-js-file 'Xul "/jscontrols/Xul.js" :depends-on '(JsHelper))
 
+(def-js-file :dojo "script/dojo/dojo.js")
+(def-js-file :sorter "script/sorter.js" :depends-on '(:dojo))
+
+(defun table-sorter (id)
+  (use-js-file :sorter)
+  (add-js-snippet
+   (js:js* `(dojo.add-on-load
+	     (lambda ()
+	       (new (-Table-Sorter ,id)))))))
 
 '(flet ((button-control ()
 	 (declare (special use-js-file))
