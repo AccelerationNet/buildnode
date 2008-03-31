@@ -226,10 +226,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 
 (defun table-sorter (id)
   (use-js-file :sorter)
-  (add-js-snippet
-   (js:js* `(dojo.add-on-load
-	     (lambda ()
-	       (new (-Table-Sorter ,id)))))))
+  (add-js-snippet #?"dojo.addOnLoad(function () {new TableSorter('${id}') });"))
 
 '(flet ((button-control ()
 	 (declare (special use-js-file))
