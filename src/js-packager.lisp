@@ -1,4 +1,5 @@
 (in-package :net.acceleration.javascript)
+(cl-interpol:enable-interpol-syntax)
 
 (defun make-js-depenecy-graph ()
   (make-hash-table :test #'equal))
