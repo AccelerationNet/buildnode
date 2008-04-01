@@ -22,6 +22,7 @@
 	#:script-block
 	#:stylesheet-block
 	#:*document*
+	#:*html-compatibility-mode*
 	#:*namespace-prefix-map*))
 
 (defpackage :net.acceleration.javascript
