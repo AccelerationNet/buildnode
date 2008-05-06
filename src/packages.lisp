@@ -5,6 +5,11 @@
   (:use :common-lisp :cxml :arnesi :iterate :net.acceleration.utils)
   (:shadow #:cdata :value :name :body)
   (:export
+        #:set-attributes
+	#:push-new-attribute
+	#:push-new-attributes
+	#:set-attribute
+	#:get-attribute
 	#:?xml-stylesheet
 	#:?processing-instruction
 	#:CDATA

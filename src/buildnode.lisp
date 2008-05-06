@@ -70,6 +70,53 @@
 	#?"${prefix}:${base-tag}"
 	base-tag)))
 
+(defun prepare-attribute-name (attribute)
+  "Prepares an attribute name for output to html by coercing to strings"
+  (etypecase attribute
+    (symbol (coerce (string-downcase attribute)
+		    '(simple-array character (*))))
+    (string attribute)))
+
+(defun prepare-attribute-value (value)
+  "prepares a value for html out put by coercing to a string"
+  (princ-to-string value))
+
+(defun get-attribute (elem attribute)
+  "Gets the value of an attribute on an element"
+  (dom:get-attribute-ns
+   elem
+   nil
+   (prepare-attribute-name attribute)))
+
+(defun set-attribute (elem attribute value)
+  "Sets an attribute and passes the elem through, returns the elem"
+  (dom:set-attribute-ns
+   elem
+   nil
+   (prepare-attribute-name attribute)
+   (prepare-attribute-value value))
+  elem)
+
+(defun push-new-attribute (elem attribute value)
+  "if the attribute is not on the element then put it there with the specified value, returns the elem"
+  (when (null (get-attribute elem attribute))
+    (set-attribute elem attribute value))
+  elem)
+
+(defun push-new-attributes (elem &rest attribute-p-list)
+  "for each attribute in the plist push-new into the attributes list of the elem, returns the elem"
+  (loop for (attr val . rest) = attribute-p-list then rest
+	do (push-new-attribute elem attr val)
+	while rest)
+  elem)
+
+(defun set-attributes (elem &rest attribute-p-list)
+  "set-attribute for each attribute specified in the plist, returns the elem"
+  (loop for (attr val . rest) = attribute-p-list then rest
+	do (when (set-attribute elem attr val))
+	while rest)
+  elem)
+
 (defun create-complete-element (document namespace tagname attributes children
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
   "Creates an xml element out of all the necessary components.
@@ -79,17 +126,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 	 (elem (dom:create-element-ns document namespace tagname)))
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-    (iterate (for (name value . rest) first attributes then rest)
-	     (when name 
-	       (dom:set-attribute-ns elem nil
-				     (etypecase name
-				       (symbol (coerce (string-downcase name)
-						       '(simple-array character (*))))
-				       (string name))
-				     (if (stringp value)
-					 value
-					 (princ-to-string value))))
-	     (while rest))
+    (apply #'set-attributes (flatten elem attributes))
     ;;append the children to the element.
     (append-nodes elem children)
     elem))
