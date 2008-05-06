@@ -128,7 +128,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
 	 (elem (dom:create-element-ns document namespace tagname)))
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
-    (apply #'set-attributes (flatten elem attributes))
+    (apply #'set-attributes elem attributes)
     ;;append the children to the element.
     (append-nodes elem children)
     elem))
