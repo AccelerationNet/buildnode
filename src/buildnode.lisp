@@ -79,7 +79,7 @@
 
 (defun prepare-attribute-value (value)
   "prepares a value for html out put by coercing to a string"
-  (princ-to-string value))
+  (if (stringp value) value (princ-to-string value)))
 
 (defun get-attribute (elem attribute)
   "Gets the value of an attribute on an element"
@@ -98,23 +98,25 @@
   elem)
 
 (defun push-new-attribute (elem attribute value)
-  "if the attribute is not on the element then put it there with the specified value, returns the elem"
-  (when (null (get-attribute elem attribute))
-    (set-attribute elem attribute value))
-  elem)
+  "if the attribute is not on the element then put it there with the specified value,
+   returns the elem and whether or not the attribute was set"
+  (values elem
+   (when (null (get-attribute elem attribute))
+     (set-attribute elem attribute value)
+     T)))
 
 (defun push-new-attributes (elem &rest attribute-p-list)
   "for each attribute in the plist push-new into the attributes list of the elem, returns the elem"
   (loop for (attr val . rest) = attribute-p-list then rest
-	do (push-new-attribute elem attr val)
-	while rest)
+	while attr
+	do (push-new-attribute elem attr val))
   elem)
 
 (defun set-attributes (elem &rest attribute-p-list)
   "set-attribute for each attribute specified in the plist, returns the elem"
   (loop for (attr val . rest) = attribute-p-list then rest
-	do (when (set-attribute elem attr val))
-	while rest)
+	while attr
+	do (set-attribute elem attr val))
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children
