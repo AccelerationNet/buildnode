@@ -237,8 +237,9 @@ This sets the doctype to be xhtml transitional."
 		      (dom:create-document-type
 		       'rune-dom:implementation
 		       "html"
-		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")))
+		       "-//W3C//DTD HTML 4.01//EN"
+		       "http://www.w3.org/TR/html4/strict.dtd")
+		      ))
 	 (*html-compatibility-mode* T))
     (declare (special *document*))
     (append-nodes *document* ,@body)
