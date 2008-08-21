@@ -224,6 +224,9 @@ This sets the doctype to be xhtml transitional."
     (write-doc-to-file (with-html-document ,@body)
 		      ,filename)))
 
+(defvar *document* ()
+  "A variable for document building")
+
 (defmacro with-html-document (&body body)
   "(with-html-document ( a bunch of child nodes of the document )) --> cxml:dom document
 Creates an environment in which the special variable *document* is available
