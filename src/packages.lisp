@@ -5,6 +5,7 @@
   (:use :common-lisp :cxml :arnesi :iterate :net.acceleration.utils)
   (:shadow #:cdata :value :name :body)
   (:export
+        #:text-of-dom-snippet
         #:set-attributes
 	#:push-new-attribute
 	#:push-new-attributes

@@ -19,6 +19,32 @@
   (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		   (puri:uri #?|file://${(merge-pathnames "xhtml1-transitional.dtd" *load-truename* )}|)))
 
+(defmethod text-of-dom-snippet ((el T) &optional splice)
+  (declare (ignorable el splice))
+  ())
+
+(defmethod text-of-dom-snippet ((el dom:document) &optional splice )
+  "get all of the textnodes of a dom:document and return that string with splice between each character"
+  (let ((strings (loop for kid across (dom:child-nodes el)
+		       collecting (text-of-dom-snippet kid splice))))
+    (join-strings
+     (flatten (if splice
+		  (insert-between strings splice)
+		  strings)))))
+
+(defmethod text-of-dom-snippet ((el dom:element) &optional splice)
+  "get all of the textnodes of a dom:element and return that string with splice between each character"
+  (let ((strings (loop for kid across (dom:child-nodes el)
+		       collecting (text-of-dom-snippet kid splice))))
+    (join-strings
+     (flatten (if splice
+		  (insert-between strings splice)
+		  strings)))))
+
+(defmethod text-of-dom-snippet ((el dom:text) &optional splice)
+  (declare (ignorable splice))
+  (dom:data el))
+
 (defun inner-html (string &optional (tag "div"))
   "Will wrap the input in a tag (which is neccessary from CXMLs perspective)"
   (handler-bind ((warning #'(lambda (condition)
