@@ -29,7 +29,8 @@
 	#:stylesheet-block
 	#:*document*
 	#:*html-compatibility-mode*
-	#:*namespace-prefix-map*))
+	#:*namespace-prefix-map*
+	#:dom-comment))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)

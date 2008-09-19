@@ -66,6 +66,11 @@ special variable *document*"
   (declare (special *document*))
   (dom:create-processing-instruction *document* target data))
 
+(defun dom-comment (text)
+  "Insert a dom comment into the current *document*"
+  (declare (special *document*))
+  (dom:create-comment *document* text))
+
 (defun net.acceleration.buildnode:CDATA ( data )
   (declare (special *document*))
   (dom:create-cdata-section *document* data))
