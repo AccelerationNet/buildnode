@@ -242,8 +242,8 @@ With js-collector also appends all (non-nil) elements in body to the document"
 '(flet ((button-control ()
 	 (declare (special use-js-file))
 	 (use-js-file 'behaviour)
-	 (list (xhtml:button '(:label "Fuck"))
-	       (xhtml:button '(:label "You")))))
+	 (list (xhtml:button '(:label "Foo"))
+	       (xhtml:button '(:label "Bar")))))
   (write-document
    (with-document
      (js-insertion-block ( #'xhtml-script-tag)
@@ -264,7 +264,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 	  (button-control))))
        (xul:window '(:id "fuck")
 		   (js-insertion-block (#'xul-script-tag)
-		     (xul:button '(:label "fuck"))
+		     (xul:button '(:label "foo"))
 		     insert-script-here
-		     (xul:button '(:label "you"))
-		     (use-js-file "js/fuck your mom in her dirty ass")))))))
+		     (xul:button '(:label "bar"))
+		     (use-js-file "js/foo your mom in her dirty bam")))))))
