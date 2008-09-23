@@ -19,7 +19,23 @@
    (snippets :initarg :snippets
 	     :accessor snippets
 	     :initform nil
-	     :documentation "A list of snippet strings that should be put in a script block.")))
+	     :documentation "A list of snippet strings that should be put in a script block.")
+   (script-tag-fn :initarg :script-tag-fn
+		  :accessor script-tag-fn
+		  :initform #'xhtml-script-tag)
+   (script-block-fn :initarg :script-block-fn
+		    :accessor script-block-fn
+		    :initform #'xhtml-script-block)))
+
+(defmethod build-script-elements ((js-collector js-collector))
+  "Build all of the javascript elements, i.e. the full list of script tags and blocks."
+  (nconc
+   (mapcar (script-tag-fn js-collector)
+	   (js-list js-collector)) ;js-list is the full tree traversal.
+   (when (snippets *js-collector*)
+     (list (funcall (script-block-fn js-collector)
+		    (format nil "~{~a~%~}" (reverse (snippets js-collector))))))))
+
 
 (defun find-graph-node (key js-dependency-graph)
   "retrieves a graph-node from the js-dependency-graph based on a symbol or url"
@@ -53,10 +69,6 @@
   (if (creates-circular-dependency-p key (js-graph-node-dependency-list val) js-dependency-graph)
       (error "Insertion will lead to a circular dependency graph ~% key:~a~%graph:~a" key js-dependency-graph )
       (setf (gethash key js-dependency-graph) val)))
-
-(defun make-js-collector ()
-  "small quicky alias for make-instance 'js-collector)"
-  (make-instance 'js-collector))
 
 (defmethod js-list ((js js-collector))
   "gets the list of urls from a js collector (including dependencies)"
@@ -119,30 +131,30 @@ be in scope inside of with-javascript-collector"
   (declare (special *js-collector*))
   (push snippet (snippets *js-collector*)))
 
+(defun add-dojo-onload (fun)
+  "Use dojo to add a document onload function. This function
+is expecting a function object (in string form) as the arg."
+  (use-js-file :dojo)
+  (add-js-snippet
+   (etypecase fun
+     (string #?"dojo.addOnLoad(${fun});"))))
+
+(defvar *js-collector* nil
+  "Special variable for use in collection js snippets and scripts.")
+
 (defmacro with-javascript-collector (script-tag-fn script-block-fn &body body)
   "Returns the list of body evaluated, as well as the list of script-elements
  There is a special-symbol use-js-file that is a function to add a js file to the collection.
  (use-js-file (url-or-JsName :depends-on '(a dependency list of urls and keyword names))
 	=> has the side effect of adding a js-file to the js-collection
 With js-collector also appends all (non-nil) elements in body to the document"
-  `(let* ((*js-collector* (make-js-collector)))
-    (declare (special *js-collector*))
-    (let ((body-rtn-list (list ,@body)))
-      (values
-       body-rtn-list
-       (append (make-script-tags-from-list
-		,script-tag-fn
-		(js-list *js-collector*))
-	       (when (snippets *js-collector*)
-		 (list (funcall ,script-block-fn
-				(format nil "~{~a~%~}" (reverse (snippets *js-collector*)))))))))))
+  `(let* ((*js-collector* (make-instance 'js-collector :script-tag-fn ,script-tag-fn
+							:script-block-fn ,script-block-fn)))
+     (let ((body-rtn-list (list ,@body)))
+       (values
+	 body-rtn-list
+	 (build-script-elements *js-collector*)))))
 
-(defun make-script-tags-from-list (script-tag-function url-list)
-  "script tag function is a function that accepts a url and creates script tags out of them"
-  (mapcar
-   (lambda (url)
-     (funcall script-tag-function url))
-   url-list))
 
 (defmacro js-insertion-block ((&key (script-tag-fn 'xhtml-script-tag)
 				    (script-block-fn 'xhtml-script-block)
@@ -225,7 +237,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 
 (defun table-sorter (id)
   (use-js-file :sorter)
-  (add-js-snippet #?"dojo.addOnLoad(function () {new TableSorter('${id}') });"))
+  (add-dojo-onload #?"function () {new TableSorter('${id}') }"))
 
 '(flet ((button-control ()
 	 (declare (special use-js-file))

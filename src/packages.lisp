@@ -65,7 +65,11 @@
 	#:Xul
 	#:*cdata-script-blocks*
 	#:table-sorter
-	))
+	)
+  (:export #:add-dojo-onload
+	   #:build-script-elements
+	   #:js-collector
+	   #:*js-collector*))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)
