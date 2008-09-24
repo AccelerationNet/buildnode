@@ -69,7 +69,8 @@
   (:export #:add-dojo-onload
 	   #:build-script-elements
 	   #:js-collector
-	   #:*js-collector*))
+	   #:*js-collector*
+	   #:clear-js-collector))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)

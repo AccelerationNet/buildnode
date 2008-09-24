@@ -27,6 +27,11 @@
 		    :accessor script-block-fn
 		    :initform #'xhtml-script-block)))
 
+(defun clear-js-collector (js-collector)
+  (setf (urls js-collector) ()
+	(snippets js-collector) ()
+	))
+
 (defmethod build-script-elements ((js-collector js-collector))
   "Build all of the javascript elements, i.e. the full list of script tags and blocks."
   (nconc
