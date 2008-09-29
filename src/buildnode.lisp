@@ -221,6 +221,11 @@ complete document is returned"
       (write-document doc fd))
     (values doc filename)))
 
+(defun document-to-string (doc)
+  "Binary write-out a document. will create/overwrite any existing file named the same."
+  (with-output-to-string (fd)
+    (write-document doc fd)))
+
 (defmacro with-xhtml-document (&body chillins)
   "(with-xhtml-document ( a bunch of child nodes of the document )) --> cxml:dom document
 Creates an environment in which the special variable *document* is available

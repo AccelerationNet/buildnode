@@ -30,7 +30,8 @@
 	#:*document*
 	#:*html-compatibility-mode*
 	#:*namespace-prefix-map*
-	#:dom-comment))
+	#:dom-comment
+	#:document-to-string))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
