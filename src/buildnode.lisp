@@ -50,9 +50,10 @@
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
-    (xmls-to-dom-snippet
-     (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-xmls:make-xmls-builder)
-		 :dtd *xhtml1-transitional-extid*))))
+    
+    (let ((doc (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-dom:make-dom-builder)
+			   :dtd *xhtml1-transitional-extid*)))
+      (dom:import-node *document* (dom:first-child doc) T))))
 
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
