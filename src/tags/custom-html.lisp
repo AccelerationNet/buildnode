@@ -34,3 +34,17 @@
 	title
 	(xhtml:iframe (list :class "panel" :src src) "Loading...")))
 
+
+(defun xhtml:unordered-list (items &key ul-class li-class li-function )
+  "Expands to:
+   (xhtml:ul `(:class ,ul-class)
+     (xhtml:li `(:class li-class)
+       (funcall #'li-function item)))"
+  (let ((ul-class (when ul-class (list :class ul-class)))
+	(li-class (when li-class (list :class li-class))))
+    (xhtml:ul ul-class
+      (loop for i in items
+	    collect (xhtml:li li-class
+		      (if li-function
+			  (funcall li-function i)
+			  i))))))

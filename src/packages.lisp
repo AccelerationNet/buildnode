@@ -77,6 +77,7 @@
 	 (:nicknames :xhtml)
   (:use )
   (:export
+   #:unordered-list
 	#:tab-container
 	#:tab-title
 	#:tab
