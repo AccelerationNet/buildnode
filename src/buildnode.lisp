@@ -60,23 +60,14 @@
   (let ((doc (if (typep to-location 'rune-dom::document)
 		 to-location
 		 (dom:owner-document to-location))))
-    (labels ((map-tree (children)
-	       (when children
-		 (iterate (for child in children)
-			  (if (listp child)
-			      (map-tree child)
-			      (dom:append-child
-			       to-location
-			       (cond
-				 ((stringp child)
-				  (dom:create-text-node doc child))
-				 ((numberp child)
-				  (dom:create-text-node doc
-							#?"${child}"))
-				 (T child)
-				 )))))))
-      (map-tree chillins)
-    )
+    (adwutils:map-tree #'(lambda (child)
+			   (dom:append-child
+			    to-location
+			    (typecase child
+			      (dom:element child)
+			      (string (dom:create-text-node doc child))
+			      (T (dom:create-text-node doc (princ-to-string child))))))
+		       chillins)
     to-location))
 
 (defvar *html-compatibility-mode* nil)
