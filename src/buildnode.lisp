@@ -64,7 +64,7 @@
 			   (dom:append-child
 			    to-location
 			    (typecase child
-			      (dom:element child)
+			      (dom:node child)
 			      (string (dom:create-text-node doc child))
 			      (T (dom:create-text-node doc (princ-to-string child))))))
 		       chillins)
