@@ -32,10 +32,17 @@
 	(snippets js-collector) ()
 	))
 
-(defmethod build-script-elements ((js-collector js-collector))
-  "Build all of the javascript elements, i.e. the full list of script tags and blocks."
+(defmethod build-script-elements ((js-collector js-collector) &optional base-url)
+  "Build all of the javascript elements, i.e. the full list of script tags and blocks.
+  "
   (nconc
-   (mapcar (script-tag-fn js-collector)
+   (mapcar (lambda (url)
+	     (funcall (script-tag-fn js-collector)
+		      (if (and (char-equal #\/ (elt url 0))
+			       base-url )
+			  (let ((it (char-equal #\/ (elt base-url (- (length base-url) 1)))))
+			    #?"${ base-url }${ (if it (subseq url 1) url) }")
+			  url)))
 	   (js-list js-collector)) ;js-list is the full tree traversal.
    (when (snippets *js-collector*)
      (list (funcall (script-block-fn js-collector)
