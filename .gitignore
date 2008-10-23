@@ -1,8 +1,9 @@
 .svn
 build
 dist
-Thumbs.db
-thumbs.db
 *~
 *#
 *.fasl
+bin/gainesville-green.com
+etc/apache.conf
+etc/init.d
