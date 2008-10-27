@@ -16,8 +16,14 @@
 		   (xmls-to-dom-snippet node :namespace namespace)))))))
 
 (defparameter *xhtml1-transitional-extid*
-  (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		   (puri:uri #?|file://${(merge-pathnames "xhtml1-transitional.dtd" *load-truename* )}|)))
+  (let ((xhtml1-transitional.dtd
+	 (make-pathname :directory (append
+				    (pathname-directory (truename (asdf:system-definition-pathname :buildnode)))
+				    '("src"))
+			:name "xhtml1-transitional"
+			:type "dtd")))
+   (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
 
 (defmethod text-of-dom-snippet ((el T) &optional splice)
   (declare (ignorable el splice))
@@ -44,6 +50,14 @@
 (defmethod text-of-dom-snippet ((el dom:text) &optional splice)
   (declare (ignorable splice))
   (dom:data el))
+
+;;;; I think we might be able to use this as a dom-builder for a more efficient
+;;;; version of the inner-html function
+;; (defun make-scoped-dom-builder (node)
+;;   (let ((builder (rune-dom:make-dom-builder)))
+;;     (setf (rune-dom::document builder) (dom:owner-document node)
+;; 	  (rune-dom::element-stack builder) node)
+;;     builder))
 
 (defun inner-html (string &optional (tag "div"))
   "Will wrap the input in a tag (which is neccessary from CXMLs perspective)"
