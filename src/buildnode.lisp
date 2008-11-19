@@ -1,7 +1,7 @@
 (in-package :net.acceleration.buildnode)
 
 (cl-interpol:enable-interpol-syntax)
- 
+
 (defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
   (declare (special *document*))
   (etypecase sxml
@@ -56,7 +56,7 @@
 ;; (defun make-scoped-dom-builder (node)
 ;;   (let ((builder (rune-dom:make-dom-builder)))
 ;;     (setf (rune-dom::document builder) (dom:owner-document node)
-;; 	  (rune-dom::element-stack builder) node)
+;;	  (rune-dom::element-stack builder) node)
 ;;     builder))
 
 (defun inner-html (string &optional (tag "div"))
@@ -64,7 +64,7 @@
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
-    
+
     (let ((doc (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-dom:make-dom-builder)
 			   :dtd *xhtml1-transitional-extid*)))
       (dom:import-node *document* (dom:first-child doc) T))))
@@ -197,7 +197,7 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
-  (case (stream-element-type out-stream) 
+  (case (stream-element-type out-stream)
     ('character (write-document-to-character-stream document out-stream))
     (otherwise (write-document-to-octet-stream document out-stream))))
 
@@ -245,7 +245,7 @@ This sets the doctype to be xhtml transitional."
 		       'rune-dom:implementation
 		       "html"
 		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"))))   
+		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"))))
     (declare (special *document*))
     (append-nodes *document* ,@chillins)
     *document*))
