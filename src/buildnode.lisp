@@ -129,6 +129,12 @@
    (prepare-attribute-value value))
   elem)
 
+(defmethod add-css-class ((el dom:element) new-class)
+  (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class))))
+    (unless (find new-class css-classes :test #'string=)
+      (push new-class css-classes))
+    (set-attribute el :class (format nil "~{~a~^ ~}" css-classes))))
+
 (defun push-new-attribute (elem attribute value)
   "if the attribute is not on the element then put it there with the specified value,
    returns the elem and whether or not the attribute was set"

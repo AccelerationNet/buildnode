@@ -11,6 +11,7 @@
 	#:push-new-attributes
 	#:set-attribute
 	#:get-attribute
+	#:add-css-class
 	#:?xml-stylesheet
 	#:?processing-instruction
 	#:CDATA
