@@ -256,6 +256,25 @@ This sets the doctype to be xhtml transitional."
     (append-nodes *document* ,@chillins)
     *document*))
 
+(defmacro with-xhtml-frameset-document (&body chillins)
+  "(with-xhtml-document ( a bunch of child nodes of the document )) --> cxml:dom document
+Creates an environment in which the special variable *document* is available
+a document is necessary to create dom nodes and the document the nodes end up on
+must be the document on which they were created.  At the end of the form, the
+complete document is returned.
+This sets the doctype to be xhtml transitional."
+  `(let ((*document* (dom:create-document
+		      'rune-dom:implementation
+		      nil nil
+		      (dom:create-document-type
+		       'rune-dom:implementation
+		       "html"
+		       "-//W3C//DTD XHTML 1.0 Frameset//EN"
+		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd"))))
+    (declare (special *document*))
+    (append-nodes *document* ,@chillins)
+    *document*))
+
 (defmacro with-xhtml-document-to-file (filename &body chillins)
   "Creates a document block with-document upon which to add the chillins (southern for children).  When the document is complete, it is written out to the specified file."
   `(write-doc-to-file (with-xhtml-document ,@chillins) ,filename))

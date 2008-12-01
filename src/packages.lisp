@@ -22,6 +22,7 @@
 	#:with-document
 	#:with-document-to-file
 	#:with-xhtml-document
+	#:with-xhtml-frameset-document
 	#:with-xhtml-document-to-file
 	#:with-html-document
 	#:with-html-document-to-file
