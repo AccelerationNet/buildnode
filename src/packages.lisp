@@ -52,20 +52,6 @@
 	#:def-anon-js-file
 	#:use-js-file
 	#:add-js-snippet
-	#:JsHelper
-	#:Control
-	#:ADWSoap
-	#:Data
-	#:DetailObject
-	#:DHTMLHelper
-	#:PartialPostBack
-	#:Http
-	#:Grid
-	#:Collections
-	#:Hashtable
-	#:Behaviour
-	#:Tables
-	#:Xul
 	#:*cdata-script-blocks*
 	#:table-sorter
 	)
