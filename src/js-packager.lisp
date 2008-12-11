@@ -248,9 +248,11 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (def-js-file :dojo "http://ajax.googleapis.com/ajax/libs/dojo/1.1.1/dojo/dojo.xd.js")
 (def-js-file :sorter "/script/JSControls/sorter.js" :depends-on '(:dojo))
 
-(defun table-sorter (id)
+(defun table-sorter (id &optional row-style-fn)
   (use-js-file :sorter)
-  (add-dojo-onload #?"function () {new TableSorter('${id}') }"))
+  (if row-style-fn
+      (add-dojo-onload #?"function () {new TableSorter('${id}',${row-style-fn}) }")
+      (add-dojo-onload #?"function () {new TableSorter('${id}') }")))
 
 '(flet ((button-control ()
 	 (declare (special use-js-file))
