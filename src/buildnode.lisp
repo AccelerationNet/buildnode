@@ -74,7 +74,7 @@
   (let ((doc (if (typep to-location 'rune-dom::document)
 		 to-location
 		 (dom:owner-document to-location))))
-    (adwutils:map-tree #'(lambda (child)
+    (adwutils:map-tree-leaves #'(lambda (child)
 			   (dom:append-child
 			    to-location
 			    (typecase child
