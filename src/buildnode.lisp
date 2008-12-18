@@ -154,8 +154,7 @@ can validate the html against a DTD if one is passed, can use
 
 (defun set-attributes (elem &rest attribute-p-list)
   "set-attribute for each attribute specified in the plist, returns the elem"
-  (loop for (attr val . rest) = attribute-p-list then rest
-	while attr
+  (loop for (attr val) on attribute-p-list by #'cddr
 	do (set-attribute elem attr val))
   elem)
 
