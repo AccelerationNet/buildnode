@@ -59,14 +59,16 @@
 ;;	  (rune-dom::element-stack builder) node)
 ;;     builder))
 
-(defun inner-html (string &optional (tag "div"))
-  "Will wrap the input in a tag (which is neccessary from CXMLs perspective)"
+(defun inner-html (string &optional (tag "div") (dtd nil))
+  "Will wrap the input in a tag (which is neccessary from CXMLs perspective)
+can validate the html against a DTD if one is passed, can use
+*xhtml1-transitional-extid* for example."
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
 
     (let ((doc (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-dom:make-dom-builder)
-			   :dtd *xhtml1-transitional-extid*)))
+			   :dtd dtd)))
       (dom:import-node *document* (dom:first-child doc) T))))
 
 (defun append-nodes (to-location &rest chillins)
