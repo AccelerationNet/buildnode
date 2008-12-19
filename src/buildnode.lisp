@@ -51,13 +51,19 @@
   (declare (ignorable splice))
   (dom:data el))
 
+(defclass scoped-dom-builder (rune-dom::dom-builder)
+  ())
+(defmethod sax:start-document ((db scoped-dom-builder)))
+(defmethod sax:end-document ((db scoped-dom-builder))
+  (rune-dom::document db))
+
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
 ;;;; version of the inner-html function
-;; (defun make-scoped-dom-builder (node)
-;;   (let ((builder (rune-dom:make-dom-builder)))
-;;     (setf (rune-dom::document builder) (dom:owner-document node)
-;;	  (rune-dom::element-stack builder) node)
-;;     builder))
+(defun make-scoped-dom-builder (node)
+  (let ((builder (make-instance 'scoped-dom-builder)))
+    (setf (rune-dom::document builder) (dom:owner-document node)
+ 	  (rune-dom::element-stack builder) (list node))
+    builder))
 
 (defun inner-html (string &optional (tag "div") (dtd nil))
   "Will wrap the input in a tag (which is neccessary from CXMLs perspective)

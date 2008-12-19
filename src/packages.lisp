@@ -33,7 +33,9 @@
 	#:*html-compatibility-mode*
 	#:*namespace-prefix-map*
 	#:dom-comment
-	#:document-to-string))
+	#:document-to-string
+	#:scoped-dom-builder
+	#:make-scoped-dom-builder))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
