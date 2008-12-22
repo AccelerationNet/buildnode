@@ -138,10 +138,9 @@ be in scope inside of with-javascript-collector"
     (setf (urls *js-collector*) (nconc (urls *js-collector*) (list url-or-key))))
   '())
 
-(defun add-js-snippet (snippet)
+(defun add-js-snippet (snippet &optional (collector *js-collector*))
   "Add a snippet of javascript to the current *js-collector*"
-  (declare (special *js-collector*))
-  (push snippet (snippets *js-collector*)))
+  (push snippet (snippets collector)))
 
 (defun add-dojo-onload (fun)
   "Use dojo to add a document onload function. This function
