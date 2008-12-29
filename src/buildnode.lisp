@@ -137,6 +137,13 @@ can validate the html against a DTD if one is passed, can use
    (prepare-attribute-value value))
   elem)
 
+(defun remove-attribute (elem attribute)
+  "removes an attribute and passes the elem through, returns the elem"
+  (dom:remove-attribute
+   elem
+   (prepare-attribute-name attribute))
+  elem)
+
 (defmethod add-css-class ((el dom:element) new-class)
   (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class))))
     (unless (find new-class css-classes :test #'string=)

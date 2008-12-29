@@ -35,7 +35,8 @@
 	#:dom-comment
 	#:document-to-string
 	#:scoped-dom-builder
-	#:make-scoped-dom-builder))
+	#:make-scoped-dom-builder
+	#:remove-attribute))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
