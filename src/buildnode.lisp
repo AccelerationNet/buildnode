@@ -175,6 +175,7 @@ can validate the html against a DTD if one is passed, can use
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
   "Creates an xml element out of all the necessary components.
 If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
+  (declare (type list attributes))
   ;;if we don't already have a prefix and we do find one in the map.
   (let* ((tagname (calc-complete-tagname namespace tagname namespace-prefix-map))
 	 (elem (dom:create-element-ns document namespace tagname)))
