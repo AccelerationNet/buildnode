@@ -145,9 +145,9 @@ can validate the html against a DTD if one is passed, can use
   elem)
 
 (defmethod add-css-class ((el dom:element) new-class)
-  (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class))))
-    (unless (find new-class css-classes :test #'string=)
-      (push new-class css-classes))
+  (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class)
+						    :remove-empty-subseqs t)))
+    (pushnew new-class css-classes :test #'string=)
     (set-attribute el :class (format nil "~{~a~^ ~}" css-classes))))
 
 (defun push-new-attribute (elem attribute value)
