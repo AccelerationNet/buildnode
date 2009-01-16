@@ -72,7 +72,6 @@ can validate the html against a DTD if one is passed, can use
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
-
     (let ((doc (cxml:parse #?|<${tag}>${string}</${tag}>| (cxml-dom:make-dom-builder)
 			   :dtd dtd)))
       (dom:import-node *document* (dom:first-child doc) T))))
