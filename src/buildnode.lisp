@@ -118,7 +118,10 @@ can validate the html against a DTD if one is passed, can use
 
 (defun prepare-attribute-value (value)
   "prepares a value for html out put by coercing to a string"
-  (if (stringp value) value (princ-to-string value)))
+  (typecase value
+    (string value)
+    (symbol (string-downcase (symbol-name value)))
+    (T (princ-to-string value))))
 
 (defun get-attribute (elem attribute)
   "Gets the value of an attribute on an element"
