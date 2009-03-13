@@ -142,6 +142,10 @@ be in scope inside of with-javascript-collector"
   "Add a snippet of javascript to the current *js-collector*"
   (push snippet (snippets collector)))
 
+(defun add-new-js-snippet (snippet &optional (collector *js-collector*))
+  "Add a snippet of javascript to the current *js-collector* if it doesnt already exist"
+  (pushnew snippet (snippets collector) :test #'string=))
+
 (defun add-dojo-onload (fun)
   "Use dojo to add a document onload function. This function
 is expecting a function object (in string form) as the arg."

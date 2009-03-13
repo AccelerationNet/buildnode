@@ -62,7 +62,8 @@
 	   #:build-script-elements
 	   #:js-collector
 	   #:*js-collector*
-	   #:clear-js-collector))
+	   #:clear-js-collector
+	   #:add-new-js-snippet))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)
