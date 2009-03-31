@@ -91,6 +91,23 @@ can validate the html against a DTD if one is passed, can use
 		       chillins)
     to-location))
 
+(defun insert-nodes (to-location index &rest chillins)
+  "insert a bunch of dom-nodes (chillins) to the location specified"
+  (let ((doc (if (typep to-location 'rune-dom::document)
+		 to-location
+		 (dom:owner-document to-location))))
+    (adwutils:map-tree-leaves
+     #'(lambda (child)
+	 (dom:insert-before
+	  to-location
+	  (typecase child
+	    (dom:node child)
+	    (string (dom:create-text-node doc child))
+	    (T (dom:create-text-node doc (princ-to-string child))))
+	  (elt (dom:child-nodes to-location) index)))
+     chillins)
+    to-location))
+
 (defvar *html-compatibility-mode* nil)
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
