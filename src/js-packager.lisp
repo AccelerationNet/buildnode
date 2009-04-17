@@ -33,18 +33,19 @@
 	))
 
 (defmethod build-script-elements ((js-collector js-collector) &optional base-url)
-  "Build all of the javascript elements, i.e. the full list of script tags and blocks.
-  "
+  "Build all of the javascript elements, i.e. the full list of script tags and blocks."
   (nconc
-   (mapcar (lambda (url)
-	     (funcall (script-tag-fn js-collector)
-		      (if (and (char-equal #\/ (elt url 0))
-			       base-url )
-			  (let ((it (char-equal #\/ (elt base-url (- (length base-url) 1)))))
-			    #?"${ base-url }${ (if it (subseq url 1) url) }")
-			  url)))
-	   (js-list js-collector)) ;js-list is the full tree traversal.
-   (when (snippets *js-collector*)
+   (when (script-tag-fn js-collector)
+     (mapcar (lambda (url)
+	       (funcall (script-tag-fn js-collector)
+			(if (and (char-equal #\/ (elt url 0))
+				 base-url )
+			    (let ((it (char-equal #\/ (elt base-url (- (length base-url) 1)))))
+			      #?"${ base-url }${ (if it (subseq url 1) url) }")
+			    url)))
+	     (js-list js-collector))) ;js-list is the full tree traversal.
+   (when (and (script-block-fn js-collector)
+	      (snippets *js-collector*))
      (list (funcall (script-block-fn js-collector)
 		    (format nil "~{~a~%~}" (reverse (snippets js-collector))))))))
 
@@ -130,6 +131,8 @@ that is designated by the key (either a keyword in the *global-js-dependency-gra
   "a function to add a js-file to the special variable  *js-collector* which will
 be in scope inside of with-javascript-collector"
   (declare (special *js-collector*))
+  (unless *js-collector*
+    (error "Trying to use js file, but no *js-collector* available"))
   (unless (js-defined-p url-or-key)
     (if (stringp url-or-key)
 	(def-anon-js-file url-or-key :depends-on depends-on)
