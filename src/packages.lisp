@@ -64,7 +64,8 @@
 	   #:js-collector
 	   #:*js-collector*
 	   #:clear-js-collector
-	   #:add-new-js-snippet))
+	   #:add-new-js-snippet
+	   #:table-totaler))
 
 (defpackage :net.acceleration.xhtml
 	 (:nicknames :xhtml)
