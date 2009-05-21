@@ -65,18 +65,21 @@
  	  (rune-dom::element-stack builder) (list node))
     builder))
 
-(defun inner-html (string &optional (tag "div") (namespace-uri "http://www.w3.org/1999/xhtml") (dtd nil))
+(defun inner-html (string &optional
+		   (tag "div")
+		   (namespace-uri "http://www.w3.org/1999/xhtml")
+		   (dtd nil))
   "Will wrap the input in a tag (which is neccessary from CXMLs perspective)
 can validate the html against a DTD if one is passed, can use
 *xhtml1-transitional-extid* for example."
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
-    (let* ((doc (cxml:parse #?|<${tag} xmlns="${ namespace-uri }">${string}</${tag}>| (cxml-dom:make-dom-builder)
-			   :dtd dtd ))
-	   (new (dom:import-node *document* (dom:first-child doc) T)))
-      new
-      )))
+    (let ((node (dom:create-element *document* tag)))
+      (cxml:parse #?|<${tag} xmlns="${ namespace-uri }">${string}</${tag}>|
+		  (make-scoped-dom-builder node)
+		  :dtd dtd)
+      (dom:first-child node))))
 
 (defun append-nodes (to-location &rest chillins)
   "appends a bunch of dom-nodes (chillins) to the location specified"
