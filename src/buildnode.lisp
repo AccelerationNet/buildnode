@@ -121,7 +121,8 @@ can validate the html against a DTD if one is passed, can use
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
   (let ((prefix (and namespace-prefix-map
 		     (not (cxml::split-qname base-tag)) ;not already a prefix
-		     (when-bind namespace-entry (assoc namespace namespace-prefix-map :test #'string=)
+		     (when-bind namespace-entry (assoc namespace namespace-prefix-map
+						       :test #'string=)
 		       ;;found the given namespace in the map
 		       (let ((prefix (cdr namespace-entry)))
 			 (declare (type string prefix))
@@ -201,7 +202,9 @@ can validate the html against a DTD if one is passed, can use
 If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
   (declare (type list attributes))
   ;;if we don't already have a prefix and we do find one in the map.
-  (let* ((tagname (calc-complete-tagname namespace tagname namespace-prefix-map))
+  (let* ((tagname (if namespace-prefix-map
+		      (calc-complete-tagname namespace tagname namespace-prefix-map)
+		      tagname))
 	 (elem (dom:create-element-ns document namespace tagname)))
     (when (oddp (length attributes))
       (error "Incomplete attribute-value list. Odd number of elements in ~a" attributes))
