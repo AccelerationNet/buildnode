@@ -196,6 +196,12 @@ can validate the html against a DTD if one is passed, can use
 	do (set-attribute elem attr val))
   elem)
 
+(defun add-children (elem &rest kids)
+  "adds some kids to an element and return that element"
+  (iter (for kid in kids)
+	(dom:append-child elem kid))
+  elem)
+
 (defun create-complete-element (document namespace tagname attributes children
 					 &optional (namespace-prefix-map *namespace-prefix-map*))
   "Creates an xml element out of all the necessary components.

@@ -7,6 +7,7 @@
   (:export
         #:text-of-dom-snippet
         #:set-attributes
+	#:add-children
 	#:push-new-attribute
 	#:push-new-attributes
 	#:set-attribute
