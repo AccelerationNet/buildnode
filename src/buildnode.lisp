@@ -93,9 +93,8 @@ can validate the html against a DTD if one is passed, can use
 	   (string (dom:append-child
 		    to-location
 		    (dom:create-text-node doc child)))
-	   (array
-	      (iter (for elem in-sequence child)
-		    (append-nodes to-location elem)))
+	   (array (iter (for elem in-sequence child)
+			(append-nodes to-location elem)))
 	   (T (dom:append-child
 	       to-location
 	       (dom:create-text-node doc (princ-to-string child))))))
