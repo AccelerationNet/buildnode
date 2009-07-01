@@ -86,14 +86,20 @@ can validate the html against a DTD if one is passed, can use
   (let ((doc (if (typep to-location 'rune-dom::document)
 		 to-location
 		 (dom:owner-document to-location))))
-    (adwutils:map-tree-leaves #'(lambda (child)
-			   (dom:append-child
-			    to-location
-			    (typecase child
-			      (dom:node child)
-			      (string (dom:create-text-node doc child))
-			      (T (dom:create-text-node doc (princ-to-string child))))))
-		       chillins)
+    (adwutils:map-tree-leaves
+     #'(lambda (child)
+	 (typecase child
+	   (dom:node (dom:append-child to-location child))
+	   (string (dom:append-child
+		    to-location
+		    (dom:create-text-node doc child)))
+	   (array
+	      (iter (for elem in-sequence child)
+		    (append-nodes to-location elem)))
+	   (T (dom:append-child
+	       to-location
+	       (dom:create-text-node doc (princ-to-string child))))))
+     chillins)
     to-location))
 
 (defun insert-nodes (to-location index &rest chillins)
