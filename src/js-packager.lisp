@@ -47,7 +47,7 @@
    (when (and (script-block-fn js-collector)
 	      (snippets *js-collector*))
      (list (funcall (script-block-fn js-collector)
-		    (format nil "~{~a~%~}" (reverse (snippets js-collector))))))))
+		    (join-strings (insert-between (reverse (snippets js-collector)) ~%)))))))
 
 
 (defun find-graph-node (key js-dependency-graph)
