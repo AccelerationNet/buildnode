@@ -38,7 +38,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 	 (tagname evaled-name))
     `(progn
       (CL:defun ,name (&optional attributes &rest children )
-	,docstring
+	,@(when docstring (list docstring))
 	(declare (special *document*))
 	(create-complete-element *document*
 				 ,namespace
