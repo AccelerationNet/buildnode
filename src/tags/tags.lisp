@@ -35,7 +35,7 @@ for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box 
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
   (let* ((evaled-name (eval name))
 	 (name (intern (string-upcase evaled-name) (eval package)))
-	 (tagname (string-downcase evaled-name)))
+	 (tagname evaled-name))
     `(progn
       (CL:defun ,name (&optional attributes &rest children )
 	,docstring
