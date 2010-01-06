@@ -350,7 +350,8 @@ a document is necessary to create dom nodes and the document the nodes end up on
 must be the document on which they were created.  At the end of the form, the
 complete document is returned.
 This sets the doctype to be xhtml transitional."
-  `(let ((*document* (dom:create-document
+  `(let ((buildnode::*namespace-prefix-map* nil)
+	 (*document* (dom:create-document
 		      'rune-dom:implementation
 		      nil nil
 		      (dom:create-document-type
@@ -364,3 +365,8 @@ This sets the doctype to be xhtml transitional."
     (declare (special *document*))
     (append-nodes *document* ,@body)
     *document*))
+
+(defmacro with-html-document-to-string (() &body body)
+  "trys to output a string containing all "
+  `(let ((*html-compatibility-mode* T))
+     (document-to-string (with-html-document ,@body))))

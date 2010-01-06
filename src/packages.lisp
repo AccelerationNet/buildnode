@@ -39,7 +39,8 @@
 	#:scoped-dom-builder
 	#:make-scoped-dom-builder
 	#:remove-attribute
-	#:insert-nodes))
+	#:insert-nodes
+	#:with-html-document-to-string))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
