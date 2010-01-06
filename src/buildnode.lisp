@@ -1,5 +1,4 @@
 (in-package :net.acceleration.buildnode)
-
 (cl-interpol:enable-interpol-syntax)
 
 (defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
@@ -119,6 +118,7 @@ can validate the html against a DTD if one is passed, can use
     to-location))
 
 (defvar *html-compatibility-mode* nil)
+(defvar *cdata-script-blocks* T "Should script blocks have a cdata?")
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
 
@@ -297,7 +297,8 @@ a document is necessary to create dom nodes and the document the nodes end up on
 must be the document on which they were created.  At the end of the form, the
 complete document is returned.
 This sets the doctype to be xhtml transitional."
-  `(let ((*document* (dom:create-document
+  `(let ((*cdata-script-blocks* T)
+	 (*document* (dom:create-document
 		      'rune-dom:implementation
 		      nil nil
 		      (dom:create-document-type
@@ -358,7 +359,8 @@ This sets the doctype to be xhtml transitional."
 		       "-//W3C//DTD HTML 4.01//EN"
 		       "http://www.w3.org/TR/html4/strict.dtd")
 		      ))
-	 (*html-compatibility-mode* T))
+	 (*html-compatibility-mode* T)
+	 (*cdata-script-blocks* nil))
     (declare (special *document*))
     (append-nodes *document* ,@body)
     *document*))

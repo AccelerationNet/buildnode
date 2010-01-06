@@ -32,6 +32,7 @@
 	#:stylesheet-block
 	#:*document*
 	#:*html-compatibility-mode*
+	#:*cdata-script-blocks*
 	#:*namespace-prefix-map*
 	#:dom-comment
 	#:document-to-string
@@ -57,7 +58,6 @@
 	#:def-anon-js-file
 	#:use-js-file
 	#:add-js-snippet
-	#:*cdata-script-blocks*
 	#:table-sorter
 	)
   (:export #:add-dojo-onload
