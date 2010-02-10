@@ -64,6 +64,13 @@
  	  (rune-dom::element-stack builder) (list node))
     builder))
 
+(defclass html-whitespace-remover (cxml:sax-proxy)
+  ()
+  (:documentation "a stream filter to remove nodes that are entirely whitespace"))
+
+(defmethod sax:characters ((handler html-whitespace-remover) data)
+  (unless (every #'cxml::white-space-rune-p (cxml::rod data)) (call-next-method)))
+
 (defun inner-html (string &optional
 		   (tag "div")
 		   (namespace-uri "http://www.w3.org/1999/xhtml")
@@ -76,7 +83,8 @@ can validate the html against a DTD if one is passed, can use
 			      (muffle-warning))))
     (let ((node (dom:create-element *document* tag)))
       (cxml:parse #?|<${tag} xmlns="${ namespace-uri }">${string}</${tag}>|
-		  (make-scoped-dom-builder node)
+		  (make-instance 'html-whitespace-remover
+				 :chained-handler (make-scoped-dom-builder node))
 		  :dtd dtd)
       (dom:first-child node))))
 
