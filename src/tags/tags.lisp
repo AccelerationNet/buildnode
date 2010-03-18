@@ -19,14 +19,8 @@
 ;;get a ref to the swank::symbol-indentation in such a way that if this file
 ;; gets evaled multiple times, we always have a ref to the original function,
 ;; not one of our overrides
-(defvar +old-swank-symbol-indentation+ nil)
-(unless +old-swank-symbol-indentation+
-  (setf +old-swank-symbol-indentation+ #'swank::symbol-indentation))
-
-(defun swank::symbol-indentation (sym)
-  (aif (get sym 'swank::symbol-indentation)
-       it
-       (funcall +old-swank-symbol-indentation+ sym)))
+(defvar *tags-indentation-hints* (make-hash-table))
+(pushnew *tags-indentation-hints* swank::*application-hints-tables*)
 
 
 (defmacro def-tag-node (package name  namespace docstring  )
@@ -45,7 +39,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 				 ,tagname
 				 attributes
 				 children))
-      (setf (get ',name 'swank::symbol-indentation) 1))))
+      (setf (gethash ',name *tags-indentation-hints*) 1))))
 
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
