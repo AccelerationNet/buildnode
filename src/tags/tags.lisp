@@ -20,7 +20,8 @@
 ;; gets evaled multiple times, we always have a ref to the original function,
 ;; not one of our overrides
 (defvar *tags-indentation-hints* (make-hash-table))
-(pushnew *tags-indentation-hints* swank::*application-hints-tables*)
+(when (boundp 'swank::*application-hints-tables*)
+  (pushnew *tags-indentation-hints* swank::*application-hints-tables*))
 
 
 (defmacro def-tag-node (package name  namespace docstring  )
