@@ -242,25 +242,26 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
    document
    :include-doctype :canonical-notations))
 
+(defun make-output-sink (stream &key canonical indentation (char-p T))
+  (adwutils:add-superclass-to-instance
+   (funcall
+    (cond
+      ((and char-p *html-compatibility-mode*) #'chtml:make-character-stream-sink)
+      ((and (not char-p) *html-compatibility-mode*) #'chtml:make-octet-stream-sink)
+      ((and char-p (not *html-compatibility-mode*)) #'cxml:make-character-stream-sink)
+      ((and (not char-p) (not *html-compatibility-mode*)) #'cxml:make-octet-stream-sink))
+    stream :canonical canonical :indentation indentation)
+   'template-processing-sink :first))
+
 (defun write-document-to-character-stream (document char-stream)
   "writes a cxml:dom document to a character stream"
-  (write-normalized-document-to-sink
-   document
-      (if *html-compatibility-mode*
-       (chtml:make-character-stream-sink char-stream)
-       (cxml:make-character-stream-sink char-stream
-				    :canonical nil
-				    :indentation nil))))
+  (let ((sink (make-output-sink char-stream)))
+    (write-normalized-document-to-sink document sink)))
 
 (defun write-document-to-octet-stream (document octet-stream)
   "writes a cxml:dom document to a character stream"
-  (write-normalized-document-to-sink
-   document
-   (if *html-compatibility-mode*
-       (chtml:make-octet-stream-sink octet-stream)
-       (cxml:make-octet-stream-sink octet-stream
-				    :canonical nil
-				    :indentation 2))))
+  (let ((sink (make-output-sink octet-stream :char-p nil)))
+    (write-normalized-document-to-sink document sink)))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."

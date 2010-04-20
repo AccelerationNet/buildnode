@@ -11,7 +11,8 @@
   :description "Tool for building up an xml dom nicely."
   :components ((:module :src
 			:components ((:file "packages")
-				     (:file "buildnode" :depends-on ("packages"))
+				     (:file "templates" :depends-on ("packages"))
+				     (:file "buildnode" :depends-on ("packages" "templates"))
 				     (:file "js-packager" :depends-on ("packages" :tags ))
 				     (:module :tags
 					      :components ((:file "tags" )

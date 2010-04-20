@@ -40,7 +40,9 @@
 	#:make-scoped-dom-builder
 	#:remove-attribute
 	#:insert-nodes
-	#:with-html-document-to-string))
+	#:with-html-document-to-string
+	#:dom-template
+	#:make-output-sink))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
