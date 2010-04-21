@@ -3,7 +3,8 @@
 
 ;;;; While this lays the ground work for templates inside of the dom, you 
 ;;;; will still need to register templates with some template system (see cl-emb:register-emb)
-;;;; and define a sax:process-instruction method (see ucw-buildnode/src/app-modules/adw-application)
+;;;; and define a sax:process-instruction method specialized on template-processing-sink
+;;;; (see ucw-buildnode/src/app-modules/adw-application)
 
 (defclass template-processing-sink () ())
 

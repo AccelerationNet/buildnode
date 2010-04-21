@@ -244,13 +244,15 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
 
 (defun make-output-sink (stream &key canonical indentation (char-p T))
   (adwutils:add-superclass-to-instance
-   (funcall
+   (apply
     (cond
       ((and char-p *html-compatibility-mode*) #'chtml:make-character-stream-sink)
       ((and (not char-p) *html-compatibility-mode*) #'chtml:make-octet-stream-sink)
       ((and char-p (not *html-compatibility-mode*)) #'cxml:make-character-stream-sink)
       ((and (not char-p) (not *html-compatibility-mode*)) #'cxml:make-octet-stream-sink))
-    stream :canonical canonical :indentation indentation)
+    stream
+    (unless *html-compatibility-mode*
+      (list :canonical canonical :indentation indentation)))
    'template-processing-sink :first))
 
 (defun write-document-to-character-stream (document char-stream)
