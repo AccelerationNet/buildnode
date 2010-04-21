@@ -25,7 +25,7 @@
 (defgeneric %process-template-data (sink value)
   (:documentation "Turns a value into a string for inclusion in a template"))
 
-(defmethod %process-template-data (sink (value dom:element))
+(defmethod %process-template-data (sink (value dom:node))
   (with-output-to-string (str)
     (let ((parent-ystream (cxml::sink-ystream sink))
 	  (new-ystream (runes::make-character-stream-ystream str)))
