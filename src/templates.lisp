@@ -7,6 +7,7 @@
 ;;;; (see ucw-buildnode/src/app-modules/adw-application)
 
 (defclass template-processing-sink () ())
+(defclass html-template-processing-sink (template-processing-sink) ())
 
 (defclass template-node (rune-dom::processing-instruction)
   ((dom:node-name :accessor dom:node-name :initarg :node-name :initform "template-node")))

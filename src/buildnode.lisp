@@ -253,7 +253,10 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
     stream
     (unless *html-compatibility-mode*
       (list :canonical canonical :indentation indentation)))
-   'template-processing-sink :first))
+   (if *html-compatibility-mode*
+       'html-template-processing-sink
+       'template-processing-sink)
+   :first))
 
 (defun write-document-to-character-stream (document char-stream)
   "writes a cxml:dom document to a character stream"
