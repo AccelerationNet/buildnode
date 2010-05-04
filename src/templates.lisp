@@ -17,7 +17,9 @@
   `(let ((attribs (append ,attribs
 			  (list :body (list ,@body)))))
      (unless (getf attribs :type)
-       (setf (getf attribs :type) "emb"))
+       (let* ((name (merge-pathnames (getf attribs :name) "."))
+	      (type (when name (pathname-type name))))
+	 (setf (getf attribs :type) (or type "emb"))))
      (make-instance 'template-node
 		    :owner *document*
 		    :target (getf attribs :type)
