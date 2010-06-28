@@ -261,6 +261,12 @@ With js-collector also appends all (non-nil) elements in body to the document"
       (add-dojo-onload #?"function () {new TableSorter('${id}',${row-style-fn}) }")
       (add-dojo-onload #?"function () {new TableSorter('${id}') }")))
 
+(defun multi-row-table-sorter (id &optional (n 2) row-style-fn)
+  (use-js-file :sorter)
+  (if row-style-fn
+      (add-dojo-onload #?"function () {new MultiRowTableSorter('${id}', ${n},${row-style-fn}) }")
+      (add-dojo-onload #?"function () {new MultiRowTableSorter('${id}', ${n}) }")))
+
 (defun table-totaler (id &optional excluded-indexes)
   (use-js-file :totaler)
   (let ((eis (format nil "[~{~A~^,~}]" excluded-indexes)))
