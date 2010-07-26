@@ -130,17 +130,19 @@ can validate the html against a DTD if one is passed, can use
 (defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
 				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
 
+(defun get-prefix (namespace &optional (namespace-prefix-map
+					*namespace-prefix-map*))
+  (when namespace-prefix-map
+  (the (or null string)
+    (cdr (assoc namespace namespace-prefix-map :test #'string=)))))
 
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
   (let ((prefix (and namespace-prefix-map
 		     (not (cxml::split-qname base-tag)) ;not already a prefix
-		     (when-bind namespace-entry (assoc namespace namespace-prefix-map
-						       :test #'string=)
+		     (when-bind prefix (get-prefix namespace namespace-prefix-map)
 		       ;;found the given namespace in the map
-		       (let ((prefix (cdr namespace-entry)))
-			 (declare (type string prefix))
-			 (when (> (length prefix) 0)
-			   prefix))))))
+		       (when (> (length (the string prefix)) 0)
+			 prefix)))))
     (if prefix
 	#?"${prefix}:${base-tag}"
 	base-tag)))
