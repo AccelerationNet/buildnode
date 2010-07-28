@@ -25,32 +25,3 @@
 		    :target (getf attribs :type)
 		    :data attribs)))
 
-(defgeneric %process-template-data (sink value)
-  (:documentation "Turns a value into a string for inclusion in a template"))
-
-(defmethod %process-template-data (sink (value dom:node))
-  (with-output-to-string (str)
-    (let ((parent-ystream (cxml::sink-ystream sink))
-	  (new-ystream (runes::make-character-stream-ystream str)))
-      (unwind-protect
-	   (progn
-	     (setf (runes:ystream-encoding new-ystream) (runes:ystream-encoding parent-ystream))
-	     (setf (cxml::sink-ystream sink) new-ystream)
-	     (dom:walk sink value)
-	     (runes::flush-ystream (cxml::sink-ystream sink)))
-	(setf (cxml::sink-ystream sink) parent-ystream)))))
-
-(defmethod %process-template-data (sink (value list))
-  (with-output-to-string (s)
-    (iter (for v in value)
-	  (write-sequence (%process-template-data sink v) s))))
-
-(defmethod %process-template-data (sink value) (declare (ignore sink))
-  (princ-to-string value))
-
-(defun process-template-data (sink data)
-  (iter (for (key value . rest) = data)
-	(while key) (setf data rest)
-	(collect key)
-	(collect (%process-template-data sink value))))
-
