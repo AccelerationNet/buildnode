@@ -245,20 +245,19 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
    :include-doctype :canonical-notations))
 
 (defun make-output-sink (stream &key canonical indentation (char-p T))
-  (adwutils:add-superclass-to-instance
-   (apply
-    (cond
-      ((and char-p *html-compatibility-mode*) #'chtml:make-character-stream-sink)
-      ((and (not char-p) *html-compatibility-mode*) #'chtml:make-octet-stream-sink)
-      ((and char-p (not *html-compatibility-mode*)) #'cxml:make-character-stream-sink)
-      ((and (not char-p) (not *html-compatibility-mode*)) #'cxml:make-octet-stream-sink))
-    stream
-    (unless *html-compatibility-mode*
-      (list :canonical canonical :indentation indentation)))
-   (if *html-compatibility-mode*
-       'html-template-processing-sink
-       'template-processing-sink)
-   :first))
+  (apply
+   (cond
+     ((and char-p *html-compatibility-mode*)
+      #'chtml:make-character-stream-sink)
+     ((and (not char-p) *html-compatibility-mode*)
+      #'chtml:make-octet-stream-sink)
+     ((and char-p (not *html-compatibility-mode*))
+      #'cxml:make-character-stream-sink)
+     ((and (not char-p) (not *html-compatibility-mode*))
+      #'cxml:make-octet-stream-sink))
+   stream
+   (unless *html-compatibility-mode*
+     (list :canonical canonical :indentation indentation))))
 
 (defun write-document-to-character-stream (document char-stream)
   "writes a cxml:dom document to a character stream"

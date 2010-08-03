@@ -9,16 +9,19 @@
 
 (defsystem :buildnode
   :description "Tool for building up an xml dom nicely."
-  :components ((:module :src
-			:components ((:file "packages")
-				     (:file "templates" :depends-on ("packages"))
-				     (:file "buildnode" :depends-on ("packages" "templates"))
-				     (:file "js-packager" :depends-on ("packages" :tags ))
-				     (:module :tags
-					      :components ((:file "tags" )
-							   (:file "xul-tags" :depends-on ("tags"))
-							   (:file "custom-xul" :depends-on ( "xul-tags"))
-							   (:file "xhtml-tags" :depends-on ("tags"))
-							   (:file "custom-html" :depends-on ("xhtml-tags")))
-					      :depends-on ("packages" "buildnode")))))
-  :depends-on (:cxml :iterate :flexi-streams :arnesi :swank :adwcodebase :cl-interpol :closure-html))
+  :components
+  ((:module :src
+	    :components
+	    ((:file "packages")
+	     (:file "buildnode" :depends-on ("packages" "templates"))
+	     (:file "js-packager" :depends-on ("packages" :tags ))
+	     (:module :tags
+		      :components
+		      ((:file "tags" )
+		       (:file "xul-tags" :depends-on ("tags"))
+		       (:file "custom-xul" :depends-on ( "xul-tags"))
+		       (:file "xhtml-tags" :depends-on ("tags"))
+		       (:file "custom-html" :depends-on ("xhtml-tags")))
+		      :depends-on ("packages" "buildnode")))))
+  :depends-on (:cxml :iterate :flexi-streams :arnesi :swank
+		     :adwcodebase :cl-interpol :closure-html))
