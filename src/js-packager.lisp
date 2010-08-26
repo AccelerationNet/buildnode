@@ -157,6 +157,14 @@ is expecting a function object (in string form) as the arg."
    (etypecase fun
      (string #?"dojo.addOnLoad(${fun});"))))
 
+(defun add-jquery-onload (fun)
+  "Use dojo to add a document onload function. This function
+is expecting a function object (in string form) as the arg."
+  (use-js-file :jquery)
+  (add-js-snippet
+   (etypecase fun
+     (string #?"\$(document).ready(${fun});"))))
+
 (defvar *js-collector* nil
   "Special variable for use in collection js snippets and scripts.")
 
@@ -252,6 +260,7 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (def-js-file :Xul "/script/JSControls/Xul.js" :depends-on '(:JsHelper))
 
 (def-js-file :dojo "http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js")
+(def-js-file :jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js")
 (def-js-file :sorter "/script/JSControls/sorter.js" :depends-on '(:dojo))
 (def-js-file :totaler "/script/JSControls/totaler.js" :depends-on '(:dojo))
 

@@ -65,6 +65,7 @@
 	#:multi-row-table-sorter
 	)
   (:export #:add-dojo-onload
+	   #:add-jquery-onload
 	   #:build-script-elements
 	   #:js-collector
 	   #:*js-collector*
