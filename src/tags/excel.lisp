@@ -49,7 +49,7 @@
 		 "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
 		 "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
 		 "Workbook" "Worksheet" )
-    (#:currency-cell #:date-cell #:string-cell))
+    (#:currency-cell #:date-cell #:string-cell #:header-cell))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.excel :x
     ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
@@ -126,10 +126,52 @@
   (add-style
    "ShortDate" :parent "Default"
    :styles (list (ss:numberformat '("ss:Format" "Short Date"))))
+  
   (add-style
    "Currency" :parent "Default"
    :styles (list (ss:numberformat
-		     '("ss:Format" "_(\"$\"* #,##0.00_);_(\"$\"* \(#,##0.00\);_(\"$\"* \"-\"??_);_(@_)")))))
+		     '("ss:Format" "_(\"$\"* #,##0.00_);_(\"$\"* \(#,##0.00\);_(\"$\"* \"-\"??_);_(@_)"))))
+  
+  (add-style
+   "Title" :parent "Default"
+   :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Center"))
+		 (ss:font '("ss:Bold" "1" "ss:Size" "13"))
+		 (ss:borders ()
+		   (ss:border '("ss:Position" "Bottom"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#213B92")))))
+  
+  (add-style
+   "Header" :parent "Default"
+   :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Center"))
+		 (ss:interior '("ss:Color" "#213B92" "ss:Pattern" "Solid"))
+		 (ss:font '("ss:Color" "#FFFFFF" "ss:Bold" "1"))
+		 (ss:borders ()
+		   (ss:border '("ss:Position" "Bottom"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#FF6730"))
+		   (ss:border '("ss:Position" "Left"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#FF6730"))
+		   (ss:border '("ss:Position" "Right"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#FF6730"))
+		   (ss:border '("ss:Position" "Top"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#FF6730")))
+		 (ss:numberformat '("ss:Format" "@"))))
+  )
+
+(defun build-excel-cell-reference (sheet-name row cell)
+  (format nil "#~A!~A~A" sheet-name row cell))
+
+(defun link-to (item reference)
+  (set-attributes item "ss:HRef" reference))
 
 (defun ss::date-cell (v &optional (style-id "ShortDate"))
   (ss:cell `("ss:StyleID" ,style-id)
@@ -146,14 +188,29 @@
     (ss:data '("ss:Type" "String")
       v)))
 
+(defun ss::header-cell (v &optional (style-id "Header"))
+  (ss:string-cell v style-id ))
+
+(defun set-index (val item)
+  (set-attribute item "ss:Index" val))
+
 (defun simple-excel-test ( &optional file)
   (let ((res (with-excel-workbook-string ()
 	       (ss:worksheet `("ss:Name" "First WorkSheet")
 		 (ss:table ()
+		   (ss:row ()
+		     (set-attribute
+		      (ss:string-cell "PAGE TITLE" "Title")
+		      "ss:MergeAcross" "6"))
+		   (set-index 3
+		    (ss:row ()
+		      (set-index 3 (ss:header-cell "String Data"))
+		      (ss:header-cell "Currency Data")
+		      (ss:header-cell "Date Data")))
 		   (iter (for i from 0 to 5)
 			 (collect 
 			     (ss:row ()
-			       (ss:string-cell "Here is string data")
+			       (set-index 3 (ss:string-cell "Here is string data"))
 			       (ss:currency-cell "42838.0311111111111111")
 			       (ss::date-cell "2010-08-10T00:00:00.000"))))))
 	       )))

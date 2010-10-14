@@ -168,11 +168,14 @@ can validate the html against a DTD if one is passed, can use
     (T (princ-to-string value))))
 
 (defun attribute-uri (attribute)
-  (let ((list (cl-ppcre:split ":" attribute)))
-    (case (length list)
-      (2 (get-namespace-from-prefix (first list)))
-      ((0 1) nil)
-      (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))
+  (typecase attribute
+    (symbol nil)
+    (string 
+       (let ((list (cl-ppcre:split ":" attribute)))
+	 (case (length list)
+	   (2 (get-namespace-from-prefix (first list)))
+	   ((0 1) nil)
+	   (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))))
 
 (defun get-attribute (elem attribute)
   "Gets the value of an attribute on an element"

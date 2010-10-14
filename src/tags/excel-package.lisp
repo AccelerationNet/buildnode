@@ -9,4 +9,6 @@
    #:default-excel-styles
    #:?mso-application
    #:def-excel-tag
+   #:set-index
+   #:link-to
    ))
