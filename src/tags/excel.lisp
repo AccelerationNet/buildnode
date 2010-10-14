@@ -49,12 +49,12 @@
 		 "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
 		 "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
 		 "Workbook" "Worksheet" )
-    (#:currency-cell #:date-cell))
+    (#:currency-cell #:date-cell #:string-cell))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.excel :x
     ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
 		  "AutoFilterOr" "Footer" "Header" "Layout" "PageMargins" "PageSetup"
-		  "PhoneticText" "WorksheetOptions") )
+		  "PhoneticText" "WorksheetOptions"))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.office :o
     ("Smarts" "SmartType" "DocumentProperties" "Author" "LastAuthor"
@@ -74,17 +74,39 @@
 
 
 
-
+(defvar *styles-node*)
 
 (defmacro with-excel-workbook (() &body chillins)
   `(let ((*namespace-prefix-map* +excel-namespaces+))
      (with-document ()
        (?mso-application)
-       (ss:workbook () ,@chillins))))
+       (let ((*styles-node* (ss:styles ())))
+	 (add-default-excel-styles)
+	 (ss:workbook ()
+	   *styles-node*
+	   ,@chillins)))))
+
+(defun remove-style (id)
+  (iter (for kid in (dom:child-nodes *styles-node*))
+	(when (string-equal id (get-attribute kid "ss:ID"))
+	  (dom:remove-child *styles-node* kid))))
+
+(defun add-style (id &key name parent styles)
+  (remove-style id)  
+  (add-children
+   *styles-node*
+   (ss:style (append
+	      (when id
+		(list "ss:ID" id))
+	      (when name
+		(list "ss:Name" name))
+	      (when parent
+		(list "ss:Parent" parent)))
+     styles)))
 
 (defmacro with-excel-workbook-string (() &body chillins)
   `(with-output-to-string (s)
-     (let ((doc (buildnode::with-excel-workbook () ,@chillins)))
+     (let ((doc (with-excel-workbook () ,@chillins)))
        (write-document doc s))))
 
 (defparameter +valid-data-types+
@@ -95,39 +117,43 @@
   '(("Date" . "")
     ("DateTime" . "")))
 
-(defun default-excel-styles ()
-  (list 
-   (ss:style '("ss:ID" "Default" "ss:Name" "Normal")
-     (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Left"))
-     (ss:font `("ss:FontName" "Arial" "x:Family" "Swiss" "ss:Size" "11" "ss:Color" "#000000")))
-   (ss:style '("ss:ID" "ShortDate" "ss:Parent" "Default")
-     (ss:numberformat '("ss:Format" "Short Date")))
-   (ss:style '("ss:ID" "Currency" "ss:Parent" "Default")
-     (ss:numberformat '("ss:Format" "_(\"$\"* #,##0.00_);_(\"$\"* \(#,##0.00\);_(\"$\"* \"-\"??_);_(@_)")))))
+(defun add-default-excel-styles ()
+  (add-style
+   "Default" :name "Normal"
+   :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Left"))
+		 (ss:font `("ss:FontName" "Arial" "x:Family" "Swiss"
+					  "ss:Size" "11" "ss:Color" "#000000"))))
+  (add-style
+   "ShortDate" :parent "Default"
+   :styles (list (ss:numberformat '("ss:Format" "Short Date"))))
+  (add-style
+   "Currency" :parent "Default"
+   :styles (list (ss:numberformat
+		     '("ss:Format" "_(\"$\"* #,##0.00_);_(\"$\"* \(#,##0.00\);_(\"$\"* \"-\"??_);_(@_)")))))
 
-(defun ss::date-cell (v)
-  (ss:cell `("ss:StyleID" "ShortDate")
+(defun ss::date-cell (v &optional (style-id "ShortDate"))
+  (ss:cell `("ss:StyleID" ,style-id)
     (ss:data '("ss:Type" "DateTime")
       v)))
-(export 'ss::date-cell :ss)
 
-(defun ss::currency-cell (v)
-  (ss:cell `("ss:StyleID" "Currency")
+(defun ss::currency-cell (v &optional (style-id "Currency"))
+  (ss:cell `("ss:StyleID" ,style-id)
     (ss:data '("ss:Type" "Number")
+      v)))
+
+(defun ss::string-cell (v &optional (style-id "Default"))
+  (ss:cell `("ss:StyleID" ,style-id)
+    (ss:data '("ss:Type" "String")
       v)))
 
 (defun simple-excel-test ( &optional file)
   (let ((res (with-excel-workbook-string ()
-	       (ss:styles ()
-		 (%default-excel-styles))
 	       (ss:worksheet `("ss:Name" "First WorkSheet")
 		 (ss:table ()
 		   (iter (for i from 0 to 5)
 			 (collect 
 			     (ss:row ()
-			       (ss:cell ()
-				 (ss:data '("ss:Type" "String")
-				   "Here is string data"))
+			       (ss:string-cell "Here is string data")
 			       (ss:currency-cell "42838.0311111111111111")
 			       (ss::date-cell "2010-08-10T00:00:00.000"))))))
 	       )))
@@ -137,3 +163,4 @@
        :if-exists :supersede
        :if-does-not-exist :create))
     res))
+
