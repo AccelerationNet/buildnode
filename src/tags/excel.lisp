@@ -49,7 +49,7 @@
 		 "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
 		 "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
 		 "Workbook" "Worksheet" )
-    (#:currency-cell #:date-cell #:string-cell #:header-cell))
+    (#:currency-cell #:date-cell #:string-cell #:header-cell #:title-cell))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.excel :x
     ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
@@ -72,19 +72,18 @@
   (dom:create-processing-instruction
    *document* "mso-application" value))
 
-
-
+(defvar *workbook-node*)
 (defvar *styles-node*)
 
 (defmacro with-excel-workbook (() &body chillins)
   `(let ((*namespace-prefix-map* +excel-namespaces+))
      (with-document ()
        (?mso-application)
-       (let ((*styles-node* (ss:styles ())))
+       (let* ((*workbook-node* (ss:workbook ()))
+	      (*styles-node* (ss:styles ())))
 	 (add-default-excel-styles)
-	 (ss:workbook ()
-	   *styles-node*
-	   ,@chillins)))))
+	 (apply #'add-children *workbook-node*
+		*styles-node* (list ,@chillins))))))
 
 (defun remove-style (id)
   (iter (for kid in (dom:child-nodes *styles-node*))
@@ -103,6 +102,11 @@
 	      (when parent
 		(list "ss:Parent" parent)))
      styles)))
+
+(defmacro with-excel-workbook-file ((file) &body chillins)
+  `(with-output-to-file (s ,file :if-exists :supersede :if-does-not-exist :create)
+     (let ((doc (with-excel-workbook () ,@chillins)))
+       (write-document doc s))))
 
 (defmacro with-excel-workbook-string (() &body chillins)
   `(with-output-to-string (s)
@@ -137,6 +141,14 @@
    :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Center"))
 		 (ss:font '("ss:Bold" "1" "ss:Size" "13"))
 		 (ss:borders ()
+		   (ss:border '("ss:Position" "Bottom"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "2"
+				"ss:Color" "#213B92")))))
+
+  (add-style
+   "LastTitle" :parent "Title"
+   :styles (list (ss:borders ()
 		   (ss:border '("ss:Position" "Bottom"
 				"ss:LineStyle" "Continuous"
 				"ss:Weight" "2"
@@ -188,6 +200,9 @@
     (ss:data '("ss:Type" "String")
       v)))
 
+(defun ss::title-cell (v &optional (style-id "Title"))
+  (ss:string-cell v style-id ))
+
 (defun ss::header-cell (v &optional (style-id "Header"))
   (ss:string-cell v style-id ))
 
@@ -220,4 +235,19 @@
        :if-exists :supersede
        :if-does-not-exist :create))
     res))
+
+(defun validate-excel-output (node)
+  "Tries to help validate that your output will be readable by excel"
+  (let ((ht (make-hash-table :test #'equal)))
+    (labels ((doit (node)
+	       (cond
+		 ((string-equal "ss:Worksheet" (dom:tag-name node))
+		  (when (gethash ht (get-attribute node "ss:Name"))
+		    (error "The worksheet names are not unique!"))
+		  (setf (gethash ht (get-attribute node "ss:Name")) T))))
+	     (walker (node)
+	       (doit node)
+	       (iter (for kid in (dom:child-nodes node))
+		     (walker kid))))
+      (walker node))))
 

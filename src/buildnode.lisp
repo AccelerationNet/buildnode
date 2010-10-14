@@ -231,7 +231,9 @@ can validate the html against a DTD if one is passed, can use
 (defun add-children (elem &rest kids)
   "adds some kids to an element and return that element"
   (iter (for kid in kids)
-	(dom:append-child elem kid))
+	(typecase kid
+	    (list (apply #'add-children elem kid) )
+	    (T (dom:append-child elem kid))))
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children
