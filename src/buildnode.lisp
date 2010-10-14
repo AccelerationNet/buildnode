@@ -136,6 +136,12 @@ can validate the html against a DTD if one is passed, can use
   (the (or null string)
     (cdr (assoc namespace namespace-prefix-map :test #'string=)))))
 
+(defun get-namespace-from-prefix (prefix &optional (namespace-prefix-map
+						    *namespace-prefix-map*))
+  (when namespace-prefix-map
+    (the (or null string)
+      (car (find prefix namespace-prefix-map :key #'cdr :test #'string=)))))
+
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
   (let ((prefix (and namespace-prefix-map
 		     (not (cxml::split-qname base-tag)) ;not already a prefix
@@ -161,26 +167,34 @@ can validate the html against a DTD if one is passed, can use
     (symbol (string-downcase (symbol-name value)))
     (T (princ-to-string value))))
 
+(defun attribute-uri (attribute)
+  (let ((list (cl-ppcre:split ":" attribute)))
+    (case (length list)
+      (2 (get-namespace-from-prefix (first list)))
+      ((0 1) nil)
+      (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))
+
 (defun get-attribute (elem attribute)
   "Gets the value of an attribute on an element"
   (dom:get-attribute-ns
    elem
-   nil
+   (attribute-uri attribute)
    (prepare-attribute-name attribute)))
 
 (defun set-attribute (elem attribute value)
   "Sets an attribute and passes the elem through, returns the elem"
   (dom:set-attribute-ns
    elem
-   nil
+   (attribute-uri attribute)
    (prepare-attribute-name attribute)
    (prepare-attribute-value value))
   elem)
 
 (defun remove-attribute (elem attribute)
   "removes an attribute and passes the elem through, returns the elem"
-  (dom:remove-attribute
+  (dom:remove-attribute-ns
    elem
+   (attribute-uri attribute)
    (prepare-attribute-name attribute))
   elem)
 
@@ -218,7 +232,8 @@ can validate the html against a DTD if one is passed, can use
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children
-					 &optional (namespace-prefix-map *namespace-prefix-map*))
+					 &optional
+				(namespace-prefix-map *namespace-prefix-map*))
   "Creates an xml element out of all the necessary components.
 If the tagname does not contain a prefix, then one is added based on the namespace-prefix map."
   (declare (type list attributes))

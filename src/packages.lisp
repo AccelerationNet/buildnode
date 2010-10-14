@@ -42,7 +42,8 @@
 	#:insert-nodes
 	#:with-html-document-to-string
 	#:dom-template
-	#:make-output-sink))
+	#:make-output-sink
+	#:def-tag-node))
 
 (defpackage :net.acceleration.javascript
 	 (:nicknames :javascript)
