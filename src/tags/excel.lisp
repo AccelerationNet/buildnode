@@ -91,7 +91,7 @@
 	  (dom:remove-child *styles-node* kid))))
 
 (defun add-style (id &key name parent styles)
-  (remove-style id)  
+  (remove-style id)
   (add-children
    *styles-node*
    (ss:style (append
@@ -127,6 +127,8 @@
    :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Left"))
 		 (ss:font `("ss:FontName" "Arial" "x:Family" "Swiss"
 					  "ss:Size" "11" "ss:Color" "#000000"))))
+  (add-style "String" :parent "Default"
+	     :styles (list (ss:numberformat '("ss:Format" "@"))))
   (add-style
    "ShortDate" :parent "Default"
    :styles (list (ss:numberformat '("ss:Format" "Short Date"))))
@@ -140,11 +142,7 @@
    "Title" :parent "Default"
    :styles (list (ss:alignment '("ss:Vertical" "Bottom" "ss:Horizontal" "Center"))
 		 (ss:font '("ss:Bold" "1" "ss:Size" "13"))
-		 (ss:borders ()
-		   (ss:border '("ss:Position" "Bottom"
-				"ss:LineStyle" "Continuous"
-				"ss:Weight" "2"
-				"ss:Color" "#213B92")))))
+		 (ss:numberformat '("ss:Format" "@"))))
 
   (add-style
    "LastTitle" :parent "Title"
@@ -195,7 +193,7 @@
     (ss:data '("ss:Type" "Number")
       v)))
 
-(defun ss::string-cell (v &optional (style-id "Default"))
+(defun ss::string-cell (v &optional (style-id "String"))
   (ss:cell `("ss:StyleID" ,style-id)
     (ss:data '("ss:Type" "String")
       v)))
@@ -217,7 +215,7 @@
 		     (set-attribute
 		      (ss:string-cell "PAGE TITLE" "Title")
 		      "ss:MergeAcross" "6"))
-		   (set-index 3
+		   (set-index 5
 		    (ss:row ()
 		      (set-index 3 (ss:header-cell "String Data"))
 		      (ss:header-cell "Currency Data")

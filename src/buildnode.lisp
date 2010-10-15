@@ -231,9 +231,15 @@ can validate the html against a DTD if one is passed, can use
 (defun add-children (elem &rest kids)
   "adds some kids to an element and return that element"
   (iter (for kid in kids)
-	(typecase kid
-	    (list (apply #'add-children elem kid) )
-	    (T (dom:append-child elem kid))))
+	(etypecase kid
+	  (list
+	     (apply #'add-children elem kid))
+	  (vector
+	     ;; turn the vector into a list as it is usually someone elses
+	     ;; child vector and can be modified along the way
+	     (apply #'add-children elem
+		    (iter (for sub-kid in-sequence kid) (collect sub-kid))))
+	  (dom:element (dom:append-child elem kid))))
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children
