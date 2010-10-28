@@ -1,7 +1,7 @@
 (in-package :common-lisp-user)
 
 (defpackage :net.acceleration.buildnode.excel
-    (:nicknames :excel-xml :buildnode-excel)
+    (:nicknames :excel-xml :buildnode-excel :excel)
   (:use :common-lisp :buildnode :iterate :arnesi)
   (:export
    #:with-excel-workbook
@@ -13,4 +13,5 @@
    #:set-index
    #:link-to
    #:build-excel-cell-reference
+   #:set-merge
    ))

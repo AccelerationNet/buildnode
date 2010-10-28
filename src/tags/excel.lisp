@@ -48,13 +48,14 @@
     ("Alignment" "Border" "Borders" "Cell" "Column" "Comment" 
 		 "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
 		 "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
-		 "Workbook" "Worksheet" )
+		 "Workbook" "Worksheet")
     (#:currency-cell #:date-cell #:string-cell #:header-cell #:title-cell))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.excel :x
     ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
-		  "AutoFilterOr" "Footer" "Header" "Layout" "PageMargins" "PageSetup"
-		  "PhoneticText" "WorksheetOptions"))
+		  "AutoFilterOr" "Footer" "Header" "Layout" "PageMargins"
+		  "PageSetup" "PhoneticText" "WorksheetOptions"
+		  "TabColorIndex"))
 
 (excel-tag-package :urn.schemas-microsoft-com.office.office :o
     ("Smarts" "SmartType" "DocumentProperties" "Author" "LastAuthor"
@@ -129,6 +130,12 @@
 					  "ss:Size" "11" "ss:Color" "#000000"))))
   (add-style "String" :parent "Default"
 	     :styles (list (ss:numberformat '("ss:Format" "@"))))
+  (excel::add-style
+     "Notes" :parent "String"
+     :styles (list (ss:font `("ss:FontName" "Arial" "x:Family" "Swiss"
+					    "ss:Size" "9" "ss:Color" "#666666"))))
+  (add-style "HyperLink" :parent "String"
+	     :styles (list (ss:font `("ss:Color" "#0000FF" "ss:Underline" "Single"))))
   (add-style
    "ShortDate" :parent "Default"
    :styles (list (ss:numberformat '("ss:Format" "Short Date"))))
@@ -150,6 +157,23 @@
 		   (ss:border '("ss:Position" "Bottom"
 				"ss:LineStyle" "Continuous"
 				"ss:Weight" "2"
+				"ss:Color" "#213B92")))))
+
+  (add-style
+   "TotalText" :parent "String"
+   :styles (list (ss:interior '("ss:Color" "#E2E6F4" "ss:Pattern" "Solid"))
+		 (ss:borders ()
+		   (ss:border '("ss:Position" "Top"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "1"
+				"ss:Color" "#213B92")))))
+   (add-style
+   "TotalAmount" :parent "Currency"
+   :styles (list (ss:interior '("ss:Color" "#E2E6F4" "ss:Pattern" "Solid"))
+		 (ss:borders ()
+		   (ss:border '("ss:Position" "Top"
+				"ss:LineStyle" "Continuous"
+				"ss:Weight" "1"
 				"ss:Color" "#213B92")))))
   
   (add-style
@@ -177,21 +201,33 @@
 		 (ss:numberformat '("ss:Format" "@"))))
   )
 
+(defun special-char-p (s)
+  "Check if a string has any special characters"
+  (loop for char across s
+	thereis (find char '(#\space #\, #\. #\! #\@ #\# #\$ #\%
+			     #\^ #\& #\* #\| #\( #\) #\- #\+))))
+
 (defun build-excel-cell-reference (sheet-name row cell)
-  (format nil "#~A!~A~A" sheet-name row cell))
+  (let (*print-pretty*)
+    (format nil "#~A!~A~A"
+	    (if (special-char-p sheet-name)
+		(format nil "'~A'" sheet-name)
+		sheet-name)
+	    row cell)))
 
 (defun link-to (item reference)
-  (set-attributes item "ss:HRef" reference))
+  (set-attributes item "ss:HRef" reference "ss:StyleID" "HyperLink"))
 
-(defun ss::date-cell (v &optional (style-id "ShortDate"))
+(defun ss::date-cell (v &optional (style-id "ShortDate"))  
   (ss:cell `("ss:StyleID" ,style-id)
-    (ss:data '("ss:Type" "DateTime")
-      v)))
+    (ss:data '("ss:Type" "DateTime") v )))
 
 (defun ss::currency-cell (v &optional (style-id "Currency"))
-  (ss:cell `("ss:StyleID" ,style-id)
-    (ss:data '("ss:Type" "Number")
-      v)))
+  (let ((sv (etypecase v
+	      (number (format nil "~0,2F" v))
+	      (string v))))
+    (ss:cell `("ss:StyleID" ,style-id)
+      (ss:data '("ss:Type" "Number") sv ))))
 
 (defun ss::string-cell (v &optional (style-id "String"))
   (ss:cell `("ss:StyleID" ,style-id)
@@ -207,6 +243,9 @@
 (defun set-index (val item)
   (set-attribute item "ss:Index" val))
 
+(defun set-merge (col-cnt item)
+  (set-attribute item "ss:MergeAcross" (princ-to-string col-cnt)))
+
 (defun simple-excel-test ( &optional file)
   (let ((res (with-excel-workbook-string ()
 	       (ss:worksheet `("ss:Name" "First WorkSheet")
@@ -219,12 +258,14 @@
 		    (ss:row ()
 		      (set-index 3 (ss:header-cell "String Data"))
 		      (ss:header-cell "Currency Data")
+		      (ss:header-cell "Double Currency Data")
 		      (ss:header-cell "Date Data")))
-		   (iter (for i from 0 to 5)
+		   (iter (for i from 0 to 1)
 			 (collect 
 			     (ss:row ()
 			       (set-index 3 (ss:string-cell "Here is string data"))
 			       (ss:currency-cell "42838.0311111111111111")
+			       (ss:currency-cell 42838.0311111111111111d0)
 			       (ss::date-cell "2010-08-10T00:00:00.000"))))))
 	       )))
     (when file
