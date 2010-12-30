@@ -201,7 +201,7 @@ can validate the html against a DTD if one is passed, can use
    (prepare-attribute-name attribute))
   elem)
 
-(defun remove-attributes (elem attributes)
+(defun remove-attributes (elem &rest attributes)
   "removes an attribute and passes the elem through, returns the elem"
   (iter (for attr in attributes)
 	(remove-attribute elem attr))

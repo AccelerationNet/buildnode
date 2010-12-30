@@ -39,6 +39,7 @@
 	#:scoped-dom-builder
 	#:make-scoped-dom-builder
 	#:remove-attribute
+	#:remove-attributes
 	#:insert-nodes
 	#:with-html-document-to-string
 	#:dom-template
