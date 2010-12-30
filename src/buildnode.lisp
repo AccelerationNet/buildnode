@@ -201,6 +201,12 @@ can validate the html against a DTD if one is passed, can use
    (prepare-attribute-name attribute))
   elem)
 
+(defun remove-attributes (elem attributes)
+  "removes an attribute and passes the elem through, returns the elem"
+  (iter (for attr in attributes)
+	(remove-attribute elem attr))
+  elem)
+
 (defmethod add-css-class ((el dom:element) new-class)
   (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class)
 						    :remove-empty-subseqs t)))
@@ -411,3 +417,76 @@ This sets the doctype to be xhtml transitional."
   "trys to output a string containing all "
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
+
+(defun %merge-conts (order &rest conts)
+  (setf conts (remove-if #'null conts))
+  (when conts
+    (unless order (setf conts (nreverse conts)))
+    (lambda ()
+      (let ((rest (rest conts)))
+	(multiple-value-bind (item new-cont) (funcall (first conts))
+	  (when new-cont (setf rest (append (list new-cont) rest)))
+	  (values item (apply #'merge-conts rest))
+	  )))))
+
+(defun %walk-dom-cont (tree &optional (depth-first T))
+  (typecase tree
+    (null nil)
+    (list
+       (when (first tree)
+	 (multiple-value-bind (item cont) (%walk-dom-cont (first tree) depth-first)
+	   (values
+	     item (%merge-conts
+		   depth-first
+		   cont (when (rest tree)
+			  (lambda () (%walk-dom-cont (rest tree) depth-first))))))))
+    (vector
+       (when (> (length tree) 0)
+	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) depth-first)
+	   (values
+	     item (%merge-conts
+		   depth-first
+		   cont
+		   (when (> (length tree) 1)
+		     (lambda () (%walk-dom-cont (subseq tree 1) depth-first))))))))
+    (dom:document (%walk-dom-cont (dom:child-nodes tree) depth-first))
+    (dom:element
+       (values tree
+	       (when (> (length (dom:child-nodes tree)) 0)
+		 (lambda () (%walk-dom-cont (dom:child-nodes tree) depth-first)))))))
+
+(defun depth-first-nodes (tree)
+  (iter
+    (with cont = (lambda () (%walk-dom-cont tree)))
+    (if cont
+	(multiple-value-bind (item new-cont) (funcall cont)
+	  (when item (collect item))
+	  (setf cont new-cont))
+	(terminate))
+    ))
+
+(defun breadth-first-nodes (tree)
+  (iter
+    (with cont = (lambda () (%walk-dom-cont tree nil)))
+    (if cont
+	(multiple-value-bind (item new-cont) (funcall cont)
+	  (when item (collect item))
+	  (setf cont new-cont))
+	(terminate))
+    ))
+
+(iterate:defmacro-driver (FOR node in-dom tree)
+  (let ((kwd (if generate 'generate 'for)))    
+    (with-unique-names (cont new-cont genned-node)
+      `(progn
+	 (with ,cont = (lambda () (%walk-dom-cont ,tree)))
+	 (,kwd ,node next
+	       (if (null ,cont)
+		   (terminate)
+		   (multiple-value-bind (,genned-node ,new-cont) (funcall ,cont)
+		     (setf ,cont ,new-cont)
+		     ,genned-node)))
+	 (unless ,node (next-iteration))
+	 ))))
+
+
