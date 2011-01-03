@@ -420,55 +420,34 @@ This sets the doctype to be xhtml transitional."
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
 
-(defun %merge-conts (order &rest conts)
+(defun %merge-conts (&rest conts)
   (setf conts (remove-if #'null conts))
   (when conts
-    (unless order (setf conts (nreverse conts)))
     (lambda ()
       (let ((rest (rest conts)))
 	(multiple-value-bind (item new-cont) (funcall (first conts))
-	  (when new-cont (setf rest (append (list new-cont) rest)))
-	  (values item (when-apply rest #'%merge-conts))
-	  )))))
+	  (when new-cont (push new-cont rest))
+	  (values item (when rest
+			 (apply #'%merge-conts rest))))))))
 
-(defun %walk-dom-cont (tree &optional (depth-first T))
+(defun %walk-dom-cont (tree)
   (typecase tree
     (null nil)
-    (list
-       (when (first tree)
-	 (multiple-value-bind (item cont) (%walk-dom-cont (first tree) depth-first)
-	   (values
-	     item (%merge-conts
-		   depth-first
-		   cont (when (rest tree)
-			  (lambda () (%walk-dom-cont (rest tree) depth-first))))))))
-    (vector
+    ((vector list)
        (when (> (length tree) 0)
-	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) depth-first)
+	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) )
 	   (values
 	     item (%merge-conts
-		   depth-first
-		   cont
-		   (when (> (length tree) 1)
-		     (lambda () (%walk-dom-cont (subseq tree 1) depth-first))))))))
-    (dom:document (%walk-dom-cont (dom:child-nodes tree) depth-first))
+		   cont (lambda () (%walk-dom-cont (subseq tree 1))))))))
+    (dom:document (%walk-dom-cont (dom:child-nodes tree)))
     (dom:element
        (values tree
 	       (when (> (length (dom:child-nodes tree)) 0)
-		 (lambda () (%walk-dom-cont (dom:child-nodes tree) depth-first)))))))
+		 (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
 
 (defun depth-first-nodes (tree)
   (iter
     (with cont = (lambda () (%walk-dom-cont tree)))
-    (if cont
-	(multiple-value-bind (item new-cont) (funcall cont)
-	  (when item (collect item))
-	  (setf cont new-cont))
-	(terminate))))
-
-(defun breadth-first-nodes (tree)
-  (iter
-    (with cont = (lambda () (%walk-dom-cont tree nil)))
     (if cont
 	(multiple-value-bind (item new-cont) (funcall cont)
 	  (when item (collect item))
