@@ -195,10 +195,12 @@ can validate the html against a DTD if one is passed, can use
 
 (defun remove-attribute (elem attribute)
   "removes an attribute and passes the elem through, returns the elem"
-  (dom:remove-attribute-ns
-   elem
-   (attribute-uri attribute)
-   (prepare-attribute-name attribute))
+  ;; throws errors to remove attributes that dont exist
+  ;; dont care about that
+  (let ((uri (attribute-uri attribute))
+	(name (prepare-attribute-name attribute)))
+    (when (dom:has-attribute-ns elem uri name)
+      (dom:remove-attribute-ns elem uri name)))
   elem)
 
 (defun remove-attributes (elem &rest attributes)
