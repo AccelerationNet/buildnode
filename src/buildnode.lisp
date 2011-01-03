@@ -464,8 +464,7 @@ This sets the doctype to be xhtml transitional."
 	(multiple-value-bind (item new-cont) (funcall cont)
 	  (when item (collect item))
 	  (setf cont new-cont))
-	(terminate))
-    ))
+	(terminate))))
 
 (defun breadth-first-nodes (tree)
   (iter
@@ -474,8 +473,7 @@ This sets the doctype to be xhtml transitional."
 	(multiple-value-bind (item new-cont) (funcall cont)
 	  (when item (collect item))
 	  (setf cont new-cont))
-	(terminate))
-    ))
+	(terminate))))
 
 (iterate:defmacro-driver (FOR node in-dom tree)
   (let ((kwd (if generate 'generate 'for)))    
