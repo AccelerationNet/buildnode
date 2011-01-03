@@ -428,7 +428,7 @@ This sets the doctype to be xhtml transitional."
       (let ((rest (rest conts)))
 	(multiple-value-bind (item new-cont) (funcall (first conts))
 	  (when new-cont (setf rest (append (list new-cont) rest)))
-	  (values item (apply #'merge-conts rest))
+	  (values item (when-apply rest #'%merge-conts))
 	  )))))
 
 (defun %walk-dom-cont (tree &optional (depth-first T))
