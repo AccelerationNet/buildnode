@@ -88,42 +88,48 @@ can validate the html against a DTD if one is passed, can use
 		  :dtd dtd)
       (dom:first-child node))))
 
+(defun document-of (el)
+  (if (typep el 'rune-dom::document)
+      el
+      (dom:owner-document el)))
+
+(defun flatten-children (doc kids)
+  (iter (for kid in kids)
+	(typecase kid
+	  (string (collecting (dom:create-text-node doc kid)))
+	  ((or dom:element dom:node) (collecting kid))
+	  (list (appending (flatten-children doc kid)))
+	  (vector (appending
+		   (flatten-children doc
+		    (iter (for sub-kid in-sequence kid) (collect sub-kid))))))))
+
+(defun add-children (elem &rest kids)
+  "adds some kids to an element and return that element
+    alias for append-nodes"
+  (iter (for kid in (flatten-children (document-of elem) kids))
+	(dom:append-child elem kid))
+  elem)
+
+(defun insert-children (elem idx &rest kids)
+  " insert a bunch of dom-nodes (kids) to the location specified
+     alias for insert-nodes"
+  (setf kids (flatten-children (document-of elem) kids))
+  (if (<= (length (dom:child-nodes elem)) idx )
+      (apply #'add-children elem kids)
+      (let ((after (elt (dom:child-nodes elem) idx)))
+	(iter (for k in kids)
+	      (dom:insert-before elem k after))))
+  elem)
+
 (defun append-nodes (to-location &rest chillins)
-  "appends a bunch of dom-nodes (chillins) to the location specified"
-  (let ((doc (if (typep to-location 'rune-dom::document)
-		 to-location
-		 (dom:owner-document to-location))))
-    (adwutils:map-tree-leaves
-     #'(lambda (child)
-	 (typecase child
-	   (dom:node (dom:append-child to-location child))
-	   (string (dom:append-child
-		    to-location
-		    (dom:create-text-node doc child)))
-	   (array (iter (for elem in-sequence child)
-			(append-nodes to-location elem)))
-	   (T (dom:append-child
-	       to-location
-	       (dom:create-text-node doc (princ-to-string child))))))
-     chillins)
-    to-location))
+  "appends a bunch of dom-nodes (chillins) to the location specified
+   alias of add-children"
+  (apply #'add-children to-location chillins))
 
 (defun insert-nodes (to-location index &rest chillins)
-  "insert a bunch of dom-nodes (chillins) to the location specified"
-  (let ((doc (if (typep to-location 'rune-dom::document)
-		 to-location
-		 (dom:owner-document to-location))))
-    (adwutils:map-tree-leaves
-     #'(lambda (child)
-	 (dom:insert-before
-	  to-location
-	  (typecase child
-	    (dom:node child)
-	    (string (dom:create-text-node doc child))
-	    (T (dom:create-text-node doc (princ-to-string child))))
-	  (elt (dom:child-nodes to-location) index)))
-     chillins)
-    to-location))
+  "insert a bunch of dom-nodes (chillins) to the location specified
+    alias of insert-children"
+  (apply #'insert-children to-location index chillins))
 
 (defvar *html-compatibility-mode* nil)
 (defvar *cdata-script-blocks* T "Should script blocks have a cdata?")
@@ -234,20 +240,6 @@ can validate the html against a DTD if one is passed, can use
   "set-attribute for each attribute specified in the plist, returns the elem"
   (loop for (attr val) on attribute-p-list by #'cddr
 	do (set-attribute elem attr val))
-  elem)
-
-(defun add-children (elem &rest kids)
-  "adds some kids to an element and return that element"
-  (iter (for kid in kids)
-	(etypecase kid
-	  (list
-	     (apply #'add-children elem kid))
-	  (vector
-	     ;; turn the vector into a list as it is usually someone elses
-	     ;; child vector and can be modified along the way
-	     (apply #'add-children elem
-		    (iter (for sub-kid in-sequence kid) (collect sub-kid))))
-	  (dom:element (dom:append-child elem kid))))
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children

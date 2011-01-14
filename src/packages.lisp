@@ -7,7 +7,6 @@
   (:export
         #:text-of-dom-snippet
         #:set-attributes
-	#:add-children
 	#:push-new-attribute
 	#:push-new-attributes
 	#:set-attribute
@@ -28,6 +27,9 @@
 	#:with-html-document
 	#:with-html-document-to-file
 	#:append-nodes
+	#:insert-nodes
+	#:add-children
+	#:insert-children
 	#:script-block
 	#:stylesheet-block
 	#:*document*
