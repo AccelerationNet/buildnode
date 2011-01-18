@@ -101,7 +101,8 @@ can validate the html against a DTD if one is passed, can use
 	  (list (appending (flatten-children doc kid)))
 	  (vector (appending
 		   (flatten-children doc
-		    (iter (for sub-kid in-sequence kid) (collect sub-kid))))))))
+		    (iter (for sub-kid in-sequence kid) (collect sub-kid)))))
+	  (T (collecting (dom:create-text-node doc (princ-to-string kid)))))))
 
 (defun add-children (elem &rest kids)
   "adds some kids to an element and return that element
