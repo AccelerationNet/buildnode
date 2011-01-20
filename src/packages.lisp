@@ -12,6 +12,8 @@
 	#:set-attribute
 	#:get-attribute
 	#:add-css-class
+	#:remove-css-class
+	#:css-classes
 	#:?xml-stylesheet
 	#:?processing-instruction
 	#:CDATA

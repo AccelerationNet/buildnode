@@ -23,5 +23,18 @@
 		       (:file "xhtml-tags" :depends-on ("tags"))
 		       (:file "custom-html" :depends-on ("xhtml-tags")))
 		      :depends-on ("packages" "buildnode")))))
-  :depends-on (:cxml :iterate :flexi-streams :arnesi :swank
+  :depends-on (:cxml :iterate :flexi-streams :arnesi
+		     :swank ;; for setting tag-indentation
 		     :adwcodebase :cl-interpol :closure-html))
+
+(defsystem :buildnode-test
+  :description ":buildnode-test: tests for buildnode library of code"
+  :author "Acceleration.net"
+  :licence "It's ours."
+  :version "not so early"
+  :components
+  ((:module :tests
+	    :serial t
+	    :components ((:file "setup")
+			 (:file "basic-tests"))))
+  :depends-on (:buildnode :lisp-unit))

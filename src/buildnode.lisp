@@ -186,10 +186,11 @@ can validate the html against a DTD if one is passed, can use
 
 (defun get-attribute (elem attribute)
   "Gets the value of an attribute on an element"
-  (dom:get-attribute-ns
-   elem
-   (attribute-uri attribute)
-   (prepare-attribute-name attribute)))
+  (let ((args (list elem
+		    (attribute-uri attribute)
+		    (prepare-attribute-name attribute))))
+    (when (apply #'dom:has-attribute-ns args)
+      (apply #'dom:get-attribute-ns args))))
 
 (defun set-attribute (elem attribute value)
   "Sets an attribute and passes the elem through, returns the elem"
@@ -216,11 +217,26 @@ can validate the html against a DTD if one is passed, can use
 	(remove-attribute elem attr))
   elem)
 
+(defmethod css-classes ((el dom:element))
+  (split-sequence:split-sequence
+   #\space (get-attribute el :class)
+   :remove-empty-subseqs t))
+
 (defmethod add-css-class ((el dom:element) new-class)
-  (let ((css-classes (split-sequence:split-sequence #\space (get-attribute el :class)
-						    :remove-empty-subseqs t)))
+  (let ((css-classes (css-classes el)))
     (pushnew new-class css-classes :test #'string=)
-    (set-attribute el :class (format nil "~{~a~^ ~}" css-classes))))
+    (set-attribute el :class (format nil "~{~a~^ ~}" css-classes)))
+  el)
+
+(defmethod remove-css-class ((el dom:element) new-class)
+  (let ((css-classes (remove
+		      new-class
+		      (css-classes el)
+		      :test #'string=)))
+    (if css-classes
+	(set-attribute el :class (format nil "~{~a~^ ~}" css-classes))
+	(remove-attribute el :class))
+    el))
 
 (defun push-new-attribute (elem attribute value)
   "if the attribute is not on the element then put it there with the specified value,
@@ -232,15 +248,14 @@ can validate the html against a DTD if one is passed, can use
 
 (defun push-new-attributes (elem &rest attribute-p-list)
   "for each attribute in the plist push-new into the attributes list of the elem, returns the elem"
-  (loop for (attr val . rest) = attribute-p-list then rest
-	while attr
-	do (push-new-attribute elem attr val))
+  (iter (for (attr val) on attribute-p-list by #'cddr)
+	(push-new-attribute elem attr val))
   elem)
 
 (defun set-attributes (elem &rest attribute-p-list)
   "set-attribute for each attribute specified in the plist, returns the elem"
-  (loop for (attr val) on attribute-p-list by #'cddr
-	do (set-attribute elem attr val))
+  (iter (for (attr val) on attribute-p-list by #'cddr)
+	(set-attribute elem attr val))
   elem)
 
 (defun create-complete-element (document namespace tagname attributes children
