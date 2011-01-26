@@ -1,7 +1,10 @@
-#.(unless (find-package :net.acceleration.xhtml)
+(in-package :net.acceleration.buildnode)
+
+(eval-always
+  (unless (find-package :net.acceleration.buildnode.excel)
     (defpackage :net.acceleration.buildnode.excel
 	(:nicknames :excel-xml :buildnode-excel :excel)
-      (:use :common-lisp :buildnode :iterate :arnesi)
+      (:use :common-lisp :buildnode :iterate)
       (:export
        #:with-excel-workbook
        #:with-excel-workbook-string
@@ -13,7 +16,8 @@
        #:link-to
        #:build-excel-cell-reference
        #:set-merge
-       )))
+       ))))
+
 (in-package :net.acceleration.buildnode.excel)
 
 ;; XML-Spreadsheet Reference:
@@ -22,7 +26,7 @@
 ;; XML in Excel and the Spreadsheet Component
 ;;   http://msdn.microsoft.com/en-us/library/aa140062%28office.10%29.aspx
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
+(buildnode::eval-always
   (defparameter +excel-namespaces+
     '(("urn:schemas-microsoft-com:office:spreadsheet" . "ss")
       ("urn:schemas-microsoft-com:office:office" . "o")
@@ -45,7 +49,7 @@
 	      (:nicknames ,nick)
 	    (:use )
 	    (:export
-	     ,@(mapcar (compose #'make-symbol #'string-upcase)
+	     ,@(mapcar (lambda (x) (make-symbol (string-upcase x)))
 		       tags)
 	     ,@other-symbols)))
 	(snick (string-downcase nick)))
@@ -60,26 +64,27 @@
 			     ,tag
 			   ,snick))))))
 
-(excel-tag-package :urn.schemas-microsoft-com.office.spreadsheet :ss
-    ("Alignment" "Border" "Borders" "Cell" "Column" "Comment" 
-		 "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
-		 "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
-		 "Workbook" "Worksheet")
-    (#:currency-cell #:date-cell #:string-cell #:header-cell #:title-cell))
+(buildnode::eval-always
+  (excel-tag-package :urn.schemas-microsoft-com.office.spreadsheet :ss
+		     ("Alignment" "Border" "Borders" "Cell" "Column" "Comment" 
+				  "Data" "Font"  "Interior" "NamedCell" "NamedRange" "Names" 
+				  "NumberFormat" "Protection" "Row" "Style" "Styles" "Table" 
+				  "Workbook" "Worksheet")
+		     (#:currency-cell #:date-cell #:string-cell #:header-cell #:title-cell))
 
-(excel-tag-package :urn.schemas-microsoft-com.office.excel :x
-    ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
-		  "AutoFilterOr" "Footer" "Header" "Layout" "PageMargins"
-		  "PageSetup" "PhoneticText" "WorksheetOptions"
-		  "TabColorIndex"))
+  (excel-tag-package :urn.schemas-microsoft-com.office.excel :x
+		     ("AutoFilter" "AutoFilterAnd" "AutoFilterColumn" "AutoFilterCondition"
+				   "AutoFilterOr" "Footer" "Header" "Layout" "PageMargins"
+				   "PageSetup" "PhoneticText" "WorksheetOptions"
+				   "TabColorIndex"))
 
-(excel-tag-package :urn.schemas-microsoft-com.office.office :o
-    ("Smarts" "SmartType" "DocumentProperties" "Author" "LastAuthor"
-	      "Created" "Company" "LastSaved" "Version"))
+  (excel-tag-package :urn.schemas-microsoft-com.office.office :o
+		     ("Smarts" "SmartType" "DocumentProperties" "Author" "LastAuthor"
+			       "Created" "Company" "LastSaved" "Version"))
 
-(excel-tag-package :urn.schemas-microsoft-com.office.component.spreadsheet :c
-    ("ComponentOptions" "DisplayCustomHeaders" "HideOfficeLogo" "Toolbar"
-			"WorksheetOptions"))
+  (excel-tag-package :urn.schemas-microsoft-com.office.component.spreadsheet :c
+		     ("ComponentOptions" "DisplayCustomHeaders" "HideOfficeLogo" "Toolbar"
+					 "WorksheetOptions")))
 
 
 

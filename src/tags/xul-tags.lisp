@@ -1,121 +1,34 @@
 (in-package :net.acceleration.buildnode)
 
-#.(unless (find-package :net.acceleration.xul)
+(eval-always
+  (unless (find-package :net.acceleration.xul)
     (defpackage :net.acceleration.xul
 	(:nicknames :xul)
       (:use )
-      (:export
-       #:boolean-radio
-       #:menulist-with-items
-       #:label-value-list
-       #:tabbox-with-tabs
-       #:radiogroup-with-options
-       #:groupbox-with-caption
-       #:action
-       #:arrowscrollbox
-       #:bbox
-       #:binding
-       #:bindings
-       #:box
-       #:broadcaster
-       #:broadcasterset
-       #:button
-       #:browser
-       #:checkbox
-       #:caption
-       #:colorpicker
-       #:column
-       #:columns
-       #:commandset
-       #:command
-       #:conditions
-       #:content
-       #:deck
-       #:description
-       #:dialog
-       #:dialogheader
-       #:editor
-       #:grid
-       #:grippy
-       #:groupbox
-       #:hbox
-       #:iframe
-       #:image
-       #:key
-       #:keyset
-       #:label
-       #:listbox
-       #:listcell
-       #:listcol
-       #:listcols
-       #:listhead
-       #:listheader
-       #:listitem
-       #:member
-       #:menu
-       #:menubar
-       #:menuitem
-       #:menulist
-       #:menupopup
-       #:menuseparator
-       #:observes
-       #:overlay
-       #:page
-       #:popup
-       #:popupset
-       #:progressmeter
-       #:radio
-       #:radiogroup
-       #:resizer
-       #:richlistbox
-       #:row
-       #:rows
-       #:rule
-       #:script
-       #:scrollbar
-       #:scrollbox
-       #:separator
-       #:spacer
-       #:splitter
-       #:stack
-       #:statusbar
-       #:statusbarpanel
-       #:stringbundle
-       #:stringbundleset
-       #:tab
-       #:tabbrowser
-       #:tabbox
-       #:tabpanel
-       #:tabpanels
-       #:tabs
-       #:template
-       #:textnode
-       #:textbox
-       #:titlebar
-       #:toolbar
-       #:toolbarbutton
-       #:toolbargrippy
-       #:toolbaritem
-       #:toolbarpalette
-       #:toolbarseparator
-       #:toolbarset
-       #:toolbarspacer
-       #:toolbarspring
-       #:toolbox
-       #:tooltip
-       #:tree
-       #:treecell
-       #:treechildren
-       #:treecol
-       #:treecols
-       #:treeitem
-       #:treerow
-       #:treeseparator
-       #:triple
-       #:vbox
-       #:window
-       #:wizard
-       #:wizardpage)))
+      (:export #:boolean-radio #:menulist-with-items
+	       #:label-value-list #:tabbox-with-tabs #:radiogroup-with-options
+	       #:groupbox-with-caption #:action #:arrowscrollbox #:bbox
+	       #:binding #:bindings #:box #:broadcaster #:broadcasterset
+	       #:button #:browser #:checkbox #:caption #:colorpicker #:column
+	       #:columns #:commandset #:command #:conditions #:content #:deck
+	       #:description #:dialog #:dialogheader #:editor #:grid #:grippy
+	       #:groupbox #:hbox #:iframe #:image #:key #:keyset #:label
+	       #:listbox #:listcell #:listcol #:listcols #:listhead
+	       #:listheader #:listitem #:member #:menu #:menubar #:menuitem
+	       #:menulist #:menupopup #:menuseparator #:observes #:overlay
+	       #:page #:popup #:popupset #:progressmeter #:radio #:radiogroup
+	       #:resizer #:richlistbox #:row #:rows #:rule #:script #:scrollbar
+	       #:scrollbox #:separator #:spacer #:splitter #:stack #:statusbar
+	       #:statusbarpanel #:stringbundle #:stringbundleset #:tab
+	       #:tabbrowser #:tabbox #:tabpanel #:tabpanels #:tabs #:template
+	       #:textnode #:textbox #:titlebar #:toolbar #:toolbarbutton
+	       #:toolbargrippy #:toolbaritem #:toolbarpalette
+	       #:toolbarseparator #:toolbarset #:toolbarspacer #:toolbarspring
+	       #:toolbox #:tooltip #:tree #:treecell #:treechildren #:treecol
+	       #:treecols #:treeitem #:treerow #:treeseparator #:triple #:vbox
+	       #:window #:wizard #:wizardpage))))
+
+(in-package :net.acceleration.xul)
 
 (defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
 (defmacro def-xul-element (name doc &rest attributes)

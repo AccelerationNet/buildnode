@@ -1,29 +1,17 @@
-#.(unless (find-package :net.acceleration.javascript-packager)
+(in-package :net.acceleration.buildnode)
+
+(eval-always
+  (unless (find-package :net.acceleration.javascript-packager)
     (defpackage :net.acceleration.javascript-packager
 	(:nicknames :javascript :net.acceleration.javascript)
       (:use :common-lisp :buildnode :iterate)
-      (:export
-       #:js-insertion-block
-       #:xhtml-script-tag
-       #:xhtml-script-block
-       #:insert-script-here
-       #:with-javascript-collector
-       #:js-defined-p
-       #:def-js-file
-       #:def-anon-js-file
-       #:use-js-file
-       #:add-js-snippet
-       #:table-sorter
-       #:multi-row-table-sorter
-       )
-      (:export #:add-dojo-onload
-	       #:add-jquery-onload
-	       #:build-script-elements
-	       #:js-collector
-	       #:*js-collector*
-	       #:clear-js-collector
-	       #:add-new-js-snippet
-	       #:table-totaler)))
+      (:export #:js-insertion-block #:xhtml-script-tag
+	       #:xhtml-script-block #:insert-script-here
+	       #:with-javascript-collector #:js-defined-p #:def-js-file
+	       #:def-anon-js-file #:use-js-file #:add-js-snippet #:table-sorter
+	       #:multi-row-table-sorter #:add-dojo-onload #:add-jquery-onload
+	       #:build-script-elements #:js-collector #:*js-collector*
+	       #:clear-js-collector #:add-new-js-snippet #:table-totaler))))
 
 (in-package :net.acceleration.javascript-packager)
 (cl-interpol:enable-interpol-syntax)
