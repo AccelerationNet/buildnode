@@ -11,18 +11,19 @@
   :description "Tool for building up an xml dom nicely."
   :components
   ((:module :src
+	    :serial T
 	    :components
 	    ((:file "packages")
 	     (:file "buildnode" :depends-on ("packages"))
-	     (:file "js-packager" :depends-on ("packages" :tags ))
 	     (:module :tags
+		      :serial T
 		      :components
 		      ((:file "tags" )
 		       (:file "xul-tags" :depends-on ("tags"))
-		       (:file "custom-xul" :depends-on ( "xul-tags"))
 		       (:file "xhtml-tags" :depends-on ("tags"))
 		       (:file "custom-html" :depends-on ("xhtml-tags")))
-		      :depends-on ("packages" "buildnode")))))
+		      :depends-on ("packages" "buildnode"))
+	     (:file "js-packager" :depends-on ("packages" :tags )))))
   :depends-on (:cxml :iterate :flexi-streams :arnesi
 		     :swank ;; for setting tag-indentation
 		     :adwcodebase :cl-interpol :closure-html))
