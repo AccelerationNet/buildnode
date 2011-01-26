@@ -244,8 +244,8 @@ With js-collector also appends all (non-nil) elements in body to the document"
 		   ,chillins)
 		 (substitute ,script-tags ,replacement-node ,chillins ))))))))
 
-(defun xhtml-script-tag (url) (make-script-fn #'xhtml:script url))
-(defun xhtml-script-block (js) (make-script-block-fn #'xhtml:script js))
+(defun xhtml-script-tag (url) (buildnode::make-script-block-fn #'xhtml:script url))
+(defun xhtml-script-block (js) (buildnode::make-script-block-fn #'xhtml:script js))
 
 (def-js-file :JsHelper "/script/JSControls/JSHelper.js" :depends-on '())
 (def-js-file :Controls "/script/JSControls/Controls.js" :depends-on '(:JsHelper))
