@@ -24,6 +24,7 @@
 	     item (%merge-conts
 		   cont (lambda () (%walk-dom-cont (subseq tree 1))))))))
     (dom:document (%walk-dom-cont (dom:child-nodes tree)))
+    (dom:text tree)
     (dom:element
        (values tree
 	       (when (> (length (dom:child-nodes tree)) 0)
