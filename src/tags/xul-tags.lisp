@@ -1457,3 +1457,8 @@ src:NIL")
     "This element is used to create a list of items, similar to a listbox, but is designed to be used when the items do not contain simple text content. The richlistbox supports selecting a single item at a time."
   ("suppressonselect" "If this attribue is not specified, a select event is fired whenever an item is selected, either by the user or by calling one of the select methods. If set to true, the select event is never fired.")
   )
+
+(defun javascript::xul-script-tag (url) (make-script-fn #'xul:script url))
+(defun javascript::xul-script-block (js) (make-script-block-fn #'xul:script js))
+(def-js-file :Xul "/script/JSControls/Xul.js" :depends-on '(:JsHelper))
+(export '(javascript::xul-script-tag javascript::xul-script-block))

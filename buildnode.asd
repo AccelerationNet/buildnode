@@ -53,9 +53,9 @@
   ((:module :src
 	    :serial T
 	    :components
-	    ((:module :tags
+	    ((:file "js-packager")
+	     (:module :tags
 		      :serial T
 		      :components
-		      ((:file "xul-tags")))
-	     (:file "js-packager"))))
+		      ((:file "xul-tags"))))))
   :depends-on (:buildnode))

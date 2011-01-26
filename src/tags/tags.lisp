@@ -59,6 +59,12 @@ special variable *document*"
   (declare (special *document*))
   (dom:create-cdata-section *document* data))
 
+(defun stylesheet-block (list &optional (type "text/css"))
+  "given a list of urls, will build a list of ?xml-stylesheet nodes pointing to the appropriate urls"
+  (mapcar #'(lambda (sheet)
+	      (?xml-stylesheet sheet type))
+	  list))
+
 (defun script-block (fn list-of-urls)
   "given a list of urls, will build a list of script nodes pointing to the appropriate urls.
 Pass in #'xul:script or #'xhtml:script as the first argument"
@@ -66,8 +72,14 @@ Pass in #'xul:script or #'xhtml:script as the first argument"
 	      (funcall fn (list :language "javascript" :type "text/javascript" :src url )))
 	  list-of-urls))
 
-(defun stylesheet-block (list &optional (type "text/css"))
-  "given a list of urls, will build a list of ?xml-stylesheet nodes pointing to the appropriate urls"
-  (mapcar #'(lambda (sheet)
-	      (?xml-stylesheet sheet type))
-	  list))
+(defun make-script-fn (fn-script url)
+  (funcall fn-script `(:src ,url
+			    "type" "text/javascript")))
+
+(defun make-script-block-fn (fn-script js)
+  (declare (special buildnode:*document*))
+  (funcall fn-script
+	   (list "type" "text/javascript")
+	   (if buildnode:*cdata-script-blocks*
+	       (dom:create-cdata-section buildnode:*document* (format nil "~%~a~%" js))
+	       (dom:create-text-node buildnode:*document* (format nil "~%~a~%" js)))))

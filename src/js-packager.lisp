@@ -5,9 +5,7 @@
       (:export
        #:js-insertion-block
        #:xhtml-script-tag
-       #:xul-script-tag
        #:xhtml-script-block
-       #:xul-script-block
        #:insert-script-here
        #:with-javascript-collector
        #:js-defined-p
@@ -258,28 +256,8 @@ With js-collector also appends all (non-nil) elements in body to the document"
 		   ,chillins)
 		 (substitute ,script-tags ,replacement-node ,chillins ))))))))
 
-(defun xhtml-script-tag (url)
-  (make-script-fn #'xhtml:script url))
-
-(defun xul-script-tag (url)  
-  (make-script-fn #'xul:script url))
-
-(defun xhtml-script-block (js)
-  (make-script-block-fn #'xhtml:script js))
-(defun xul-script-block (js)
-  (make-script-block-fn #'xul:script js))
-
-(defun make-script-fn (fn-script url)
-  (funcall fn-script `(:src ,url
-			    "type" "text/javascript")))
-
-(defun make-script-block-fn (fn-script js)
-  (declare (special buildnode:*document*))
-  (funcall fn-script
-	   (list "type" "text/javascript")
-	   (if buildnode:*cdata-script-blocks*
-	       (dom:create-cdata-section buildnode:*document* (format nil "~%~a~%" js))
-	       (dom:create-text-node buildnode:*document* (format nil "~%~a~%" js)))))
+(defun xhtml-script-tag (url) (make-script-fn #'xhtml:script url))
+(defun xhtml-script-block (js) (make-script-block-fn #'xhtml:script js))
 
 (def-js-file :JsHelper "/script/JSControls/JSHelper.js" :depends-on '())
 (def-js-file :Controls "/script/JSControls/Controls.js" :depends-on '(:JsHelper))
@@ -296,7 +274,6 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (def-js-file :Hashtable "/script/JSControls/Collections.Hashtable.js" :depends-on '(:JsHelper :Collections))
 (def-js-file :Behaviour "/script/JSControls/Behaviour.js" :depends-on '(:Hashtable))
 (def-js-file :Tables "/script/JSControls/Tables.js" :depends-on '(:JsHelper))
-(def-js-file :Xul "/script/JSControls/Xul.js" :depends-on '(:JsHelper))
 
 (def-js-file :dojo "http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js")
 (def-js-file :jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js")
