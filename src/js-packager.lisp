@@ -1,6 +1,6 @@
 #.(unless (find-package :net.acceleration.javascript-packager)
     (defpackage :net.acceleration.javascript-packager
-	(:nicknames :javascript)
+	(:nicknames :javascript :net.acceleration.javascript)
       (:use :common-lisp :buildnode :iterate)
       (:export
        #:js-insertion-block
