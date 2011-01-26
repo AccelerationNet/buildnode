@@ -117,3 +117,18 @@
        "this is a test"
        (xhtml:br)
        ))))
+
+(buildnode-w/doc-test test-text-of-dom (dom-manipulation)
+  (let* ((node (xhtml:div () "This is a test"
+			  (xhtml:span () " of the text")
+			  (xhtml:ul ()
+			    (xhtml:li () " you")
+			    (xhtml:li () " should")
+			    (xhtml:li () " find"))))
+	 (out (text-of-dom-snippet node))
+	 (out2 (text-of-dom-snippet node "|")))
+    (assert-equal "This is a test of the text you should find"
+		  out)
+    (assert-equal "This is a test| of the text| you| should| find"
+		  out2)
+    ))

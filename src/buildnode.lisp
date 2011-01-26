@@ -1,6 +1,58 @@
 (in-package :net.acceleration.buildnode)
 (cl-interpol:enable-interpol-syntax)
 
+(defun ensure-list (l) (if (listp l) l (list l)))
+
+(defun flatten-children (doc kids)
+  (iter (for kid in (ensure-list kids))
+	(typecase kid
+	  (string (collecting (dom:create-text-node doc kid)))
+	  ((or dom:element dom:node) (collecting kid))
+	  (list (appending (flatten-children doc kid)))
+	  (vector (appending
+		   (flatten-children doc
+		    (iter (for sub-kid in-sequence kid) (collect sub-kid)))))
+	  (T (collecting (dom:create-text-node doc (princ-to-string kid)))))))
+
+(defun %walk-dom-cont (tree)
+  (typecase tree
+    (null nil)
+    ((vector list)
+       (when (> (length tree) 0)
+	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) )
+	   (values
+	     item (%merge-conts
+		   cont (lambda () (%walk-dom-cont (subseq tree 1))))))))
+    (dom:document (%walk-dom-cont (dom:child-nodes tree)))
+    (dom:element
+       (values tree
+	       (when (> (length (dom:child-nodes tree)) 0)
+		 (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
+
+(defun depth-first-nodes (tree)
+  (iter
+    (with cont = (lambda () (%walk-dom-cont tree)))
+    (if cont
+	(multiple-value-bind (item new-cont) (funcall cont)
+	  (when item (collect item))
+	  (setf cont new-cont))
+	(terminate))))
+
+(iterate:defmacro-driver (FOR node in-dom tree)
+  (let ((kwd (if generate 'generate 'for)))    
+    (with-unique-names (cont new-cont genned-node)
+      `(progn
+	 (with ,cont = (lambda () (%walk-dom-cont ,tree)))
+	 (,kwd ,node next
+	       (if (null ,cont)
+		   (terminate)
+		   (multiple-value-bind (,genned-node ,new-cont) (funcall ,cont)
+		     (setf ,cont ,new-cont)
+		     ,genned-node)))
+	 (unless ,node (next-iteration))
+	 ))))
+
+
 (defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
   (declare (special *document*))
   (etypecase sxml
@@ -92,17 +144,6 @@ can validate the html against a DTD if one is passed, can use
   (if (typep el 'rune-dom::document)
       el
       (dom:owner-document el)))
-
-(defun flatten-children (doc kids)
-  (iter (for kid in kids)
-	(typecase kid
-	  (string (collecting (dom:create-text-node doc kid)))
-	  ((or dom:element dom:node) (collecting kid))
-	  (list (appending (flatten-children doc kid)))
-	  (vector (appending
-		   (flatten-children doc
-		    (iter (for sub-kid in-sequence kid) (collect sub-kid)))))
-	  (T (collecting (dom:create-text-node doc (princ-to-string kid)))))))
 
 (defun add-children (elem &rest kids)
   "adds some kids to an element and return that element
@@ -438,42 +479,5 @@ This sets the doctype to be xhtml transitional."
 	  (values item (when rest
 			 (apply #'%merge-conts rest))))))))
 
-(defun %walk-dom-cont (tree)
-  (typecase tree
-    (null nil)
-    ((vector list)
-       (when (> (length tree) 0)
-	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) )
-	   (values
-	     item (%merge-conts
-		   cont (lambda () (%walk-dom-cont (subseq tree 1))))))))
-    (dom:document (%walk-dom-cont (dom:child-nodes tree)))
-    (dom:element
-       (values tree
-	       (when (> (length (dom:child-nodes tree)) 0)
-		 (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
-
-(defun depth-first-nodes (tree)
-  (iter
-    (with cont = (lambda () (%walk-dom-cont tree)))
-    (if cont
-	(multiple-value-bind (item new-cont) (funcall cont)
-	  (when item (collect item))
-	  (setf cont new-cont))
-	(terminate))))
-
-(iterate:defmacro-driver (FOR node in-dom tree)
-  (let ((kwd (if generate 'generate 'for)))    
-    (with-unique-names (cont new-cont genned-node)
-      `(progn
-	 (with ,cont = (lambda () (%walk-dom-cont ,tree)))
-	 (,kwd ,node next
-	       (if (null ,cont)
-		   (terminate)
-		   (multiple-value-bind (,genned-node ,new-cont) (funcall ,cont)
-		     (setf ,cont ,new-cont)
-		     ,genned-node)))
-	 (unless ,node (next-iteration))
-	 ))))
 
 
