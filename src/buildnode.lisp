@@ -77,31 +77,21 @@
    (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
 
-(defmethod text-of-dom-snippet ((el T) &optional splice)
-  (declare (ignorable el splice))
-  ())
-
-(defmethod text-of-dom-snippet ((el dom:document) &optional splice )
-  "get all of the textnodes of a dom:document and return that string with splice between each character"
-  (let ((strings (loop for kid across (dom:child-nodes el)
-		       collecting (text-of-dom-snippet kid splice))))
-    (join-strings
-     (flatten (if splice
-		  (insert-between strings splice)
-		  strings)))))
-
-(defmethod text-of-dom-snippet ((el dom:element) &optional splice)
-  "get all of the textnodes of a dom:element and return that string with splice between each character"
-  (let ((strings (loop for kid across (dom:child-nodes el)
-		       collecting (text-of-dom-snippet kid splice))))
-    (join-strings
-     (flatten (if splice
-		  (insert-between strings splice)
-		  strings)))))
-
-(defmethod text-of-dom-snippet ((el dom:text) &optional splice)
-  (declare (ignorable splice))
-  (dom:data el))
+(defmethod text-of-dom-snippet (el &optional splice stream)
+  (flet ((body (s)
+	   (iter
+	     (with has-written = nil )
+	     (for node in-dom el)
+	     (when (dom:text-node-p node)
+	       (when (and has-written splice)
+		 (princ splice s))
+	       (princ (dom:data node) s)
+	       (setf has-written T)
+	       ))))
+    (if stream
+	(body stream)
+	(with-output-to-string (stream)
+	  (body stream)))))
 
 (defclass scoped-dom-builder (rune-dom::dom-builder)
   ())
