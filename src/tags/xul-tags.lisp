@@ -117,6 +117,12 @@
        #:wizard
        #:wizardpage)))
 
+(defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
+(defmacro def-xul-element (name doc &rest attributes)
+  "defines a function that will build an xul node (on *document*) when called"
+  (declare (ignore attributes))
+  `(def-tag-node :net.acceleration.xul ,name  +xul-namespace+ ,doc))
+
 ;;;THIS DOCUMENT CONTAINS THE GENERATED DEFINITIONS OF ALL THE XUL elements pulled from XULPlanet
 
 (DEF-XUL-ELEMENT "action"

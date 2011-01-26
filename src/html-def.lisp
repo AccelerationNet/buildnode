@@ -8,7 +8,7 @@
 	  (lambda (cons)
 		 (let ((tag-name (string-downcase (car cons)))
 				 (tag-doc (string-trim '(#\Space #\Tab #\Newline)
-											  (cadr cons))))
+						       (cadr cons))))
 			(let ((tag-name (subseq tag-name 1 (1- (length tag-name)))))
 			  (format str "(def-html-tag ~s ~s)~%" tag-name tag-doc))))
 	  +shitty-html-def+)
@@ -16,13 +16,13 @@
 
 (defun create-export-list (&optional (output-str T))
    (mapc
-	  (lambda (cons)
-		 (let ((tag-name (string-downcase (car cons)))
-				 (tag-doc (string-trim '(#\Space #\Tab #\Newline)
-											  (cadr cons))))
-			(let ((tag-name (subseq tag-name 1 (1- (length tag-name)))))
-			  (format output-str "#:~a~%" tag-name tag-doc))))
-	  +shitty-html-def+)
+    (lambda (cons)
+      (let ((tag-name (string-downcase (car cons)))
+	    (tag-doc (string-trim '(#\Space #\Tab #\Newline)
+				  (cadr cons))))
+	(let ((tag-name (subseq tag-name 1 (1- (length tag-name)))))
+	  (format output-str "#:~a~%" tag-name tag-doc))))
+    +shitty-html-def+)
   )
 
 

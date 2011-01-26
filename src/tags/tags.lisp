@@ -1,7 +1,5 @@
 (in-package :net.acceleration.buildnode)
 
-(defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
-(defparameter +xhtml-namespace+ "http://www.w3.org/1999/xhtml")
 
 ;(defparameter +xul-core-attributes+
 ;  (mapcar #'(lambda (s) (intern (string-upcase s)))
@@ -41,15 +39,6 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 				 attributes
 				 children))
       (setf (gethash ',name *tags-indentation-hints*) 1))))
-
-(defmacro def-xul-element (name doc &rest attributes)
-  "defines a function that will build an xul node (on *document*) when called"
-  (declare (ignore attributes))
-  `(def-tag-node :net.acceleration.xul ,name  +xul-namespace+ ,doc))
-
-(defmacro def-html-tag (name doc)
-  "defines a function that will build an xhtml node (on *document*) when called"
-  `(def-tag-node :net.acceleration.xhtml ,name  +xhtml-namespace+ ,doc))
 
 (defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the

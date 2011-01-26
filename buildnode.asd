@@ -20,8 +20,7 @@
 		      :components
 		      ((:file "tags" )
 		       (:file "xul-tags" :depends-on ("tags"))
-		       (:file "xhtml-tags" :depends-on ("tags"))
-		       (:file "custom-html" :depends-on ("xhtml-tags")))
+		       (:file "xhtml-tags" :depends-on ("tags")))
 		      :depends-on ("packages" "buildnode"))
 	     (:file "js-packager" :depends-on ("packages" :tags )))))
   :depends-on (:cxml :iterate :flexi-streams :arnesi
@@ -39,3 +38,27 @@
 	    :components ((:file "setup")
 			 (:file "basic-tests"))))
   :depends-on (:buildnode :lisp-unit))
+
+(defsystem :buildnode-xhtml
+  :description "Tool for building up an xml dom of an excel spreadsheet nicely."
+  :components
+  ((:module :src
+	    :serial T
+	    :components
+	    ((:module :tags
+		      :serial T
+		      :components
+		      ((:file "xhtml-tags"))))))
+  :depends-on (:buildnode))
+
+(defsystem :buildnode-xul
+  :description "Tool for building up an xml dom of an excel spreadsheet nicely."
+  :components
+  ((:module :src
+	    :serial T
+	    :components
+	    ((:module :tags
+		      :serial T
+		      :components
+		      ((:file "xul-tags"))))))
+  :depends-on (:buildnode))

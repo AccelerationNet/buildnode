@@ -104,6 +104,11 @@
        #:xmp
        )))
 
+(defparameter +xhtml-namespace+ "http://www.w3.org/1999/xhtml")
+(defmacro def-html-tag (name doc)
+  "defines a function that will build an xhtml node (on *document*) when called"
+  `(def-tag-node :net.acceleration.xhtml ,name  +xhtml-namespace+ ,doc))
+
 ;(def-html-tag "!--" "Defines a comment")
 ;(def-html-tag "!doctype" "Defines the document type")
 (def-html-tag "a" "Defines an anchor")
