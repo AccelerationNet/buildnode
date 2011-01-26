@@ -78,6 +78,8 @@
 		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
 
 (defmethod text-of-dom-snippet (el &optional splice stream)
+  "get all of the textnodes of a dom:element and return that string
+   with splice between each character"
   (flet ((body (s)
 	   (iter
 	     (with has-written = nil )
