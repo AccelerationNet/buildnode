@@ -16,6 +16,5 @@
 	    ((:module :tags
 		      :serial T
 		      :components
-		      ((:file "excel-package" )
-		       (:file "excel"))))))
+		      ((:file "excel"))))))
   :depends-on (:buildnode))

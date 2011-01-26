@@ -1,4 +1,33 @@
-(in-package :net.acceleration.javascript)
+#.(unless (find-package :net.acceleration.javascript-packager)
+    (defpackage :net.acceleration.javascript-packager
+	(:nicknames :javascript)
+      (:use :common-lisp :buildnode :iterate)
+      (:export
+       #:js-insertion-block
+       #:xhtml-script-tag
+       #:xul-script-tag
+       #:xhtml-script-block
+       #:xul-script-block
+       #:insert-script-here
+       #:with-javascript-collector
+       #:js-defined-p
+       #:def-js-file
+       #:def-anon-js-file
+       #:use-js-file
+       #:add-js-snippet
+       #:table-sorter
+       #:multi-row-table-sorter
+       )
+      (:export #:add-dojo-onload
+	       #:add-jquery-onload
+	       #:build-script-elements
+	       #:js-collector
+	       #:*js-collector*
+	       #:clear-js-collector
+	       #:add-new-js-snippet
+	       #:table-totaler)))
+
+(in-package :net.acceleration.javascript-packager)
 (cl-interpol:enable-interpol-syntax)
 
 (defun make-js-depenecy-graph ()
@@ -34,20 +63,28 @@
 
 (defmethod build-script-elements ((js-collector js-collector) &optional base-url)
   "Build all of the javascript elements, i.e. the full list of script tags and blocks."
+  ;; TODO Clean up make script builder and all that, why is it formatting
+  ;; the scripts?
   (nconc
    (when (script-tag-fn js-collector)
-     (mapcar (lambda (url)
-	       (funcall (script-tag-fn js-collector)
-			(if (and (char-equal #\/ (elt url 0))
-				 base-url )
-			    (let ((it (char-equal #\/ (elt base-url (- (length base-url) 1)))))
-			      #?"${ base-url }${ (if it (subseq url 1) url) }")
-			    url)))
-	     (js-list js-collector))) ;js-list is the full tree traversal.
+     (mapcar
+      (lambda (url)
+	(funcall (script-tag-fn js-collector)
+		 (if (and (char-equal #\/ (elt url 0))
+			  base-url )
+		     (let ((it (char-equal #\/ (elt base-url (- (length base-url) 1)))))
+		       #?"${ base-url }${ (if it (subseq url 1) url) }")
+		     url)))
+      (js-list js-collector)))	  ;js-list is the full tree traversal.
    (when (and (script-block-fn js-collector)
 	      (snippets *js-collector*))
-     (list (funcall (script-block-fn js-collector)
-		    (join-strings (insert-between (reverse (snippets js-collector)) ~%)))))))
+     (list
+      (funcall (script-block-fn js-collector)
+	       (with-output-to-string (stream)
+		 (mapc
+		  (lambda (s) (princ s stream)(princ "~%" stream))
+		  (reverse (snippets js-collector))))
+	       )))))
 
 
 (defun find-graph-node (key js-dependency-graph)
@@ -100,8 +137,9 @@
 (defun get-dependency-list (key)
   "gets a list of all the files required for proper execution  of a javascript file
 that is designated by the key (either a keyword in the *global-js-dependency-graph* or a url)"
-  (let ((return-list '()))
-    (awhen (find-graph-node key *global-js-dependency-graph*)
+  (let ((return-list '())
+	(it (find-graph-node key *global-js-dependency-graph*)))
+    (when it
       (mapc (lambda (key-dep-list-item)
 	      (let ((dep-list (get-dependency-list key-dep-list-item)))
 		(mapc
@@ -192,30 +230,33 @@ With js-collector also appends all (non-nil) elements in body to the document"
    as defined by the keyword argument insertion-point-symbol
    (defaults to 'insert-script-here) that will be the final location of all
    of the collected script tags in the body"
-  (arnesi:with-unique-names (chillins script-tags replacement-node parent )
+  (let ((chillins (gensym "chillins-"))
+	(script-tags (gensym "script-tags-"))
+	(replacement-node (gensym "replacement-node-"))
+	(parent (gensym "parent-")))
     `(let ((,replacement-node)) 
-      (symbol-macrolet ((,insertion-point-symbol 
-			 (if ,replacement-node
-			     (error "More than one script tag insertion point in a document is not allowed")
-			     (setf ,replacement-node
-				   (create-complete-element *document*
-							    "adw"
-							    "adw:replacement-node"
-							    '()
-							    '())))))
-	(multiple-value-bind (,chillins ,script-tags)
-	    (with-javascript-collector #',script-tag-fn #',script-block-fn
-	      ,@body)
- 
-	    (arnesi:if-bind ,parent (dom:parent-node ,replacement-node)
-	      (progn
-		(mapc
-		 (lambda (elem)
-		   (dom:insert-before ,parent elem ,replacement-node))
-		 ,script-tags)
-		(dom:remove-child ,parent ,replacement-node)
-		,chillins)
-	      (substitute ,script-tags ,replacement-node ,chillins )))))))
+       (symbol-macrolet ((,insertion-point-symbol 
+			  (if ,replacement-node
+			      (error "More than one script tag insertion point in a document is not allowed")
+			      (setf ,replacement-node
+				    (create-complete-element *document*
+							     "adw"
+							     "adw:replacement-node"
+							     '()
+							     '())))))
+	 (multiple-value-bind (,chillins ,script-tags)
+	     (with-javascript-collector #',script-tag-fn #',script-block-fn
+	       ,@body)
+	   (let ((,parent (dom:parent-node ,replacement-node)))
+	     (if ,parent
+		 (progn
+		   (mapc
+		    (lambda (elem)
+		      (dom:insert-before ,parent elem ,replacement-node))
+		    ,script-tags)
+		   (dom:remove-child ,parent ,replacement-node)
+		   ,chillins)
+		 (substitute ,script-tags ,replacement-node ,chillins ))))))))
 
 (defun xhtml-script-tag (url)
   (make-script-fn #'xhtml:script url))
@@ -231,8 +272,6 @@ With js-collector also appends all (non-nil) elements in body to the document"
 (defun make-script-fn (fn-script url)
   (funcall fn-script `(:src ,url
 			    "type" "text/javascript")))
-
-
 
 (defun make-script-block-fn (fn-script js)
   (declare (special buildnode:*document*))
@@ -281,32 +320,3 @@ With js-collector also appends all (non-nil) elements in body to the document"
   (let ((eis (format nil "[~{~A~^,~}]" excluded-indexes)))
 	(add-dojo-onload #?"function () {new TableTotaler('${id}',${eis}) }")))
 
-'(flet ((button-control ()
-	 (declare (special use-js-file))
-	 (use-js-file 'behaviour)
-	 (list (xhtml:button '(:label "Foo"))
-	       (xhtml:button '(:label "Bar")))))
-  (write-document
-   (with-document
-     (js-insertion-block ( #'xhtml-script-tag)
-       (use-js-file 'grid)
-       (xhtml:html
-	'()
-	(xhtml:head
-	 '()
-	 (xhtml:div '() "above")
-	 insert-script-here
-	 (xhtml:div '() "below")
-	 )
-	(xhtml:body
-	 '()
-	 (xhtml:div
-	  '()
-	  (use-js-file "js/initgrid.js")
-	  (button-control))))
-       (xul:window '(:id "fuck")
-		   (js-insertion-block (#'xul-script-tag)
-		     (xul:button '(:label "foo"))
-		     insert-script-here
-		     (xul:button '(:label "bar"))
-		     (use-js-file "js/foo your mom in her dirty bam")))))))

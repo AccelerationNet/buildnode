@@ -1,6 +1,9 @@
 (in-package :net.acceleration.buildnode)
 (cl-interpol:enable-interpol-syntax)
 
+(defmacro eval-always (&body body)
+  `(eval-when (:compile-toplevel :load-toplevel :execute),@body))
+
 (defun ensure-list (l) (if (listp l) l (list l)))
 
 (defun flatten-children (doc kids)
@@ -40,21 +43,23 @@
 	(terminate))))
 
 (iterate:defmacro-driver (FOR node in-dom tree)
-  (let ((kwd (if generate 'generate 'for)))    
-    (with-unique-names (cont new-cont genned-node)
-      `(progn
-	 (with ,cont = (lambda () (%walk-dom-cont ,tree)))
-	 (,kwd ,node next
-	       (if (null ,cont)
-		   (terminate)
-		   (multiple-value-bind (,genned-node ,new-cont) (funcall ,cont)
-		     (setf ,cont ,new-cont)
-		     ,genned-node)))
-	 (unless ,node (next-iteration))
-	 ))))
+  (let ((kwd (if generate 'generate 'for))
+	(cont (gensym "CONT-"))
+	(new-cont (gensym "NEW-CONT-"))
+	(genned-node (gensym "GENNED-NODE-")))    
+    `(progn
+       (with ,cont = (lambda () (%walk-dom-cont ,tree)))
+       (,kwd ,node next
+	     (if (null ,cont)
+		 (terminate)
+		 (multiple-value-bind (,genned-node ,new-cont) (funcall ,cont)
+		   (setf ,cont ,new-cont)
+		   ,genned-node)))
+       (unless ,node (next-iteration)))))
 
 
-(defun xmls-to-dom-snippet ( sxml &key (namespace "http://www.w3.org/1999/xhtml"))
+(defun xmls-to-dom-snippet ( sxml &key
+			    (namespace "http://www.w3.org/1999/xhtml"))
   (declare (special *document*))
   (etypecase sxml
     (string sxml)
@@ -62,7 +67,7 @@
 	    (create-complete-element
 	     *document* namespace
 	     tagname
-	     (flatten attrs)
+	     (iter (for (k v) in attrs) (collect k) (collect v))
 	     (loop for node in kids
 		   collecting
 		   (xmls-to-dom-snippet node :namespace namespace)))))))
@@ -184,12 +189,13 @@ can validate the html against a DTD if one is passed, can use
       (car (find prefix namespace-prefix-map :key #'cdr :test #'string=)))))
 
 (defun calc-complete-tagname (namespace base-tag namespace-prefix-map)
-  (let ((prefix (and namespace-prefix-map
-		     (not (cxml::split-qname base-tag)) ;not already a prefix
-		     (when-bind prefix (get-prefix namespace namespace-prefix-map)
-		       ;;found the given namespace in the map
-		       (when (> (length (the string prefix)) 0)
-			 prefix)))))
+  (let ((prefix
+	 (and namespace-prefix-map
+	      (not (cxml::split-qname base-tag)) ;not already a prefix
+	      (let ((prefix (get-prefix namespace namespace-prefix-map)))
+		;;found the given namespace in the map
+		(when (and prefix (> (length (the string prefix)) 0))
+		  prefix)))))
     (if prefix
 	#?"${prefix}:${base-tag}"
 	base-tag)))
