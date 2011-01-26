@@ -5,7 +5,6 @@
 	:lisp-unit :buildnode)
   (:shadow :cdata))
 
-
 (in-package :buildnode-test)
 (cl-interpol:enable-interpol-syntax)
 
