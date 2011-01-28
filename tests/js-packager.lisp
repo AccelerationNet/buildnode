@@ -1,3 +1,7 @@
+(in-package :buildnode-test)
+(cl-interpol:enable-interpol-syntax)
+
+
 '(flet ((button-control ()
 	 (declare (special use-js-file))
 	 (use-js-file 'behaviour)

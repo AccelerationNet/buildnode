@@ -18,7 +18,7 @@
 	     (:module :tags
 		      :serial T
 		      :components ((:file "tags" ))))))
-  :depends-on (:cxml :iterate :flexi-streams 
+  :depends-on (:cxml :iterate :flexi-streams :split-sequence
 		     :swank ;; for setting tag-indentation
 		     :cl-interpol :closure-html))
 
@@ -33,29 +33,3 @@
 	    :components ((:file "setup")
 			 (:file "basic-tests"))))
   :depends-on (:buildnode :buildnode-xhtml :lisp-unit :adwcodebase :arnesi))
-
-(defsystem :buildnode-xhtml
-  :description "Tool for building up an xml dom of an excel spreadsheet nicely."
-  :components
-  ((:module :src
-	    :serial T
-	    :components
-	    ((:module :tags
-		      :serial T
-		      :components
-		      ((:file "xhtml-tags")))
-	     (:file "js-packager"))))
-  :depends-on (:buildnode))
-
-(defsystem :buildnode-xul
-  :description "Tool for building up an xml dom of an excel spreadsheet nicely."
-  :components
-  ((:module :src
-	    :serial T
-	    :components
-	    ((:file "js-packager")
-	     (:module :tags
-		      :serial T
-		      :components
-		      ((:file "xul-tags"))))))
-  :depends-on (:buildnode))
