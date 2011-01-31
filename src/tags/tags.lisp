@@ -1,5 +1,5 @@
 (in-package :net.acceleration.buildnode)
-
+(cl-interpol:enable-interpol-syntax)
 
 ;(defparameter +xul-core-attributes+
 ;  (mapcar #'(lambda (s) (intern (string-upcase s)))
@@ -81,5 +81,5 @@ Pass in #'xul:script or #'xhtml:script as the first argument"
   (funcall fn-script
 	   (list "type" "text/javascript")
 	   (if buildnode:*cdata-script-blocks*
-	       (dom:create-cdata-section buildnode:*document* (format nil "~%~a~%" js))
-	       (dom:create-text-node buildnode:*document* (format nil "~%~a~%" js)))))
+	       (dom:create-cdata-section buildnode:*document* #?"\r\n${js}\r\n")
+	       (dom:create-text-node buildnode:*document* #?"\r\n${js}\r\n"))))

@@ -68,7 +68,7 @@
       (funcall (script-block-fn js-collector)
 	       (with-output-to-string (stream)
 		 (mapc
-		  (lambda (s) (princ s stream)(princ "~%" stream))
+		  (lambda (s) (princ s stream)(princ #?"\r\n" stream))
 		  (reverse (snippets js-collector))))
 	       )))))
 
