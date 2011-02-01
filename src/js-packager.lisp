@@ -24,6 +24,7 @@
   (dependency-list))
 
 (defvar *global-js-dependency-graph* (make-js-depenecy-graph))
+(defvar *js-collector* nil "The current collector in use.")
 
 (defclass js-collector ()
   ((urls
@@ -154,7 +155,6 @@ that is designated by the key (either a keyword in the *global-js-dependency-gra
 (defun use-js-file (url-or-key &key depends-on )
   "a function to add a js-file to the special variable  *js-collector* which will
 be in scope inside of with-javascript-collector"
-  (declare (special *js-collector*))
   (unless *js-collector*
     (error "Trying to use js file, but no *js-collector* available"))
   (unless (js-defined-p url-or-key)

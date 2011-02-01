@@ -1,6 +1,11 @@
 (in-package :net.acceleration.buildnode)
 (cl-interpol:enable-interpol-syntax)
 
+
+(defvar *document* ()
+  "A variable that holds the current document that is being built. see
+  with-document.")
+
 (defmacro eval-always (&body body)
   `(eval-when (:compile-toplevel :load-toplevel :execute),@body))
 
@@ -60,7 +65,6 @@
 
 (defun xmls-to-dom-snippet ( sxml &key
 			    (namespace "http://www.w3.org/1999/xhtml"))
-  (declare (special *document*))
   (etypecase sxml
     (string sxml)
     (list (destructuring-bind (tagname attrs . kids) sxml
@@ -364,7 +368,6 @@ a document is necessary to create dom nodes and the document the nodes end up on
 must be the document on which they were created.  At the end of the form, the
 complete document is returned"
   `(let ((*document*  (cxml-dom:create-document)))
-    (declare (special *document*))
     (append-nodes *document* ,@chillins)
     *document*))
 
@@ -403,7 +406,6 @@ This sets the doctype to be xhtml transitional."
 		       "html"
 		       "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"))))
-    (declare (special *document*))
     (append-nodes *document* ,@chillins)
     *document*))
 
@@ -422,7 +424,6 @@ This sets the doctype to be xhtml transitional."
 		       "html"
 		       "-//W3C//DTD XHTML 1.0 Frameset//EN"
 		       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd"))))
-    (declare (special *document*))
     (append-nodes *document* ,@chillins)
     *document*))
 
@@ -437,8 +438,7 @@ This sets the doctype to be xhtml transitional."
     (write-doc-to-file (with-html-document ,@body)
 		      ,filename)))
 
-(defvar *document* ()
-  "A variable for document building")
+
 
 (defmacro with-html-document (&body body)
   "(with-html-document ( a bunch of child nodes of the document )) --> cxml:dom document
@@ -447,7 +447,7 @@ a document is necessary to create dom nodes and the document the nodes end up on
 must be the document on which they were created.  At the end of the form, the
 complete document is returned.
 This sets the doctype to be xhtml transitional."
-  `(let ((buildnode::*namespace-prefix-map* nil)
+  `(let ((*namespace-prefix-map* nil)
 	 (*document* (dom:create-document
 		      'rune-dom:implementation
 		      nil nil
