@@ -121,22 +121,42 @@
      (urls js))
     (nreverse return-list)))
 
-(defun get-dependency-list (key)
-  "gets a list of all the files required for proper execution  of a javascript file
-that is designated by the key (either a keyword in the *global-js-dependency-graph* or a url)"
+(defun get-dependency-list (key &key want-keys-p)
+  "gets a list of all the URLs required for proper execution of a
+javascript file that is designated by the key (either a keyword in the
+*global-js-dependency-graph* or a url)
+
+If :want-keys-p is true, it returns a list of
+*global-js-dependency-graph* keywords instead of URLs."
   (let ((return-list '())
 	(it (find-graph-node key *global-js-dependency-graph*)))
     (when it
       (mapc (lambda (key-dep-list-item)
-	      (let ((dep-list (get-dependency-list key-dep-list-item)))
+	      (let ((dep-list (get-dependency-list key-dep-list-item :want-keys-p want-keys-p)))
 		(mapc
 		 (lambda (elem)
 		   (pushnew elem return-list :test #'equal))
 		 dep-list)
-		(push (get-url-from-key key-dep-list-item *global-js-dependency-graph*)
+		(push (if want-keys-p
+			  key-dep-list-item
+			  (get-url-from-key key-dep-list-item *global-js-dependency-graph*))
 		      return-list)))
 	    (js-graph-node-dependency-list it)))
     (nreverse return-list)))
+
+(defun get-dependency-graph (&optional (s T))
+  "prints out the *global-js-dependency-graph* in DOT format"
+  (let ((keys (loop for k being the hash-keys of *global-js-dependency-graph*
+		    when (keywordp k) collect k))
+	(id 0)
+	(node-map (make-hash-table)))
+    (macrolet ((node-name (k) `(gethash ,k node-map)))
+      (dolist (k keys)
+	(setf (node-name k) (format nil "n~a" (incf id))))
+      (dolist (k keys)
+	(format s "~a [label=\"~a\"]~%" (node-name k) k)
+	(dolist (dep (get-dependency-list k :want-keys-p T))
+	  (format s "~a -> ~a~%" (node-name dep) (node-name k)))))))
 
 (defun def-js-file (js-name url &key depends-on)
   "defines a named (using a keyword) javascript file and its dependencies"
