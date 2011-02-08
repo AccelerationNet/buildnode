@@ -183,13 +183,15 @@ is expecting a function object (in string form) as the arg."
     (use-js-file :dojo)
     (add-js-snippet #?"dojo.addOnLoad(${fun});")))
 
-(defun add-jquery-onload (fun)
+(defun add-jquery-onload (fun &optional add-js-function-syntax)
   "Use dojo to add a document onload function. This function
 is expecting a function object (in string form) as the arg."
-  (use-js-file :jquery)
-  (add-js-snippet
-   (etypecase fun
-     (string #?"\$(document).ready(${fun});"))))
+  (check-type fun string)
+  (let ((fun (if add-js-function-syntax
+		 #?"function(){${fun};}"
+		 fun)))
+    (use-js-file :jquery)
+    (add-js-snippet #?"\$(document).ready(${fun});")))
 
 (defvar *js-collector* nil
   "Special variable for use in collection js snippets and scripts.")
