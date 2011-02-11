@@ -22,12 +22,13 @@
   (pushnew *tags-indentation-hints* swank::*application-hints-tables*))
 
 
-(defmacro def-tag-node (package name  namespace docstring  )
+(defmacro def-tag-node (package name  namespace docstring &optional fn-name )
   "Defines a tag function in the package with the name and prefix specified
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
   (let* ((evaled-name (eval name))
-	 (name (intern (string-upcase evaled-name) (eval package)))
+	 (name (or fn-name
+		   (intern (string-upcase evaled-name) (eval package))))
 	 (tagname evaled-name))
     `(progn
       (CL:defun ,name (&optional attributes &rest children )
