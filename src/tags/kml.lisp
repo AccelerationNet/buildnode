@@ -1,6 +1,6 @@
 (in-package :net.acceleration.buildnode)
 
-(eval-always
+(buildnode::eval-always
   (unless (find-package :net.acceleration.buildnode.kml)
     (defpackage :net.acceleration.buildnode.kml
 	(:nicknames :kml :buildnode-kml)
@@ -28,7 +28,8 @@
 		    ,s))
 	     (collect `(export ',s :kml)))))
 
-(kml-tags "AbstractView" "address" "AddressDetails" "Alias" "altitude"
+(buildnode::eval-always
+ (kml-tags "AbstractView" "address" "AddressDetails" "Alias" "altitude"
 	  "altitudeMode" "BalloonStyle" "begin" "bgColor" "bottomFov" "Camera"
 	  "Change" "color" "colorMode" "ColorStyle" "Container" "cookie" "coordinates"
 	  "Create" "Data" "Delete" "description" "displayMode" "displayName" "Document"
@@ -54,7 +55,7 @@
 	  "viewBoundScale" "viewFormat" "viewRefreshMode" "viewRefreshTime" "ViewVolume"
 	  "visibility"
 	  ;; "gx:Wait"
-	  "west" "when" "width")
+	  "west" "when" "width"))
 
 (defmacro with-kml-document (&body children)
   `(let ((*document* (dom:create-document
@@ -93,7 +94,7 @@
 	(coordinates ()
 	  (format nil "~F,~F,0" (lon m) (lat m)))))
     (cl:when (addr m)
-      (kml:address () (addr m)))
+      (address () (addr m)))
     (description () (desc m))
     (style ()
       (iconstyle ()
