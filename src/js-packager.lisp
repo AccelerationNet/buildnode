@@ -289,6 +289,8 @@ With js-collector also appends all (non-nil) elements in body to the document"
 
 (def-js-file :dojo "http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js")
 (def-js-file :jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js")
+(def-js-file :jquery-ui "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"
+  :depends-on '(:jquery))
 (def-js-file :sorter "/script/JSControls/sorter.js" :depends-on '(:dojo))
 (def-js-file :totaler "/script/JSControls/totaler.js" :depends-on '(:dojo))
 
