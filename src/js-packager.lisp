@@ -8,7 +8,8 @@
       (:export #:js-insertion-block #:xhtml-script-tag
 	       #:xhtml-script-block #:insert-script-here
 	       #:with-javascript-collector #:js-defined-p #:def-js-file
-	       #:def-anon-js-file #:use-js-file #:add-js-snippet #:table-sorter
+	       #:def-anon-js-file #:use-js-file #:js-file-used?
+	       #:add-js-snippet #:table-sorter
 	       #:multi-row-table-sorter #:add-dojo-onload #:add-jquery-onload
 	       #:build-script-elements #:js-collector #:*js-collector*
 	       #:clear-js-collector #:add-new-js-snippet #:table-totaler))))
@@ -78,7 +79,7 @@
   "retrieves a graph-node from the js-dependency-graph based on a symbol or url"
   (gethash key js-dependency-graph ))
 
-(defun get-url-from-key (key js-dependency-graph)
+(defun get-url-from-key (key &optional (js-dependency-graph *global-js-dependency-graph*))
   "gets the url for a key reguardles of whether it is a symbol or url (assuming it is in the graph)"
   (if (stringp key) key
       (let ((it (find-graph-node key js-dependency-graph)))
@@ -104,22 +105,18 @@
 
 (defun add-graph-node (key val js-dependency-graph)
   (if (creates-circular-dependency-p key (js-graph-node-dependency-list val) js-dependency-graph)
-      (error "Insertion will lead to a circular dependency graph ~% key:~a~%graph:~a" key js-dependency-graph )
+      (error "Insertion will lead to a circular dependency graph ~% key:~a~%graph:~a"
+	     key js-dependency-graph )
       (setf (gethash key js-dependency-graph) val)))
 
-(defmethod js-list ((js js-collector))
+(defmethod js-list ((js js-collector) &aux res)
   "gets the list of urls from a js collector (including dependencies)"
-  (let ((return-list '()))
-    (mapc				;foreach key/url in the js-collector
-     (lambda (key-or-url)
-       (mapc				;foreach url get the dependency list
-	(lambda (elem)
-	  (pushnew elem return-list :test #'string=))
-	(get-dependency-list key-or-url))
-       (pushnew (get-url-from-key key-or-url *global-js-dependency-graph*)
-		return-list :test #'string=))
-     (urls js))
-    (nreverse return-list)))
+  (labels ((helper (url)
+	     (mapc #'helper (get-dependency-list url))
+	     (pushnew (get-url-from-key url *global-js-dependency-graph*)
+		      res :test #'string=)))
+    (mapc #'helper (urls js))
+    (nreverse res)))
 
 (defun get-dependency-list (key &key want-keys-p)
   "gets a list of all the URLs required for proper execution of a
@@ -181,9 +178,12 @@ be in scope inside of with-javascript-collector"
     (if (stringp url-or-key)
 	(def-anon-js-file url-or-key :depends-on depends-on)
 	(error (format nil "js-file with name ~s is not defined" url-or-key))))
-  (unless (member url-or-key (urls *js-collector*) :test #'equal )
+  (unless (js-file-used? url-or-key)
     (setf (urls *js-collector*) (nconc (urls *js-collector*) (list url-or-key))))
   '())
+
+(defun js-file-used? (url-or-key)
+  (member (get-url-from-key url-or-key) (js-list *js-collector*) :test #'string= ))
 
 (defun add-js-snippet (snippet &optional (collector *js-collector*))
   "Add a snippet of javascript to the current *js-collector*"
