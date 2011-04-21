@@ -12,14 +12,17 @@
 (defun ensure-list (l) (if (listp l) l (list l)))
 
 (defun flatten-children (kids &optional doc)
+  "Handles flattening nested lists and vectors of nodes
+   into a single flat list of children
+  "
   (iter (for kid in (ensure-list kids))
 	(typecase kid
 	  (string (collecting (if doc
 				  (dom:create-text-node doc kid)
 				  kid)))
 	  ((or dom:element dom:node) (collecting kid))
-	  (list (appending (flatten-children kid doc)))
-	  (vector (appending
+	  (list (nconcing (flatten-children kid doc)))
+	  (vector (nconcing
 		   (flatten-children
 		    (iter (for sub-kid in-sequence kid) (collect sub-kid))
 		    doc)))
@@ -28,7 +31,25 @@
 			       (dom:create-text-node doc it)
 			       it)))))))
 
+(defun %merge-conts (&rest conts)
+  "Takes many continuations and makes a single continuation that
+   iterates through each of the arguments in turn"
+  (setf conts (remove-if #'null conts))
+  (when conts
+    (lambda ()
+      (let ((rest (rest conts)))
+	(multiple-value-bind (item new-cont) (funcall (first conts))
+	  (when new-cont (push new-cont rest))
+	  (values item (when rest
+			 (apply #'%merge-conts rest))))))))
+
 (defun %walk-dom-cont (tree)
+  "calls this on a dom tree (or tree list) and you get back
+   a node and a continuation function.
+
+   repeated calls to the continuation each return the next node
+   and the next walker continuation
+  "
   (typecase tree
     (null nil)
     ((or vector list)
@@ -46,6 +67,7 @@
 	   (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
 
 (defun depth-first-nodes (tree)
+  "get a list of the nodes in a depth first traversal of the dom trees"
   (iter
     (with cont = (lambda () (%walk-dom-cont tree)))
     (if cont
@@ -55,6 +77,7 @@
 	(terminate))))
 
 (iterate:defmacro-driver (FOR node in-dom tree)
+  "A driver that will walk over every node in a set of dom trees"
   (let ((kwd (if generate 'generate 'for))
 	(cont (gensym "CONT-"))
 	(new-cont (gensym "NEW-CONT-"))
@@ -70,6 +93,8 @@
        (unless ,node (next-iteration)))))
 
 (iterate:defmacro-driver (FOR parent in-dom-parents node)
+  "A driver that will return each parent node up from a starting node
+   until we get to a null parent"
   (let ((kwd (if generate 'generate 'for)))
     `(progn
        ;; (with ,cont = (lambda () (%walk-dom-cont ,tree)))
@@ -82,10 +107,12 @@
        (unless ,parent (next-iteration)))))
 
 (iterate:defmacro-driver (FOR kid in-dom-children nodes)
+  "iterates over the children of a dom node as per flatten-children"
   (let ((kwd (if generate 'generate 'for)))
     `(progn
        ;; (with ,cont = (lambda () (%walk-dom-cont ,tree)))
-       (with ,nodes = (flatten-children
+       (with ,nodes =
+	     (flatten-children ,nodes
 	      (typecase ,nodes
 		((or dom:element dom:document) (dom:child-nodes ,nodes))
 		((or list vector) ,nodes))))
@@ -94,6 +121,7 @@
 
 (defun xmls-to-dom-snippet ( sxml &key
 			    (namespace "http://www.w3.org/1999/xhtml"))
+  "Given a snippet of xmls, return a new dom snippet of that content"
   (etypecase sxml
     (string sxml)
     (list (destructuring-bind (tagname attrs . kids) sxml
@@ -134,7 +162,9 @@
 	  (body stream)))))
 
 (defclass scoped-dom-builder (rune-dom::dom-builder)
-  ())
+  ()
+  (:documentation
+   "A dom builder that builds inside of another dom-node"))
 (defmethod sax:start-document ((db scoped-dom-builder)))
 (defmethod sax:end-document ((db scoped-dom-builder))
   (rune-dom::document db))
@@ -142,6 +172,8 @@
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
 ;;;; version of the inner-html function
 (defun make-scoped-dom-builder (node)
+  "Returns a new scoped dom builder, scoped to the passed in node.
+   Nodes built with this builder will be added to the passed in node"
   (let ((builder (make-instance 'scoped-dom-builder)))
     (setf (rune-dom::document builder) (dom:owner-document node)
  	  (rune-dom::element-stack builder) (list node))
@@ -158,9 +190,15 @@
 		   (tag "div")
 		   (namespace-uri "http://www.w3.org/1999/xhtml")
 		   (dtd nil))
-  "Will wrap the input in a tag (which is neccessary from CXMLs perspective)
-can validate the html against a DTD if one is passed, can use
-*xhtml1-transitional-extid* for example."
+  "Parses a string containing a well formed html snippet
+   into dom nodes inside of a newly created node.
+
+   (Based loosely around the idea of setting the javascript innerHTML property)
+
+   Will wrap the input in a tag (which is neccessary from CXMLs perspective)
+   can validate the html against a DTD if one is passed, can use
+   *xhtml1-transitional-extid* for example.
+   "
   (handler-bind ((warning #'(lambda (condition)
 			      (declare (ignore condition))
 			      (muffle-warning))))
@@ -172,6 +210,7 @@ can validate the html against a DTD if one is passed, can use
       (dom:first-child node))))
 
 (defun document-of (el)
+  "Returns the document of a given node (or the document if passed in)"
   (if (typep el 'rune-dom::document)
       el
       (dom:owner-document el)))
@@ -206,8 +245,9 @@ can validate the html against a DTD if one is passed, can use
 
 (defvar *html-compatibility-mode* nil)
 (defvar *cdata-script-blocks* T "Should script blocks have a cdata?")
-(defvar *namespace-prefix-map* '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
-				 ("http://www.w3.org/1999/xhtml" . "xhtml")))
+(defvar *namespace-prefix-map*
+  '(("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" . "xul")
+    ("http://www.w3.org/1999/xhtml" . "xhtml")))
 
 (defun get-prefix (namespace &optional (namespace-prefix-map
 					*namespace-prefix-map*))
@@ -258,7 +298,9 @@ can validate the html against a DTD if one is passed, can use
 	   (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))))
 
 (defun get-attribute (elem attribute)
-  "Gets the value of an attribute on an element"
+  "Gets the value of an attribute on an element
+   if the attribute does not exist return nil
+  "
   (let ((args (list elem
 		    (attribute-uri attribute)
 		    (prepare-attribute-name attribute))))
@@ -275,7 +317,9 @@ can validate the html against a DTD if one is passed, can use
   elem)
 
 (defun remove-attribute (elem attribute)
-  "removes an attribute and passes the elem through, returns the elem"
+  "removes an attribute and passes the elem through, returns the elem
+   If the attribute does not exist, simply skip it
+  "
   ;; throws errors to remove attributes that dont exist
   ;; dont care about that
   (let ((uri (attribute-uri attribute))
@@ -291,17 +335,20 @@ can validate the html against a DTD if one is passed, can use
   elem)
 
 (defmethod css-classes ((el dom:element))
+  "Returns a list of css classes (space separated names in the 'class' attribute)"
   (split-sequence:split-sequence
    #\space (get-attribute el :class)
    :remove-empty-subseqs t))
 
 (defmethod add-css-class ((el dom:element) new-class)
+  "Adds a new css class to the element and returns the element"
   (let ((css-classes (css-classes el)))
     (pushnew new-class css-classes :test #'string=)
     (set-attribute el :class (format nil "~{~a~^ ~}" css-classes)))
   el)
 
 (defmethod remove-css-class ((el dom:element) new-class)
+  "Removes a css class from the elements and returns the element"
   (let ((css-classes (remove
 		      new-class
 		      (css-classes el)
@@ -497,15 +544,7 @@ This sets the doctype to be xhtml transitional."
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
 
-(defun %merge-conts (&rest conts)
-  (setf conts (remove-if #'null conts))
-  (when conts
-    (lambda ()
-      (let ((rest (rest conts)))
-	(multiple-value-bind (item new-cont) (funcall (first conts))
-	  (when new-cont (push new-cont rest))
-	  (values item (when rest
-			 (apply #'%merge-conts rest))))))))
+
 
 
 
