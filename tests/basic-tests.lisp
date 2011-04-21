@@ -1,18 +1,128 @@
 (in-package :buildnode-test)
 (cl-interpol:enable-interpol-syntax)
 
-(buildnode-w/doc-test test-flatten-&-iter-dom-children (dom-manipulation)
+(buildnode-w/doc-test test-flatten-&-iter-dom-children (dom-manipulation iter)
   (assert-equal
    7
-   (length (flatten-children *document*
-			     (list
+   (length (flatten-children (list
 			      (list (xhtml:div () (xhtml:div ()))
 				    (xhtml:div ()))
 			      (dom:child-nodes (xhtml:div () (xhtml:div () (xhtml:div ()))))
 			      (xhtml:span ())
 			      "47.3"
 			      42.02d0
-			      3)))))
+			      3)
+			     *document*))))
+
+(defun tag-sym (n)
+  (typecase n
+    (dom:element
+       (adwutils:symbolize-string (dom:tag-name n) :keyword))))
+
+(buildnode-w/doc-test test-iter-parents (dom-manipulation iter)
+  (let* (it
+	 (n (xhtml:div ()
+	      (xhtml:span ()
+		"span 1"
+		(xhtml:label ()
+		  "inner"
+		  (xhtml:label ()
+		    (xhtml:span ()
+		      (xhtml:div ())
+		      (setf it (xhtml:div () "target"))))))
+	      (xhtml:span () "span 2" (xhtml:div ()))
+	      (xhtml:span () "span 3"))))
+    (iter (for node in-dom-parents it)
+	  (for tag = (tag-sym node))
+	  ;(break "~A:~A" tag node)
+	  (when (first-iteration-p)
+	    (assert-eql :span tag ))
+	  (case tag
+	    (:span (count tag into spans))
+	    (:div (count tag into divs))
+	    (:label (count tag into labels)))
+	  (finally
+	   (assert-eql 2 spans )
+	   (assert-eql 1 divs )
+	   (assert-eql 2 labels)))
+    ))
+
+(buildnode-w/doc-test test-iter-children (dom-manipulation iter)
+  (let ((t1 (list
+	     (vector
+	      (xhtml:div ()
+		(xhtml:span ()
+		  "span 1"
+		  (xhtml:label () "inner"))
+		(xhtml:span () "span 2")
+		(xhtml:span () "span 3"))
+	      (xhtml:span ()))
+	     (xhtml:span ())
+	     (xhtml:div () (xhtml:label ()))))
+	(t2 (xhtml:div ()
+	      (xhtml:span () (xhtml:span () (xhtml:span () (xhtml:span ()))))
+	      (xhtml:label ())
+	      (xhtml:span ())
+	      (xhtml:label ())
+	      (xhtml:span ())
+	      (xhtml:label ()))))
+    (iter (for node in-dom-children t1)
+	  (for tag = (tag-sym node))
+	  (case tag
+	    (:span (count tag into spans))
+	    (:div (count tag into divs))
+	    (:label (count tag into labels)))
+	  (finally
+	   (assert-eql 2 spans )
+	   (assert-eql 2 divs )
+	   (assert-eql 0 labels)))
+    (iter (for node in-dom-children t2)
+	  (for tag = (tag-sym node))
+	  (case tag
+	    (:span (count tag into spans))
+	    (:div (count tag into divs))
+	    (:label (count tag into labels)))
+	  (finally
+	   (assert-eql 3 spans )
+	   (assert-eql 0 divs )
+	   (assert-eql 3 labels)))
+    ))
+
+(buildnode-w/doc-test test-iter-nodes (dom-manipulation iter)
+  (let* ((t1 (xhtml:div ()
+	       (xhtml:span ()
+		 "span 1"
+		 (xhtml:label () "inner"))
+	       (xhtml:span () "span 2")
+	       (xhtml:span ()
+		 "span 3"
+		 (xhtml:span ()
+		   (xhtml:span ())
+		   (xhtml:div ()))))
+	   )
+	 (t2 (list (vector t1 t1)
+		   (list (list (list t1))))
+	   ))
+    (iter (for node in-dom t1)
+	  (for tag = (tag-sym node))
+	  (case tag
+	    (:span (count tag into spans))
+	    (:div (count tag into divs))
+	    (:label (count tag into labels)))
+	  (finally
+	   (assert-eql 5 spans )
+	   (assert-eql 2 divs )
+	   (assert-eql 1 labels)))
+    (iter (for node in-dom t2)
+	  (for tag = (tag-sym node))
+	  (case tag
+	    (:span (count tag into spans))
+	    (:div (count tag into divs))
+	    (:label (count tag into labels)))
+	  (finally
+	   (assert-eql 15 spans )
+	   (assert-eql 6 divs )
+	   (assert-eql 3 labels)))))
 
 (buildnode-w/doc-test test-add-chilren (dom-manipulation)
   (let ((node (xhtml:div ())))

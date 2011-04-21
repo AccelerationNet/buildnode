@@ -11,22 +11,28 @@
 
 (defun ensure-list (l) (if (listp l) l (list l)))
 
-(defun flatten-children (doc kids)
+(defun flatten-children (kids &optional doc)
   (iter (for kid in (ensure-list kids))
 	(typecase kid
-	  (string (collecting (dom:create-text-node doc kid)))
+	  (string (collecting (if doc
+				  (dom:create-text-node doc kid)
+				  kid)))
 	  ((or dom:element dom:node) (collecting kid))
-	  (list (appending (flatten-children doc kid)))
+	  (list (appending (flatten-children kid doc)))
 	  (vector (appending
-		   (flatten-children doc
-		    (iter (for sub-kid in-sequence kid) (collect sub-kid)))))
-	  (T (collecting (dom:create-text-node doc (princ-to-string kid)))))))
+		   (flatten-children
+		    (iter (for sub-kid in-sequence kid) (collect sub-kid))
+		    doc)))
+	  (T (collecting (let ((it (princ-to-string kid)))
+			   (if doc
+			       (dom:create-text-node doc it)
+			       it)))))))
 
 (defun %walk-dom-cont (tree)
   (typecase tree
     (null nil)
-    ((vector list)
-       (when (> (length tree) 0)
+    ((or vector list)
+       (when (plusp (length tree))
 	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) )
 	   (values
 	     item (%merge-conts
@@ -34,9 +40,10 @@
     (dom:document (%walk-dom-cont (dom:child-nodes tree)))
     (dom:text tree)
     (dom:element
-       (values tree
-	       (when (> (length (dom:child-nodes tree)) 0)
-		 (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
+       (values
+	 tree
+	 (when (> (length (dom:child-nodes tree)) 0)
+	   (lambda () (%walk-dom-cont (dom:child-nodes tree) )))))))
 
 (defun depth-first-nodes (tree)
   (iter
@@ -61,6 +68,28 @@
 		   (setf ,cont ,new-cont)
 		   ,genned-node)))
        (unless ,node (next-iteration)))))
+
+(iterate:defmacro-driver (FOR parent in-dom-parents node)
+  (let ((kwd (if generate 'generate 'for)))
+    `(progn
+       ;; (with ,cont = (lambda () (%walk-dom-cont ,tree)))
+       (,kwd ,parent next
+	     (if (first-iteration-p)
+		 (dom:parent-node ,node)
+		 (if (null ,parent)
+		     (terminate)
+		     (dom:parent-node ,parent))))
+       (unless ,parent (next-iteration)))))
+
+(iterate:defmacro-driver (FOR kid in-dom-children nodes)
+  (let ((kwd (if generate 'generate 'for)))
+    `(progn
+       ;; (with ,cont = (lambda () (%walk-dom-cont ,tree)))
+       (with ,nodes = (flatten-children
+	      (typecase ,nodes
+		((or dom:element dom:document) (dom:child-nodes ,nodes))
+		((or list vector) ,nodes))))
+       (,kwd ,kid in ,nodes))))
 
 
 (defun xmls-to-dom-snippet ( sxml &key
@@ -150,14 +179,14 @@ can validate the html against a DTD if one is passed, can use
 (defun add-children (elem &rest kids)
   "adds some kids to an element and return that element
     alias for append-nodes"
-  (iter (for kid in (flatten-children (document-of elem) kids))
+  (iter (for kid in (flatten-children kids (document-of elem)))
 	(dom:append-child elem kid))
   elem)
 
 (defun insert-children (elem idx &rest kids)
   " insert a bunch of dom-nodes (kids) to the location specified
      alias for insert-nodes"
-  (setf kids (flatten-children (document-of elem) kids))
+  (setf kids (flatten-children kids (document-of elem)))
   (if (<= (length (dom:child-nodes elem)) idx )
       (apply #'add-children elem kids)
       (let ((after (elt (dom:child-nodes elem) idx)))
