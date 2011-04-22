@@ -11,7 +11,7 @@
 
 (defun ensure-list (l) (if (listp l) l (list l)))
 
-(defun flatten-children (kids &optional doc)
+(defun flatten-children (kids &optional (doc *document*))
   "Handles flattening nested lists and vectors of nodes
    into a single flat list of children
   "
