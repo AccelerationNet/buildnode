@@ -17,7 +17,7 @@
 (defun tag-sym (n)
   (typecase n
     (dom:element
-       (adwutils:symbolize-string (dom:tag-name n) :keyword))))
+       (intern (string-upcase (dom:tag-name n)) :keyword))))
 
 (buildnode-w/doc-test test-iter-parents (dom-manipulation iter)
   (let* (it

@@ -36,7 +36,7 @@
 	    :serial t
 	    :components ((:file "setup")
 			 (:file "basic-tests"))))
-  :depends-on (:buildnode :buildnode-xhtml :lisp-unit :adwcodebase :arnesi))
+  :depends-on (:buildnode :buildnode-xhtml :lisp-unit))
 
 ;;;; Copyright (C) 2011 Acceleration.net, Russ Tyndall
 ;;;;   email: bobbysmith007@gmail.com
