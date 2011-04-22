@@ -108,15 +108,15 @@
 
 (iterate:defmacro-driver (FOR kid in-dom-children nodes)
   "iterates over the children of a dom node as per flatten-children"
-  (let ((kwd (if generate 'generate 'for)))
+  (let ((kwd (if generate 'generate 'for))
+	(nl (gensym "NL-")))
     `(progn
-       ;; (with ,cont = (lambda () (%walk-dom-cont ,tree)))
-       (with ,nodes =
-	     (flatten-children ,nodes
+       (with ,nl =
+	     (flatten-children
 	      (typecase ,nodes
 		((or dom:element dom:document) (dom:child-nodes ,nodes))
 		((or list vector) ,nodes))))
-       (,kwd ,kid in ,nodes))))
+       (,kwd ,kid in ,nl))))
 
 
 (defun xmls-to-dom-snippet ( sxml &key
