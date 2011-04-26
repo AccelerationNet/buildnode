@@ -43,20 +43,20 @@
      (buildnode:with-html-document (progn ,@body nil))))
 
 
-(defun run-tests-with-debugging (&key tests suites)
-  (let* ((lisp-unit::*use-debugger* T)
-	 (tests (append (buildnode::ensure-list tests)
+(defun run-tests (&key suites tests (use-debugger T))
+  (let* ((*package* (find-package :buildnode-test))
+	 (lisp-unit::*use-debugger* use-debugger)
+	 (tests (append (ensure-list tests)
 			(iter (for suite in (ensure-list suites))
 			      (appending (get suite :tests)))))
-	 (out (with-output-to-string (s)
-		(let ((lisp-unit::*lisp-unit-stream*
-		       (make-broadcast-stream
-			s
-			(if (eql t lisp-unit::*lisp-unit-stream*)
-			    *standard-output*
-			    lisp-unit::*lisp-unit-stream*))))
-		  (lisp-unit::run-test-thunks
-		   (lisp-unit::get-test-thunks
-		    (if (null tests) (get-tests *package*) tests)))))))
-    (buildnode-tests.info "~% ** TEST RESULTS ** ~%-----------~%~A~%------------~%" out)))
+	 (out (with-output-to-string (lisp-unit::*lisp-unit-stream*)
+		(lisp-unit::run-test-thunks
+		 (lisp-unit::get-test-thunks
+		  (if (null tests)
+		      (get-tests *package*)
+		      tests))))))
+    
+    (format *standard-output*
+	    "~&~% ** TEST RESULTS: Buildnode ** ~%-----------~%~A~%------ END TEST RESULTS ------~%"
+	    out)))
 

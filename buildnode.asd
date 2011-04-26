@@ -38,6 +38,11 @@
 			 (:file "basic-tests"))))
   :depends-on (:buildnode :buildnode-xhtml :lisp-unit))
 
+(defmethod asdf:perform ((o asdf:test-op) (c (eql (find-system :buildnode))))
+  (asdf:oos 'asdf:load-op :buildnode-test)
+  (funcall (intern "RUN-TESTS" :buildnode-test)
+	   :use-debugger nil))
+
 ;;;; Copyright (C) 2011 Acceleration.net, Russ Tyndall
 ;;;;   email: bobbysmith007@gmail.com
 ;;;;
