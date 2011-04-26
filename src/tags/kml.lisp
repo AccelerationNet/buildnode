@@ -65,6 +65,7 @@
      (declare (special *document*))
      (append-nodes *document* ,@children)
      *document*))
+(export 'with-kml-document :kml)
 
 (defclass marker ()
   ((lat :accessor lat :initarg :lat :initform nil)
@@ -110,19 +111,3 @@
 	       (collect (build-dom m)))))))
 (export 'make-doc-from-markers :kml)
 
-(defun write-test-document (&optional (f #p"test.kml") )
-  (with-open-stream (fd (cl:open f :direction :output
-			      :element-type '(unsigned-byte 8)
-			      :if-does-not-exist :create
-			      :if-exists :supersede))
-    (write-document
-     (make-doc-from-markers
-      (list
-       (make-marker :name "Acceleration.net"
-		    :description "http://www.acceleration.net"
-		    :icon-href "http://gainesville-green.com/images/my-home-marker.png"
-		    :address
-		    "2831 NW 41ST ST
-Gainesville, FL 32606"))
-      "Test KML Document")
-     fd)))
