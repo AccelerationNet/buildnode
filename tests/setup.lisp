@@ -2,7 +2,7 @@
 (defpackage :net.acceleration.buildnode-test
     (:nicknames #:buildnode-test)
   (:use :common-lisp :cxml :iterate :lisp-unit :buildnode)
-  (:shadow :cdata))
+  (:shadow :cdata :run-tests))
 
 (in-package :buildnode-test)
 
