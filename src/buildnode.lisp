@@ -462,7 +462,7 @@ complete document is returned"
     (values doc filename)))
 
 (defun document-to-string (doc)
-  "Binary write-out a document. will create/overwrite any existing file named the same."
+  "Return a string representation of a document."
   (with-output-to-string (fd)
     (write-document doc fd)))
 
