@@ -173,12 +173,12 @@
   ;; TODO:  Is this the correct answer?  I have no idea how to handle
   ;; unescaped content in a dom (which is probably why this was not
   ;; implemented on dom-builder)
-  ;; also not sure why returning this fails to work
+  ;; also not sure why returning this fails to work (tries to add it to node)
+  ;; rather than teh current subnode we are in ...
   (buildnode:add-children
    (first (rune-dom::element-stack builder))
    (dom:create-text-node (rune-dom::document builder) data))
-  (values)
-  )
+  (values))
 
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
 ;;;; version of the inner-html function

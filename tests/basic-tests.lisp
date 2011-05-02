@@ -250,3 +250,14 @@
     (assert-equal "some-class"
 		  (get-attribute (dom:first-child node) :class))
     ))
+
+(buildnode-test test-document-to-string (utils)
+  (let* ((it "<head id=\"head\" class=\"header\"><title>Title</title></head><body>Our Body</body>")
+	 (doc (with-xhtml-document
+		(inner-html it "html")))
+	 (ds (document-to-string doc)))
+    (assert-true
+     (search it ds :test #'string-equal)
+     it ds doc)
+    
+    ))
