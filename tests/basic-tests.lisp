@@ -242,3 +242,11 @@
     (assert-equal "This is a test| of the text| you| should| find"
 		  out2)
     ))
+
+(buildnode-w/doc-test test-inner-html (dom-manipulation)
+  (let* ((node (inner-html "<span class=\"some-class\">A classy spans text</span>")))
+    (assert-equal "A classy spans text"
+		  (text-of-dom-snippet node))
+    (assert-equal "some-class"
+		  (get-attribute (dom:first-child node) :class))
+    ))
