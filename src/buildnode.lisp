@@ -564,7 +564,3 @@ This sets the doctype to be xhtml transitional."
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
 
-
-
-
-
