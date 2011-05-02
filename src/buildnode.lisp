@@ -169,13 +169,26 @@
 (defmethod sax:end-document ((db scoped-dom-builder))
   (rune-dom::document db))
 
+(defmethod sax:unescaped ((builder scoped-dom-builder) data)
+  ;; TODO:  Is this the correct answer?  I have no idea how to handle
+  ;; unescaped content in a dom (which is probably why this was not
+  ;; implemented on dom-builder)
+  ;; also not sure why returning this fails to work
+  (buildnode:add-children
+   (first (rune-dom::element-stack builder))
+   (dom:create-text-node (rune-dom::document builder) data))
+  (values)
+  )
+
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
 ;;;; version of the inner-html function
 (defun make-scoped-dom-builder (node)
   "Returns a new scoped dom builder, scoped to the passed in node.
    Nodes built with this builder will be added to the passed in node"
   (let ((builder (make-instance 'scoped-dom-builder)))
-    (setf (rune-dom::document builder) (dom:owner-document node)
+    (setf (rune-dom::document builder) (etypecase node
+					 (dom:document node)
+					 (dom:node (dom:owner-document node)))
  	  (rune-dom::element-stack builder) (list node))
     builder))
 
