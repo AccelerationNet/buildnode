@@ -261,3 +261,21 @@
      it ds doc)
     
     ))
+
+(buildnode-test test-attribute-order (utils)
+  (let* ((it "<head id=\"head\" class=\"header\" foo=\"my-attrib\"><title>Title</title></head><body>Our Body</body>")
+	 (doc (with-xhtml-document
+		(inner-html it "html")))
+	 (ds (document-to-string doc))
+	 (doc2 (with-xhtml-document (xhtml:html '(:class "my-class" :id "my-id" :foo "my-attrib"))))
+	 (ds2 (document-to-string doc2)))
+    (assert-true
+     (search it ds :test #'string-equal)
+     it ds doc)
+    (let ((it "class=\"my-class\" id=\"my-id\" foo=\"my-attrib\""))
+      (assert-true
+       (search it ds2 :test #'string-equal)
+       it ds2 doc2))
+    
+    ))
+

@@ -444,11 +444,18 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
   (let ((sink (make-output-sink octet-stream :char-p nil)))
     (write-normalized-document-to-sink document sink)))
 
+(defmethod html-output? (doc)
+  (let ((dt (dom:doctype doc)))
+    (or *html-compatibility-mode*
+	(and (string-equal "html" (dom:name dt))
+	     (not (search "xhtml" (dom:system-id dt) :test #'string-equal))))))
+
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
-  (case (stream-element-type out-stream)
-    ('character (write-document-to-character-stream document out-stream))
-    (otherwise (write-document-to-octet-stream document out-stream))))
+  (let ((*html-compatibility-mode* (html-output? document)))
+    (case (stream-element-type out-stream)
+      ('character (write-document-to-character-stream document out-stream))
+      (otherwise (write-document-to-octet-stream document out-stream)))))
 
 (defmacro with-document (&body chillins)
   "(with-document ( a bunch of child nodes of the document )) --> cxml:dom document
