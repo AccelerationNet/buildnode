@@ -175,9 +175,12 @@
   ;; implemented on dom-builder)
   ;; also not sure why returning this fails to work (tries to add it to node)
   ;; rather than teh current subnode we are in ...
-  (buildnode:add-children
-   (first (rune-dom::element-stack builder))
-   (dom:create-text-node (rune-dom::document builder) data))
+  
+  (let ((content (dom:child-nodes
+		  (inner-html data "div" "http://www.w3.org/1999/xhtml" nil nil))))
+    (buildnode:add-children
+     (first (rune-dom::element-stack builder))
+     content))
   (values))
 
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
@@ -202,7 +205,8 @@
 (defun inner-html (string &optional
 		   (tag "div")
 		   (namespace-uri "http://www.w3.org/1999/xhtml")
-		   (dtd nil))
+		   (dtd nil)
+		   (remove-whitespace? t))
   "Parses a string containing a well formed html snippet
    into dom nodes inside of a newly created node.
 
@@ -217,8 +221,10 @@
 			      (muffle-warning))))
     (let ((node (dom:create-element *document* tag)))
       (cxml:parse #?|<${tag} xmlns="${ namespace-uri }">${string}</${tag}>|
-		  (make-instance 'html-whitespace-remover
-				 :chained-handler (make-scoped-dom-builder node))
+		  (if remove-whitespace?
+		      (make-instance 'html-whitespace-remover
+				     :chained-handler (make-scoped-dom-builder node))
+		      (make-scoped-dom-builder node))
 		  :dtd dtd)
       (dom:first-child node))))
 
