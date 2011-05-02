@@ -170,12 +170,10 @@
   (rune-dom::document db))
 
 (defmethod sax:unescaped ((builder scoped-dom-builder) data)
-  ;; TODO:  Is this the correct answer?  I have no idea how to handle
+  ;; TODO:  Is this the correct answer?
+  ;; I have no idea how to handle
   ;; unescaped content in a dom (which is probably why this was not
   ;; implemented on dom-builder)
-  ;; also not sure why returning this fails to work (tries to add it to node)
-  ;; rather than teh current subnode we are in ...
-  
   (let ((content (dom:child-nodes
 		  (inner-html data "div" "http://www.w3.org/1999/xhtml" nil nil))))
     (buildnode:add-children
