@@ -75,7 +75,7 @@
 	       )))))
 
 
-(defun find-graph-node (key js-dependency-graph)
+(defun find-graph-node (key &optional (js-dependency-graph *global-js-dependency-graph*))
   "retrieves a graph-node from the js-dependency-graph based on a symbol or url"
   (gethash key js-dependency-graph ))
 
@@ -87,7 +87,9 @@
 	  (js-graph-node-url it)))))
 
 (defun creates-circular-dependency-p (key dep-list js-dependency-graph &optional visited-list)
-  "checks if inserting into key into a js-dependency-list will cause a unseemly circular relationships to the beautiful dependency graph.  And you wouldnt want thatn now would you"
+  "checks if inserting into key into a js-dependency-list will cause a
+   unseemly circular relationships to the beautiful dependency graph.
+   And you wouldnt want thatn now would you"
   (let ((key-url (get-url-from-key key js-dependency-graph)))
     (when key-url
       (or (find key-url visited-list :test #'equal)
@@ -174,16 +176,22 @@ If :want-keys-p is true, it returns a list of
 be in scope inside of with-javascript-collector"
   (unless *js-collector*
     (error "Trying to use js file, but no *js-collector* available"))
-  (unless (js-defined-p url-or-key)
-    (if (stringp url-or-key)
-	(def-anon-js-file url-or-key :depends-on depends-on)
-	(error (format nil "js-file with name ~s is not defined" url-or-key))))
+  (let ((node (find-graph-node url-or-key)))
+    (if node
+	(setf (js-graph-node-dependency-list node)
+	      (union (js-graph-node-dependency-list node)
+		     depends-on :test #'equal))
+	(if (stringp url-or-key)
+	    (def-anon-js-file url-or-key :depends-on depends-on)
+	    (error (format nil "js-file with name ~s is not defined" url-or-key)))))
   (unless (js-file-used? url-or-key)
     (setf (urls *js-collector*) (nconc (urls *js-collector*) (list url-or-key))))
   '())
 
 (defun js-file-used? (url-or-key)
-  (member (get-url-from-key url-or-key) (js-list *js-collector*) :test #'string= ))
+  (member (get-url-from-key url-or-key)
+	  (js-list *js-collector*)
+	  :test #'string= ))
 
 (defun add-js-snippet (snippet &optional (collector *js-collector*))
   "Add a snippet of javascript to the current *js-collector*"
