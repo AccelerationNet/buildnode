@@ -29,6 +29,7 @@
 	       #:window #:wizard #:wizardpage))))
 
 (in-package :net.acceleration.xul)
+(pushnew :buildnode-xul *features* :test #'eql)
 
 (defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
 (defmacro def-xul-element (name doc &rest attributes)
@@ -1371,7 +1372,3 @@ src:NIL")
   ("suppressonselect" "If this attribue is not specified, a select event is fired whenever an item is selected, either by the user or by calling one of the select methods. If set to true, the select event is never fired.")
   )
 
-(defun javascript::xul-script-tag (url) (buildnode::make-script-block-fn #'xul:script url))
-(defun javascript::xul-script-block (js) (buildnode::make-script-block-fn #'xul:script js))
-(def-js-file :Xul "/script/JSControls/Xul.js" :depends-on '(:JsHelper))
-(export '(javascript::xul-script-tag javascript::xul-script-block))

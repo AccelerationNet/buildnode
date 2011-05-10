@@ -18,6 +18,8 @@
 	       #:style #:sub #:sup #:table #:tbody #:td #:textarea #:tfoot #:th
 	       #:thead #:title #:tr #:tt #:u #:ul #:var #:xmp ))))
 
+(pushnew :buildnode-xhtml *features* :test #'eql)
+
 (defparameter +xhtml-namespace+ "http://www.w3.org/1999/xhtml")
 (defmacro def-html-tag (name doc)
   "defines a function that will build an xhtml node (on *document*) when called"

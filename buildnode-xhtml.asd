@@ -16,6 +16,5 @@
 	    ((:module :tags
 		      :serial T
 		      :components
-		      ((:file "xhtml-tags")))
-	     (:file "js-packager"))))
+		      ((:file "xhtml-tags"))))))
   :depends-on (:buildnode))
