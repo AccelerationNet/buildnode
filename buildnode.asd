@@ -14,6 +14,9 @@
 	    :serial T
 	    :components
 	    ((:file "packages")
+	     ;; should be removed once a patch doing the same thing makes its
+	     ;; way upstream
+	     (:file "dom-walker")
 	     (:file "buildnode")
 	     (:module :tags
 		      :serial T

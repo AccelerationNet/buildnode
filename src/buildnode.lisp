@@ -418,7 +418,7 @@ If the tagname does not contain a prefix, then one is added based on the namespa
   "writes a cxml:dom document to the given stream-sink,
 passing the document through a namespace normalizer first, and
 possibly a html-compatibility-sink if *html-compatibility-mode* is set"
-  (dom:map-document
+  (dom-walk
    (cxml:make-namespace-normalizer stream-sink)
    document
    :include-doctype :canonical-notations))
