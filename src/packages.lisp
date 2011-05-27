@@ -50,6 +50,8 @@
    #:dom-template
    #:make-output-sink
    #:def-tag-node
-   #:remove-all-children))
+   #:remove-all-children
+   #:with-html-snippet
+   #:with-xhtml-snippet))
 
 
