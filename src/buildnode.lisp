@@ -9,13 +9,11 @@
 (defmacro eval-always (&body body)
   `(eval-when (:compile-toplevel :load-toplevel :execute),@body))
 
-(defun ensure-list (l) (if (listp l) l (list l)))
-
 (defun flatten-children (kids &optional (doc *document*))
   "Handles flattening nested lists and vectors of nodes
    into a single flat list of children
   "
-  (iter (for kid in (ensure-list kids))
+  (iter (for kid in (alexandria:ensure-list kids))
 	(typecase kid
 	  (string (collecting (if doc
 				  (dom:create-text-node doc kid)
@@ -574,3 +572,42 @@ This sets the doctype to be xhtml transitional."
   (setf (slot-value it 'rune-dom::children) (rune-dom::make-node-list))
   it)
 
+(defmacro buffer-xml-output (() &body body)
+  "buffers out sax:events to a sting
+
+   xml parameters like <param:foo param:type=\"string\"><div>bar</div></param:foo>
+       are requested to be strings (presumably for string processing)
+  "
+  (alexandria:with-unique-names (out-str)
+    `(with-output-to-string (,out-str)
+       (let ((cxml::*sink* (cxml::make-character-stream-sink ,out-str))
+	     (cxml::*current-element* nil)
+	     (cxml::*unparse-namespace-bindings* cxml::*initial-namespace-bindings*)
+	     (cxml::*current-namespace-bindings* nil))
+	 (setf (cxml::sink-omit-xml-declaration-p cxml::*sink*) T)
+	 (sax:start-document cxml::*sink*)
+	 ,@body  
+	 (sax:end-document cxml::*sink*)))))
+
+(defmacro with-html-snippet (() &body body)
+  "builds a little piece of html-dom and renders that to a string"
+  `(let ( res
+         (*html-compatibility-mode* T))
+    (with-html-document
+      (prog1 nil ;; we dont ever want to put the content on the document
+        (setf res
+              (buffer-xml-output ()
+                (buildnode::dom-walk
+                 cxml::*sink*
+                 (progn ,@body))))) ) res ))
+
+(defmacro with-xhtml-snippet (() &body body)
+  "builds a little piece of xhtml-dom and renders that to a string"
+  `(let ( res)
+    (with-xhtml-document
+      (prog1 nil
+        (setf res
+              (buffer-xml-output ()
+                (buildnode::dom-walk
+                 cxml::*sink*
+                 (progn ,@body))))) ) res ))

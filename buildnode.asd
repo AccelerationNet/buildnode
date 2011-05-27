@@ -21,7 +21,8 @@
 	     (:module :tags
 		      :serial T
 		      :components ((:file "tags" ))))))
-  :depends-on (:cxml :iterate :flexi-streams :split-sequence
+  :depends-on (:cxml :alexandria
+               :iterate :flexi-streams :split-sequence
 		     :swank ;; for setting tag-indentation
 		     :cl-interpol
 		     ;; TODO:
