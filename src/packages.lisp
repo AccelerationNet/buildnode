@@ -49,6 +49,7 @@
    #:with-html-document-to-string
    #:dom-template
    #:make-output-sink
-   #:def-tag-node))
+   #:def-tag-node
+   #:remove-all-children))
 
 

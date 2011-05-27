@@ -568,3 +568,9 @@ This sets the doctype to be xhtml transitional."
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
 
+(defmethod remove-all-children ((it dom:element))
+  ;; should be a touch faster than removing one at a time
+  (iter (for n in (dom:child-nodes it)) (setf (slot-value n 'dom::parent) nil))
+  (setf (slot-value it 'rune-dom::children) (rune-dom::make-node-list))
+  it)
+
