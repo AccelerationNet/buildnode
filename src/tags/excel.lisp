@@ -126,14 +126,13 @@
      styles)))
 
 (defmacro with-excel-workbook-file ((file) &body chillins)
-  `(with-output-to-file (s ,file :if-exists :supersede :if-does-not-exist :create)
-     (let ((doc (with-excel-workbook () ,@chillins)))
-       (write-document doc s))))
+  `(buildnode::write-doc-to-file
+    (with-excel-workbook () ,@chillins)
+    ,file))
 
 (defmacro with-excel-workbook-string (() &body chillins)
-  `(with-output-to-string (s)
-     (let ((doc (with-excel-workbook () ,@chillins)))
-       (write-document doc s))))
+  `(buildnode::document-to-string
+    (with-excel-workbook () ,@chillins)))
 
 (defparameter +valid-data-types+
   '("String" "Number" "DateTime")

@@ -449,8 +449,10 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
 (defmethod html-output? (doc)
   (let ((dt (dom:doctype doc)))
     (or *html-compatibility-mode*
-	(and (string-equal "html" (dom:name dt))
-	     (not (search "xhtml" (dom:system-id dt) :test #'string-equal))))))
+	(and
+         dt
+         (string-equal "html" (dom:name dt))
+         (not (search "xhtml" (dom:system-id dt) :test #'string-equal))))))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
@@ -586,7 +588,7 @@ This sets the doctype to be xhtml transitional."
 	     (cxml::*current-namespace-bindings* nil))
 	 (setf (cxml::sink-omit-xml-declaration-p cxml::*sink*) T)
 	 (sax:start-document cxml::*sink*)
-	 ,@body  
+	 ,@body
 	 (sax:end-document cxml::*sink*)))))
 
 (defmacro with-html-snippet (() &body body)
