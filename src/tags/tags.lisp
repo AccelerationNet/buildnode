@@ -39,7 +39,7 @@ lisp namespace. When this function is called it will create a 'xul:box' node in 
 				 ,tagname
 				 attributes
 				 children))
-      (setf (gethash ',name *tags-indentation-hints*) 1))))
+      (setf (gethash ',name *tags-indentation-hints*) '(as when)))))
 
 (defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
