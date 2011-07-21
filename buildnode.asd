@@ -9,6 +9,8 @@
 
 (defsystem :buildnode
   :description "Tool for building up an xml dom nicely."
+  :author "http://www.acceleration.net"
+  :licence "BSD"
   :components
   ((:module :src
 	    :serial T
@@ -32,9 +34,8 @@
 
 (defsystem :buildnode-test
   :description ":buildnode-test: tests for buildnode library of code"
-  :author "Acceleration.net"
-  :licence "It's ours."
-  :version "not so early"
+  :author "http://www.acceleration.net"
+  :licence "BSD"
   :components
   ((:module :tests
 	    :serial t
