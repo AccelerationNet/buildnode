@@ -19,6 +19,7 @@ Please see the examples directory for runable examples in each XML dialect
  * To provide a flexible tool for programatically generating 
    and manipulating various and sundry xml formats
 
+```
 ;;;; Copyright (C) 2011 Acceleration.net, Russ Tyndall
 ;;;;   email: bobbysmith007@gmail.com
 ;;;;
@@ -40,3 +41,4 @@ Please see the examples directory for runable examples in each XML dialect
 ;;;; This program comes with ABSOLUTELY NO WARRANTY; for details see COPYING.
 ;;;; This is free software, and you are welcome to redistribute it
 ;;;; under certain conditions; for details see COPYING.
+```
