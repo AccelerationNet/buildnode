@@ -1,17 +1,17 @@
-= Buildnode: A libary to ease interaction with cxml:dom documents and nodes =
+# Buildnode: A libary to ease interaction with cxml:dom documents and nodes
 
-== Examples ==
+## Examples 
 
 Please see the examples directory for runable examples in each XML dialect
 
-== Primary Goals ==
+## Primary Goals
  * To define packages of functions that can generate specific xml 
    dialects (see the src/tags directory and associated asd files).
 
  * To add iterate drivers for various dom interactions
  
  * To provide a reasonable base of funcationality for smoothing 
-   common dom interactions such ass
+   common dom interactions such as:
    * adding, removing, moving nodes
    * adjusting attributes and values
    * adjusting css classes
