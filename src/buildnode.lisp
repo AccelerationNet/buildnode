@@ -1,6 +1,22 @@
 (in-package :net.acceleration.buildnode)
 (cl-interpol:enable-interpol-syntax)
 
+;;;;  Common string util, stoplen from adwutils
+(defparameter +common-white-space-trimbag+
+  '(#\space #\newline #\return #\tab #\no-break_space))
+
+(defun trim-whitespace (s)
+  (string-trim +common-white-space-trimbag+ s))
+
+(defun trim-and-nullify (s)
+  "trims the whitespace from a string returning nil
+   if trimming produces an empty string or the string 'nil' "
+  (when s
+    (let ((s (trim-whitespace s)))
+      (cond ((zerop (length s)) nil)
+	    ((string-equal s "nil") nil)
+	    (T s)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar *document* ()
   "A variable that holds the current document that is being built. see
@@ -355,11 +371,13 @@
    #\space (get-attribute el :class)
    :remove-empty-subseqs t))
 
-(defmethod add-css-class ((el dom:element) new-class)
+(defmethod add-css-class ((el dom:element) new-class
+                          &aux (new-class (trim-and-nullify new-class)))
   "Adds a new css class to the element and returns the element"
-  (let ((css-classes (css-classes el)))
-    (pushnew new-class css-classes :test #'string=)
-    (set-attribute el :class (format nil "~{~a~^ ~}" css-classes)))
+  (when new-class
+    (let* ((css-classes (css-classes el)))
+      (pushnew new-class css-classes :test #'string=)
+      (set-attribute el :class (format nil "~{~a~^ ~}" css-classes))))
   el)
 
 (defmethod remove-css-class ((el dom:element) new-class)
