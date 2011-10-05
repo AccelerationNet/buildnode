@@ -19,6 +19,13 @@ Please see the examples directory for runable examples in each XML dialect
  * To provide a flexible tool for programatically generating 
    and manipulating various and sundry xml formats
 
+## Authors
+ * [Acceleration.net](http://www.acceleration.net/) [Donate](http://www.acceleration.net/programming/donate-to-acceleration-net/)
+  * [Russ Tyndall](http://russ.unwashedmeme.com/blog)
+  * [Nathan Bird](http://the.unwashedmeme.com/blog)
+  * [Ryan Davis](http://ryepup.unwashedmeme.com/blog)
+
+
 ```
 ;; Copyright (c) 2011 Russ Tyndall , Acceleration.net http://www.acceleration.net
 ;; All rights reserved.
