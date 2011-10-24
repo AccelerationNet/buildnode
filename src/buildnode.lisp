@@ -246,11 +246,18 @@
       el
       (dom:owner-document el)))
 
-(defun add-children (elem &rest kids)
+(defun add-children (elem &rest kids
+                          &aux
+                          (list? (listp elem))
+                          (doc (document-of (if list? (first elem) elem)))
+                          (elem-list (alexandria:ensure-list elem)))
   "adds some kids to an element and return that element
     alias for append-nodes"
-  (iter (for kid in (flatten-children kids (document-of elem)))
-	(dom:append-child elem kid))
+  (iter (for kid in (flatten-children kids doc))
+    (when list?
+      (setf kid (dom:clone-node kid T)))
+    (iter (for e in elem-list)
+      (dom:append-child e kid)))
   elem)
 
 (defun insert-children (elem idx &rest kids)
@@ -340,11 +347,12 @@
 
 (defun set-attribute (elem attribute value)
   "Sets an attribute and passes the elem through, returns the elem"
-  (dom:set-attribute-ns
-   elem
-   (attribute-uri attribute)
-   (prepare-attribute-name attribute)
-   (prepare-attribute-value value))
+  (iter (for e in (alexandria:ensure-list elem))
+    (dom:set-attribute-ns
+     e
+     (attribute-uri attribute)
+     (prepare-attribute-name attribute)
+     (prepare-attribute-value value)))
   elem)
 
 (defun remove-attribute (elem attribute)
@@ -353,10 +361,11 @@
   "
   ;; throws errors to remove attributes that dont exist
   ;; dont care about that
-  (let ((uri (attribute-uri attribute))
-	(name (prepare-attribute-name attribute)))
-    (when (dom:has-attribute-ns elem uri name)
-      (dom:remove-attribute-ns elem uri name)))
+  (iter (for e in (alexandria:ensure-list elem))
+    (let ((uri (attribute-uri attribute))
+          (name (prepare-attribute-name attribute)))
+      (when (dom:has-attribute-ns e uri name)
+        (dom:remove-attribute-ns e uri name))))
   elem)
 
 (defun remove-attributes (elem &rest attributes)
