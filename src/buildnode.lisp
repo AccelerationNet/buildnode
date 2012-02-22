@@ -346,13 +346,15 @@
       (apply #'dom:get-attribute-ns args))))
 
 (defun set-attribute (elem attribute value)
-  "Sets an attribute and passes the elem through, returns the elem"
-  (iter (for e in (alexandria:ensure-list elem))
-    (dom:set-attribute-ns
-     e
-     (attribute-uri attribute)
-     (prepare-attribute-name attribute)
-     (prepare-attribute-value value)))
+  "Sets an attribute and passes the elem through, returns the elem. If value is nil, removes the attribute"
+  (iter
+    (with attr = (prepare-attribute-name attribute))
+    (for e in (alexandria:ensure-list elem))
+    (if value
+        (dom:set-attribute-ns e (attribute-uri attribute)
+                              attr (prepare-attribute-value value))
+        (alexandria:when-let ((it (dom:get-attribute-node e attr)))
+          (dom:remove-attribute-node e it))))
   elem)
 
 (defun remove-attribute (elem attribute)
