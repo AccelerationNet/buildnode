@@ -107,12 +107,10 @@
 	 (apply #'add-children *workbook-node*
 		*styles-node* (list ,@chillins))))))
 
-(defun remove-style (id &aux to-remove)
-  (mapc
-   #'(lambda (kid) (dom:remove-child *styles-node* kid))
-   (dom:do-node-list (kid (dom:child-nodes *styles-node*) to-remove)
-     (when (string-equal id (get-attribute kid "ss:ID"))
-       (push kid to-remove)))))
+(defun remove-style (id)
+  (iter (for kid in (dom:child-nodes *styles-node*))
+	(when (string-equal id (get-attribute kid "ss:ID"))
+	  (dom:remove-child *styles-node* kid))))
 
 (defun add-style (id &key name parent styles)
   (remove-style id)
@@ -280,6 +278,7 @@
 		  (setf (gethash (get-attribute node "ss:Name") ht) T))))
 	     (walker (node)
 	       (doit node)
-	       (dom:map-node-list #'walker (dom:child-nodes node))))
+	       (iter (for kid in (dom:child-nodes node))
+		     (walker kid))))
       (walker node))))
 
