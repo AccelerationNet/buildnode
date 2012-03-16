@@ -108,7 +108,7 @@
 		*styles-node* (list ,@chillins))))))
 
 (defun remove-style (id)
-  (iter (for kid in (dom:child-nodes *styles-node*))
+  (iter (for kid in-dom-children *styles-node*)
 	(when (string-equal id (get-attribute kid "ss:ID"))
 	  (dom:remove-child *styles-node* kid))))
 
@@ -277,7 +277,7 @@
 		  (setf (gethash ht (get-attribute node "ss:Name")) T))))
 	     (walker (node)
 	       (doit node)
-	       (iter (for kid in (dom:child-nodes node))
+	       (iter (for kid in-dom-children node)
 		     (walker kid))))
       (walker node))))
 
