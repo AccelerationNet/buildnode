@@ -268,15 +268,16 @@
 (defun set-merge (col-cnt item)
   (set-attribute item "ss:MergeAcross" (princ-to-string col-cnt)))
 
+;;TODO: fix or delete this function
 (defun validate-excel-output (node)
   "Tries to help validate that your output will be readable by excel"
   (let ((ht (make-hash-table :test #'equal)))
     (labels ((doit (node)
 	       (cond
 		 ((string-equal "ss:Worksheet" (dom:tag-name node))
-		  (when (gethash ht (get-attribute node "ss:Name"))
+		  (when (gethash (get-attribute node "ss:Name") ht)
 		    (error "The worksheet names are not unique!"))
-		  (setf (gethash ht (get-attribute node "ss:Name")) T))))
+		  (setf (gethash (get-attribute node "ss:Name") ht) T))))
 	     (walker (node)
 	       (doit node)
 	       (dom:map-node-list #'walker (dom:child-nodes node))))
