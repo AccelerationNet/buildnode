@@ -52,6 +52,7 @@
    #:def-tag-node
    #:remove-all-children
    #:with-html-snippet
-   #:with-xhtml-snippet))
+   #:with-xhtml-snippet
+   #:write-doc-to-file))
 
 
