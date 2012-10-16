@@ -45,18 +45,21 @@
 
 (defun run-tests (&key suites tests (use-debugger T))
   (let* ((*package* (find-package :buildnode-test))
+         (lisp-unit:*print-failures* t)
+         (lisp-unit:*print-errors* t)
 	 (lisp-unit::*use-debugger* use-debugger)
 	 (tests (append (alexandria:ensure-list tests)
 			(iter (for suite in (alexandria:ensure-list suites))
-			      (appending (get suite :tests)))))
-	 (out (with-output-to-string (*standard-output*)
-		(lisp-unit::run-test-thunks
-		 (lisp-unit::get-test-thunks
-		  (if (null tests)
-		      (get-tests *package*)
-		      tests))))))
-    
+                          (appending (get suite :tests)))))
+         (actual-std-out *standard-output*)
+	 (out (with-output-to-string (s)
+		(let ((*standard-output*
+                        (make-broadcast-stream s actual-std-out)))
+                  (if (null tests)
+                      (lisp-unit::%run-all-thunks)
+                      (lisp-unit::%run-thunks tests))))))
     (format *standard-output*
-	    "~&~% ** TEST RESULTS: Buildnode ** ~%-----------~%~A~%------ END TEST RESULTS ------~%"
-	    out)))
+     "~&~% ** TEST RESULTS: BUILDNODE ** ~%-----------~%~A~%------ END TEST RESULTS ------~%"
+     out)))
+
 
