@@ -64,9 +64,8 @@
    repeated calls to the continuation each return the next node
    and the next walker continuation
   "
-  (etypecase tree
+  (typecase tree
     (null nil)
-    (string tree)
     ((or vector list)
        (when (plusp (length tree))
 	 (multiple-value-bind (item cont) (%walk-dom-cont (elt tree 0) )
