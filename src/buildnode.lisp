@@ -339,11 +339,12 @@
   "Gets the value of an attribute on an element
    if the attribute does not exist return nil
   "
-  (let ((args (list elem
-		    (attribute-uri attribute)
-		    (prepare-attribute-name attribute))))
-    (when (apply #'dom:has-attribute-ns args)
-      (apply #'dom:get-attribute-ns args))))
+  (when elem
+    (let ((args (list elem
+                      (attribute-uri attribute)
+                      (prepare-attribute-name attribute))))
+      (when (apply #'dom:has-attribute-ns args)
+        (apply #'dom:get-attribute-ns args)))))
 
 (defun set-attribute (elem attribute value)
   "Sets an attribute and passes the elem through, returns the elem. If value is nil, removes the attribute"
