@@ -335,7 +335,7 @@
 	   ((0 1) nil)
 	   (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))))
 
-(defun get-attribute (elem attribute)
+(defmethod get-attribute (elem attribute)
   "Gets the value of an attribute on an element
    if the attribute does not exist return nil
   "
@@ -346,7 +346,7 @@
       (when (apply #'dom:has-attribute-ns args)
         (apply #'dom:get-attribute-ns args)))))
 
-(defun set-attribute (elem attribute value)
+(defmethod set-attribute (elem attribute value)
   "Sets an attribute and passes the elem through, returns the elem. If value is nil, removes the attribute"
   (iter
     (with attr = (prepare-attribute-name attribute))
@@ -358,7 +358,7 @@
           (dom:remove-attribute-node e it))))
   elem)
 
-(defun remove-attribute (elem attribute)
+(defmethod remove-attribute (elem attribute)
   "removes an attribute and passes the elem through, returns the elem
    If the attribute does not exist, simply skip it
   "
