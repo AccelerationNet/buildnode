@@ -83,5 +83,5 @@ Pass in #'xul:script or #'xhtml:script as the first argument"
   (funcall fn-script
 	   (list "type" "text/javascript")
 	   (if buildnode:*cdata-script-blocks*
-	       (dom:create-cdata-section buildnode:*document* #?"\r\n${js}\r\n")
-	       (dom:create-text-node buildnode:*document* #?"\r\n${js}\r\n"))))
+	       (dom:create-cdata-section buildnode:*document* js)
+	       (dom:create-text-node buildnode:*document* js))))
