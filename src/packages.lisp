@@ -22,8 +22,6 @@
    #:write-document
    #:inner-html
    #:with-xul-document
-   #:with-html-fragment
-   #:with-html-fragment-to-string
    #:with-document
    #:with-document-to-file
    #:with-xhtml-document
