@@ -568,7 +568,20 @@ This sets the doctype to be xhtml transitional."
     (write-doc-to-file (with-html-document ,@body)
 		      ,filename)))
 
+(defmacro with-html-fragment (() &body body)
+  `(let ((*namespace-prefix-map* nil)
+	 (*html-compatibility-mode* T)
+	 (*document* (dom:create-document
+		      'rune-dom:implementation
+		      nil nil nil))
+	 (*cdata-script-blocks* nil))
+    (declare (special *document*))
+    (append-nodes *document* ,@body)
+    *document*))
 
+(defmacro with-html-fragment-to-string (() &body body)
+  `(let ((*html-compatibility-mode* t))
+    (document-to-string (with-html-fragment () ,@body))))
 
 (defmacro with-html-document (&body body)
   "(with-html-document ( a bunch of child nodes of the document )) --> cxml:dom document
