@@ -29,7 +29,9 @@
 		     :cl-interpol
 		     ;; TODO:
 		     ;; for html-generation - probably not a dependancy of the whole library
-		     :closure-html 
+		     :closure-html
+                     :cl-ppcre
+                     :symbol-munger
 		     ))
 
 (defsystem :buildnode-test

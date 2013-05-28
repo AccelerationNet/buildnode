@@ -29,6 +29,9 @@
    #:with-xhtml-document-to-file
    #:with-html-document
    #:with-html-document-to-file
+   #:with-html5-document
+   #:with-html5-document-to-file
+   #:with-html5-document-to-string
    #:append-nodes
    #:insert-nodes
    #:add-children

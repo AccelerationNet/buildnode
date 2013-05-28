@@ -626,6 +626,12 @@ This sets the doctype to be html 4.01 strict."
     (append-nodes *document* ,@body)
     *document*))
 
+(defmacro with-html5-document-to-file ((filename) &body body)
+  "Creates an html-document, writes out the results to filename"
+  `(let ((*html-compatibility-mode* T))
+    (write-doc-to-file (with-html5-document ,@body)
+     ,filename)))
+
 (defmacro with-html5-document (&body body)
   "(with-html5-document ( a bunch of child nodes of the document )) --> cxml:dom document
 Creates an environment in which the special variable *document* is available
