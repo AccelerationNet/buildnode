@@ -451,11 +451,46 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
    document
    :include-doctype :canonical-notations))
 
+;; HACK to make CHTML output html5 style doctypes
+(defclass html5-capable-character-output-sink (chtml::sink)
+  ())
+
+(defun html5-capable-character-output-sink (stream &key canonical indentation encoding)
+  (declare (ignore canonical indentation))
+  (let ((encoding (or encoding "UTF-8"))
+        (ystream #+rune-is-character
+                 (chtml::make-character-stream-ystream stream)
+                 #-rune-is-character
+                 (chtml::make-character-stream-ystream/utf8 stream)
+                 ))
+    (setf (chtml::ystream-encoding ystream)
+          (runes:find-output-encoding encoding))
+    (make-instance 'html5-capable-character-output-sink
+                   :ystream ystream
+                   :encoding encoding)))
+
+(defmethod hax:start-document ((sink html5-capable-character-output-sink) name public-id system-id)
+  (closure-html::sink-write-rod #"<!DOCTYPE " sink)
+  (closure-html::sink-write-rod name sink)
+  (cond
+    ((plusp (length public-id))
+     (closure-html::sink-write-rod #" PUBLIC \"" sink)
+     (closure-html::unparse-string public-id sink)
+     (closure-html::sink-write-rod #"\" \"" sink)
+     (closure-html::unparse-string system-id sink)
+     (closure-html::sink-write-rod #"\"" sink))
+    ((plusp (length system-id))
+     (closure-html::sink-write-rod #" SYSTEM \"" sink)
+     (closure-html::unparse-string system-id sink)
+     (closure-html::sink-write-rod #"\"" sink)))
+  (closure-html::sink-write-rod #">" sink)
+  (closure-html::sink-write-rune #/U+000A sink))
+
 (defun make-output-sink (stream &key canonical indentation (char-p T))
   (apply
    (cond
      ((and char-p *html-compatibility-mode*)
-      #'chtml:make-character-stream-sink)
+      #'html5-capable-character-output-sink)
      ((and (not char-p) *html-compatibility-mode*)
       #'chtml:make-octet-stream-sink)
      ((and char-p (not *html-compatibility-mode*))
@@ -574,7 +609,7 @@ Creates an environment in which the special variable *document* is available
 a document is necessary to create dom nodes and the document the nodes end up on
 must be the document on which they were created.  At the end of the form, the
 complete document is returned.
-This sets the doctype to be xhtml transitional."
+This sets the doctype to be html 4.01 strict."
   `(let ((*namespace-prefix-map* nil)
 	 (*document* (dom:create-document
 		      'rune-dom:implementation
@@ -591,10 +626,38 @@ This sets the doctype to be xhtml transitional."
     (append-nodes *document* ,@body)
     *document*))
 
+(defmacro with-html5-document (&body body)
+  "(with-html5-document ( a bunch of child nodes of the document )) --> cxml:dom document
+Creates an environment in which the special variable *document* is available
+a document is necessary to create dom nodes and the document the nodes end up on
+must be the document on which they were created.  At the end of the form, the
+complete document is returned.
+This sets the doctype to be html5 compatible <!DOCTYPE html>."
+  `(let ((*namespace-prefix-map* nil)
+	 (*document* (dom:create-document
+		      'rune-dom:implementation
+		      nil nil
+		      (dom:create-document-type
+		       'rune-dom:implementation
+		       "html"
+		       nil
+		       nil)
+		      ))
+	 (*html-compatibility-mode* T)
+	 (*cdata-script-blocks* nil))
+    (declare (special *document*))
+    (append-nodes *document* ,@body)
+    *document*))
+
 (defmacro with-html-document-to-string (() &body body)
   "trys to output a string containing all "
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html-document ,@body))))
+
+(defmacro with-html5-document-to-string (() &body body)
+  "trys to output a string containing all "
+  `(let ((*html-compatibility-mode* T))
+     (document-to-string (with-html5-document ,@body))))
 
 (defmethod remove-all-children ((it dom:element))
   ;; should be a touch faster than removing one at a time
