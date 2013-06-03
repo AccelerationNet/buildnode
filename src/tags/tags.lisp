@@ -21,32 +21,27 @@
 (when (boundp 'swank::*application-hints-tables*)
   (pushnew *tags-indentation-hints* swank::*application-hints-tables*))
 
-;; TODO, so hacky, but I had to make it work, please fix this future me I am
-;; guessing that originally the evals everywhere were to make sure that
-;; everything is evaled once
-(defun %do-def-tag-node (package name namespace docstring &optional fn-name)
-  (let* ((evaled-name (eval name))
-	 (name (or fn-name
-                   (symbol-munger:english->lisp-symbol (eval package))))
-	 (tagname evaled-name))
-    (eval
-     `(progn
-       (CL:defun ,name (&optional attributes &rest children )
-         ,@(when docstring (list docstring))
-         (declare (special *document*))
-         (create-complete-element *document*
-                                  ,namespace
-                                  ,tagname
-                                  attributes
-                                  children))
-       (setf (gethash ',name *tags-indentation-hints*) 1)
-       ))))
+(defun do-def-tag-node (package name namespace docstring &optional fn-name )
+  (let* ((tagname name)
+         (name (or fn-name
+                   (symbol-munger:english->lisp-symbol name package))))
+    (setf (gethash name *tags-indentation-hints*) 1)
+    (compile
+     name
+     `(lambda (&optional attributes &rest children )
+       ,@(when docstring (list docstring))
+       (declare (special *document*))
+       (create-complete-element *document*
+        ,namespace
+        ,tagname
+        attributes
+        children)))))
 
 (defmacro def-tag-node (package name  namespace docstring &optional fn-name )
   "Defines a tag function in the package with the name and prefix specified
 for example: :net.acceleration.xul \"box\" \"xul\" will create a function #'box in the :net.acceleration.xul
 lisp namespace. When this function is called it will create a 'xul:box' node in the xmlns provided in the namespace param"
-  `(%do-def-tag-node ,package ,name ,namespace ,docstring ,fn-name))
+  `(do-def-tag-node ,package ,name ,namespace ,docstring ,fn-name))
 
 (defun ?xml-stylesheet (href &optional (type "text/css" ))
   "adds an xml-stylesheet processing instruction to the cxml:dom document bound to the
