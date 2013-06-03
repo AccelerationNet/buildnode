@@ -151,11 +151,8 @@
 
 (defparameter *xhtml1-transitional-extid*
   (let ((xhtml1-transitional.dtd
-	 (make-pathname :directory (append
-				    (pathname-directory (truename (asdf:system-definition-pathname :buildnode)))
-				    '("src"))
-			:name "xhtml1-transitional"
-			:type "dtd")))
+          (asdf:system-relative-pathname
+           :buildnode "src/xhtml1-transitional.dtd")))
    (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
 
