@@ -25,7 +25,6 @@
   (let* ((tagname name)
          (name (or fn-name
                    (symbol-munger:english->lisp-symbol name package))))
-    (setf (gethash name *tags-indentation-hints*) 1)
     (compile
      name
      `(lambda (&optional attributes &rest children )
@@ -35,7 +34,8 @@
         ,namespace
         ,tagname
         attributes
-        children)))))
+        children)))
+    (ignore-errors (setf (gethash name *tags-indentation-hints*) 1))))
 
 (defmacro def-tag-node (package name  namespace docstring &optional fn-name )
   "Defines a tag function in the package with the name and prefix specified
