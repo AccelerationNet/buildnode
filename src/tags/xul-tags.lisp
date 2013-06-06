@@ -28,14 +28,13 @@
 	       #:treecols #:treeitem #:treerow #:treeseparator #:triple #:vbox
 	       #:window #:wizard #:wizardpage))))
 
-(in-package :net.acceleration.xul)
-(pushnew :buildnode-xul *features* :test #'eql)
+(pushnew :buildnode-xul cl:*features* :test #'eql)
 
 (defparameter +xul-namespace+ "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul")
 (defmacro def-xul-element (name doc &rest attributes)
   "defines a function that will build an xul node (on *document*) when called"
   (declare (ignore attributes))
-  `(def-tag-node :net.acceleration.xul ,name  +xul-namespace+ ,doc))
+  `(buildnode::do-def-tag-node :net.acceleration.xul ,name +xul-namespace+ ,doc))
 
 ;;;THIS DOCUMENT CONTAINS THE GENERATED DEFINITIONS OF ALL THE XUL elements pulled from XULPlanet
 
