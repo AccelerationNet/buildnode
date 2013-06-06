@@ -10,23 +10,21 @@
 
 (in-package :net.acceleration.buildnode.kml)
 
-(defparameter +kmlns+ "http://www.opengis.net/kml/2.2")
+(buildnode::eval-always
+  (defparameter +kmlns+ "http://www.opengis.net/kml/2.2"))
 
-(defmacro kml-tags (&rest tags)
-  `(progn
-     ,@(iter (for tag-form in tags)
-	     (for tag = (if (listp tag-form)
-			    (first tag-form)
-			    tag-form))
-	     (for s = (if (listp tag-form)
-			  (second tag-form)
-			  (intern (string-upcase tag) :kml)))
-	     (collect
-		 `(def-tag-node :kml ,tag +kmlns+
-		    ,(format nil "http://code.google.com/apis/kml/documentation/kmlreference.html#~A"
-			     tag)
-		    ,s))
-	     (collect `(export ',s :kml)))))
+(defun kml-tags (&rest tags)
+  (iter (for tag-form in tags)
+    (for tag = (if (listp tag-form)
+                   (first tag-form)
+                   tag-form))
+    (for s = (if (listp tag-form)
+                 (second tag-form)
+                 (intern (string-upcase tag) :kml)))
+    (buildnode::do-def-tag-node :kml tag +kmlns+
+      (format nil "http://code.google.com/apis/kml/documentation/kmlreference.html#~A"
+              tag))
+    (export s :kml)))
 
 (buildnode::eval-always
  (kml-tags "AbstractView" "address" "AddressDetails" "Alias" "altitude"
@@ -48,7 +46,7 @@
 	  "Polygon" "PolyStyle" "range" "refreshInterval" "refreshMode" "refreshVisibility"
 	  "Region" "ResourceMap" "rightFov" "roll" "rotation" "rotationXY"
 	  "Schema" "SchemaData" "ScreenOverlay" "screenXY" "shape" "simpleData"
-	  ("Scale" |Scale|) ("scale" |scale|)
+	  '("Scale" |Scale|) '("scale" |scale|)
 	  "SimpleField" "size" "Snippet" "south" "state" "Style" "StyleMap" "StyleSelector"
 	  "styleUrl" "targetHref" "tessellate" "text" "textcolor" "tileSize" "tilt"
 	  "TimePrimitive" "TimeSpan" "TimeStamp" "topFov" "Update" "Url" "value"
