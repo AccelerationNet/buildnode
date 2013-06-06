@@ -10,8 +10,7 @@
 
 (in-package :net.acceleration.buildnode.kml)
 
-(buildnode::eval-always
-  (defparameter +kmlns+ "http://www.opengis.net/kml/2.2"))
+(defparameter +kmlns+ "http://www.opengis.net/kml/2.2")
 
 (defun kml-tags (&rest tags)
   (iter (for tag-form in tags)
@@ -26,8 +25,7 @@
               tag))
     (export s :kml)))
 
-(buildnode::eval-always
- (kml-tags "AbstractView" "address" "AddressDetails" "Alias" "altitude"
+(kml-tags "AbstractView" "address" "AddressDetails" "Alias" "altitude"
 	  "altitudeMode" "BalloonStyle" "begin" "bgColor" "bottomFov" "Camera"
 	  "Change" "color" "colorMode" "ColorStyle" "Container" "cookie" "coordinates"
 	  "Create" "Data" "Delete" "description" "displayMode" "displayName" "Document"
@@ -53,7 +51,7 @@
 	  "viewBoundScale" "viewFormat" "viewRefreshMode" "viewRefreshTime" "ViewVolume"
 	  "visibility"
 	  ;; "gx:Wait"
-	  "west" "when" "width"))
+	  "west" "when" "width")
 
 (defmacro with-kml-document (&body children)
   `(let ((*document* (dom:create-document
