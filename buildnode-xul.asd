@@ -8,13 +8,12 @@
 (in-package :net.acceleration.buildnode.system)
 
 (defsystem :buildnode-xul
-  :description "Tool for building up an xml dom of an excel spreadsheet nicely."
+  :description "Tool for building up an xml dom of a Mozilla xul document"
   :components
   ((:module :src
 	    :serial T
 	    :components
-	    ((:file "js-packager")
-	     (:module :tags
+	    ((:module :tags
 		      :serial T
 		      :components
 		      ((:file "xul-tags"))))))
