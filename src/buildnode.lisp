@@ -677,7 +677,7 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
       `(let  ((,s-name ,stream)) ,content)
       `(with-output-to-string (,s-name) ,content)))
 
-(defmacro buffer-xml-output ((&optional stream) &body body)
+(defmacro buffer-xml-output ((&optional stream sink) &body body)
   "buffers out sax:events to a sting
 
    xml parameters like <param:foo param:type=\"string\"><div>bar</div></param:foo>
@@ -685,7 +685,7 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
   "
   (alexandria:with-unique-names (out-str)
     (let ((content
-            `(let ((cxml::*sink* (cxml::make-character-stream-sink ,out-str))
+            `(let ((cxml::*sink* (or ,sink (make-character-stream-sink ,out-str)))
                    (cxml::*current-element* nil)
                    (cxml::*unparse-namespace-bindings* cxml::*initial-namespace-bindings*)
                    (cxml::*current-namespace-bindings* nil))
@@ -695,7 +695,7 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
               (sax:end-document cxml::*sink*))))
       (%enstream stream out-str content))))
 
-(defmacro %with-snippet ((type &optional stream) &body body)
+(defmacro %with-snippet ((type &optional stream sink) &body body)
   "helper to define with-html-snippet and with-xhtml-snippet"
   (assert (member type '(with-html-document with-xhtml-document)))
   (alexandria:with-unique-names (out-str)
@@ -704,15 +704,15 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
                 (,type
                   (let ((content (flatten-children (progn ,@body))))
                     (iter (for n in content)
-                      (buffer-xml-output (,out-str) (buildnode::dom-walk cxml::*sink* n))))
+                      (buffer-xml-output (,out-str ,sink) (buildnode::dom-walk cxml::*sink* n))))
                   nil))))
       (%enstream stream out-str body)
       )))
 
-(defmacro with-html-snippet ((&optional stream) &body body)
+(defmacro with-html-snippet ((&optional stream sink) &body body)
   "builds a little piece of html-dom and renders that to a string / stream"
-  `(%with-snippet (with-html-document ,stream) ,@body))
+  `(%with-snippet (with-html-document ,stream ,sink) ,@body))
 
-(defmacro with-xhtml-snippet ((&optional stream) &body body)
+(defmacro with-xhtml-snippet ((&optional stream sink) &body body)
   "builds a little piece of xhtml-dom and renders that to a string / stream"
-  `(%with-snippet (with-xhtml-document ,stream) ,@body))
+  `(%with-snippet (with-xhtml-document ,stream ,sink) ,@body))
