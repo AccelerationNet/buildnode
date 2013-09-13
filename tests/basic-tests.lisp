@@ -284,3 +284,9 @@
     
     ))
 
+(buildnode-test test-join-text (utils)
+  (let* ((doc (with-xhtml-document
+		(xhtml:span () "test")))
+	 (tree `("3" ("2" ("1" ,doc) "1") "2" "3")))
+    (assert-equal "3 2 1 test 1 2 3" (join-text tree :delimiter " "))))
+

@@ -27,6 +27,7 @@
                :iterate :flexi-streams :split-sequence
 		     :swank ;; for setting tag-indentation
 		     :cl-interpol
+                     :collectors
 		     ;; TODO:
 		     ;; for html-generation - probably not a dependancy of the whole library
 		     :closure-html

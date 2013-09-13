@@ -7,6 +7,7 @@
   (:export
    #:dom-walk
    #:text-of-dom-snippet
+   #:join-text
    #:set-attributes
    #:push-new-attribute
    #:push-new-attributes

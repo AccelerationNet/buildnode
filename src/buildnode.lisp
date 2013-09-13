@@ -174,6 +174,21 @@
 	(with-output-to-string (stream)
 	  (body stream)))))
 
+(defun join-text (text &key delimiter)
+  "Like joins trees of lists strings and dom nodes into a single string possibly with a delimiter
+   ignores nil and empty string"
+  (collectors:with-string-builder-output
+      (%collect :delimiter delimiter)
+    (labels ((collect (s)
+               (typecase s
+                 (null)
+                 (list (collector s))
+                 (string (%collect s))
+                 (dom:node (%collect (buildnode:text-of-dom-snippet s)))))
+             (collector (items)
+               (mapcar #'collect (alexandria:ensure-list items))))
+      (collector text))))
+
 (defclass scoped-dom-builder (rune-dom::dom-builder)
   ()
   (:documentation
