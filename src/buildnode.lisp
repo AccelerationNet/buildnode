@@ -391,11 +391,12 @@
 	(remove-attribute elem attr))
   elem)
 
-(defmethod css-classes ((el dom:element))
+(defmethod css-classes ( o )
   "Returns a list of css classes (space separated names in the 'class' attribute)"
-  (split-sequence:split-sequence
-   #\space (get-attribute el :class)
-   :remove-empty-subseqs t))
+  (etypecase o
+    (null)
+    (string (split-sequence:split-sequence #\space o :remove-empty-subseqs t))
+    (dom:element (css-classes (get-attribute o :class)))))
 
 (defmethod add-css-class ((el dom:element) new-class
                           &aux (new-class (trim-and-nullify new-class)))
