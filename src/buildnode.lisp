@@ -183,7 +183,7 @@
                (typecase s
                  (null)
                  (list (collector s))
-                 (string (%collect s))
+                 ((or string number symbol) (%collect s))
                  (dom:node (%collect (buildnode:text-of-dom-snippet s)))))
              (collector (items)
                (mapcar #'collect (alexandria:ensure-list items))))
@@ -402,21 +402,31 @@
                           &aux (new-class (trim-and-nullify new-class)))
   "Adds a new css class to the element and returns the element"
   (when new-class
-    (let* ((css-classes (css-classes el)))
-      (pushnew new-class css-classes :test #'string=)
-      (set-attribute el :class (format nil "~{~a~^ ~}" css-classes))))
+    (let* ((class-string (get-attribute el :class))
+           (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*"))
+      (unless (cl-ppcre:scan regex class-string)
+        (set-attribute el :class (format nil "~a ~a" class-string new-class)))))
   el)
+
+(defmethod add-css-classes ((comp T) &rest classes)
+  (declare (dynamic-extent classes))
+  (iter (for class in classes) (add-css-class comp class))
+  comp)
 
 (defmethod remove-css-class ((el dom:element) new-class)
   "Removes a css class from the elements and returns the element"
-  (let ((css-classes (remove
-		      new-class
-		      (css-classes el)
-		      :test #'string=)))
-    (if css-classes
-	(set-attribute el :class (format nil "~{~a~^ ~}" css-classes))
+  (let* ((class-string (get-attribute el :class))
+         (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*")
+         (new-class-string (trim-and-nullify (cl-ppcre:regex-replace-all regex class-string " "))))
+    (if new-class-string
+	(set-attribute el :class new-class-string)
 	(remove-attribute el :class))
     el))
+
+(defmethod remove-css-classes ((comp T) &rest classes)
+  (declare (dynamic-extent classes))
+  (iter (for class in classes) (remove-css-class comp class))
+  comp)
 
 (defun push-new-attribute (elem attribute value)
   "if the attribute is not on the element then put it there with the specified value,
