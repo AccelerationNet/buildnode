@@ -214,7 +214,7 @@
   ;; detect when soemthing changes output
   (assert-equalp
    "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">
-<div><span class=\"test2 test\" test=\"1\" title=\"test\">42.02</span>this is a test<br></div>"
+<div><span class=\"test test2\" test=\"1\" title=\"test\">42.02</span>this is a test<br></div>"
    (with-html-document-to-string ()
      (xhtml:div ()
        (add-css-class
