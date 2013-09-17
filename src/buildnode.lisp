@@ -405,7 +405,7 @@
     (let* ((class-string (get-attribute el :class))
            (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*"))
       (unless (cl-ppcre:scan regex class-string)
-        (set-attribute el :class (format nil "~a ~a" class-string new-class)))))
+        (set-attribute el :class (format nil "~@[~a ~]~a" class-string new-class)))))
   el)
 
 (defmethod add-css-classes ((comp T) &rest classes)
