@@ -699,9 +699,10 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
 
 (defun %enstream (stream s-name content)
   "Helper to bind a stream or with-output-to-string it, based on whether "
-  (if stream
-      `(let  ((,s-name ,stream)) ,content)
-      `(with-output-to-string (,s-name) ,content)))
+  `(let ((,s-name ,stream))
+    (if ,s-name
+        ,content
+        (with-output-to-string (,s-name) ,content))))
 
 (defmacro buffer-xml-output ((&optional stream sink) &body body)
   "buffers out sax:events to a sting
