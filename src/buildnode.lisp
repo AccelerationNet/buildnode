@@ -697,12 +697,27 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
   (setf (slot-value it 'rune-dom::children) (rune-dom::make-node-list))
   it)
 
-(defun %enstream (stream s-name content)
-  "Helper to bind a stream or with-output-to-string it, based on whether "
-  `(let ((,s-name ,stream))
-    (if ,s-name
-        ,content
-        (with-output-to-string (,s-name) ,content))))
+(defvar *snippet-output-stream* nil)
+
+(defun %enstream (stream content-fn)
+  (let* ((old-out-stream *snippet-output-stream*)
+         (*snippet-output-stream* (or stream (make-string-output-stream )))
+         (result (multiple-value-list (funcall content-fn))))
+    (cond
+      (stream (apply #'values result))
+      (old-out-stream
+       (write-string (get-output-stream-string *snippet-output-stream*) old-out-stream))
+      (t (get-output-stream-string *snippet-output-stream*)))))
+
+(defun %buffer-xml-output (stream sink body-fn)
+  (let ((cxml::*sink* (or sink (make-character-stream-sink stream)))
+        (cxml::*current-element* nil)
+        (cxml::*unparse-namespace-bindings* cxml::*initial-namespace-bindings*)
+        (cxml::*current-namespace-bindings* nil))
+    (setf (cxml::sink-omit-xml-declaration-p cxml::*sink*) T)
+    (sax:start-document cxml::*sink*)
+    (funcall body-fn)
+    (sax:end-document cxml::*sink*)))
 
 (defmacro buffer-xml-output ((&optional stream sink) &body body)
   "buffers out sax:events to a sting
@@ -710,31 +725,26 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
    xml parameters like <param:foo param:type=\"string\"><div>bar</div></param:foo>
        are requested to be strings (presumably for string processing)
   "
-  (alexandria:with-unique-names (out-str)
-    (let ((content
-            `(let ((cxml::*sink* (or ,sink (make-character-stream-sink ,out-str)))
-                   (cxml::*current-element* nil)
-                   (cxml::*unparse-namespace-bindings* cxml::*initial-namespace-bindings*)
-                   (cxml::*current-namespace-bindings* nil))
-              (setf (cxml::sink-omit-xml-declaration-p cxml::*sink*) T)
-              (sax:start-document cxml::*sink*)
-              ,@body
-              (sax:end-document cxml::*sink*))))
-      (%enstream stream out-str content))))
+  (let ((content `(lambda () (%buffer-xml-output *snippet-output-stream* ,sink (lambda () ,@body)))))
+    `(%enstream ,stream ,content)))
 
 (defmacro %with-snippet ((type &optional stream sink) &body body)
   "helper to define with-html-snippet and with-xhtml-snippet"
   (assert (member type '(with-html-document with-xhtml-document)))
-  (alexandria:with-unique-names (out-str)
-    (let ((body
-              `(let ((*html-compatibility-mode* ,(eql type 'with-html-document)))
-                (,type
-                  (let ((content (flatten-children (progn ,@body))))
-                    (iter (for n in content)
-                      (buffer-xml-output (,out-str ,sink) (buildnode::dom-walk cxml::*sink* n))))
-                  nil))))
-      (%enstream stream out-str body)
-      )))
+  (alexandria:with-unique-names (result)
+  `(let ((*html-compatibility-mode* ,(eql type 'with-html-document))
+         ,result)
+    (,type
+     (progn
+       (setf
+        ,result
+        (multiple-value-list
+         (buffer-xml-output (,stream ,sink)
+           (let ((content (flatten-children (progn ,@body))))
+             (iter (for n in content)
+               (buildnode::dom-walk cxml::*sink* n))))))
+       nil))
+    (apply #'values ,result))))
 
 (defmacro with-html-snippet ((&optional stream sink) &body body)
   "builds a little piece of html-dom and renders that to a string / stream"
