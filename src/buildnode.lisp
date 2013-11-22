@@ -198,15 +198,13 @@
   (rune-dom::document db))
 
 (defmethod sax:unescaped ((builder scoped-dom-builder) data)
-  ;; TODO:  Is this the correct answer?
-  ;; I have no idea how to handle
-  ;; unescaped content in a dom (which is probably why this was not
-  ;; implemented on dom-builder)
-  (let ((content (dom:child-nodes
-		  (inner-html data "div" "http://www.w3.org/1999/xhtml" nil nil))))
-    (buildnode:add-children
-     (first (rune-dom::element-stack builder))
-     content))
+  ;; I have no idea how to handle unescaped content in a dom (which is
+  ;; probably why this was not implemented on dom-builder)
+  ;; we will just make a text node of it for now :/
+  ;; other thoughts would be a processing instruction or something
+  (buildnode:add-children
+   (first (rune-dom::element-stack builder))
+   (dom:create-text-node *document* data))
   (values))
 
 ;;;; I think we might be able to use this as a dom-builder for a more efficient
@@ -228,11 +226,11 @@
 (defmethod sax:characters ((handler html-whitespace-remover) data)
   (unless (every #'cxml::white-space-rune-p (cxml::rod data)) (call-next-method)))
 
-(defun inner-html (string &optional
-		   (tag "div")
-		   (namespace-uri "http://www.w3.org/1999/xhtml")
-		   (dtd nil)
-		   (remove-whitespace? t))
+(defun insert-text-content (string &key
+                                   (tag "div")
+                                   (namespace-uri "http://www.w3.org/1999/xhtml")
+                                   (dtd nil)
+                                   (remove-whitespace? t))
   "Parses a string containing a well formed html snippet
    into dom nodes inside of a newly created node.
 
@@ -253,6 +251,14 @@
 		      (make-scoped-dom-builder node))
 		  :dtd dtd)
       (dom:first-child node))))
+
+(defun inner-html (string &optional (tag "div")
+                          (namespace-uri "http://www.w3.org/1999/xhtml")
+                          (dtd nil)
+                          (remove-whitespace? t))
+  (insert-text-content
+   string :tag tag :namespace-uri namespace-uri :dtd dtd
+          :remove-whitespace? remove-whitespace?))
 
 (defun document-of (el)
   "Returns the document of a given node (or the document if passed in)"

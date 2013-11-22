@@ -96,8 +96,12 @@
   (sax:characters handler (dom:data n))
   (sax:end-cdata handler))
 
-(defmethod dom-walk (handler (n dom:text)  &key &allow-other-keys)
-  (sax:characters handler (dom:data n)))
+(defmethod dom-walk (handler (n dom:text) &key &allow-other-keys
+                     &aux (parent (dom:tag-name (dom:parent-node n))) )
+  (if (and *html-compatibility-mode*
+           (member parent '("script") :test #'string-equal))
+      (sax:unescaped handler (dom:data n))
+      (sax:characters handler (dom:data n))))
 
 (defmethod dom-walk (handler (n dom:comment)  &key &allow-other-keys)
   (sax:comment handler (dom:data n)))
