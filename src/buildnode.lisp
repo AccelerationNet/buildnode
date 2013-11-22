@@ -226,11 +226,11 @@
 (defmethod sax:characters ((handler html-whitespace-remover) data)
   (unless (every #'cxml::white-space-rune-p (cxml::rod data)) (call-next-method)))
 
-(defun insert-text-content (string &key
-                                   (tag "div")
-                                   (namespace-uri "http://www.w3.org/1999/xhtml")
-                                   (dtd nil)
-                                   (remove-whitespace? t))
+(defun insert-html-string (string &key
+                                  (tag "div")
+                                  (namespace-uri "http://www.w3.org/1999/xhtml")
+                                  (dtd nil)
+                                  (remove-whitespace? t))
   "Parses a string containing a well formed html snippet
    into dom nodes inside of a newly created node.
 
@@ -256,7 +256,7 @@
                           (namespace-uri "http://www.w3.org/1999/xhtml")
                           (dtd nil)
                           (remove-whitespace? t))
-  (insert-text-content
+  (insert-html-string
    string :tag tag :namespace-uri namespace-uri :dtd dtd
           :remove-whitespace? remove-whitespace?))
 

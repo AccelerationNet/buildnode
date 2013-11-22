@@ -24,6 +24,7 @@
    #:create-complete-element
    #:write-document
    #:inner-html
+   #:insert-html-string
    #:with-xul-document
    #:with-document
    #:with-document-to-file
