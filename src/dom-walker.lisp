@@ -97,7 +97,9 @@
   (sax:end-cdata handler))
 
 (defmethod dom-walk (handler (n dom:text) &key &allow-other-keys
-                     &aux (parent (dom:tag-name (dom:parent-node n))) )
+                     &aux
+                     (pn (dom:parent-node n))
+                     (parent (when pn (dom:tag-name pn))) )
   (if (and *html-compatibility-mode*
            (member parent '("script") :test #'string-equal))
       (sax:unescaped handler (dom:data n))
