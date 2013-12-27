@@ -1,8 +1,10 @@
 
 (defpackage :net.acceleration.buildnode-test
     (:nicknames #:buildnode-test)
-  (:use :common-lisp :cxml :iterate :lisp-unit :buildnode)
+  (:use :common-lisp :cxml :iterate :lisp-unit2-asserts :buildnode)
   (:shadow :cdata :run-tests))
+
+(defpackage :net.acceleration.buildnode-test-objects)
 
 (in-package :buildnode-test)
 
@@ -29,37 +31,27 @@
 	  (while more?))))
 
 (defmacro buildnode-test (name (&rest args) &body body)
-  (iter (for tag in args)
-	(setf (get tag :tests)
-	      (union (alexandria:ensure-list (get tag :tests))
-		     (list name))))
-  `(lisp-unit:define-test ,name 
-     (progn
-       ,@body
-       )))
+  `(lisp-unit2:define-test ,name (:tags '(, args)
+                                 :package :net.acceleration.buildnode-test-objects)
+    ,@body
+    ))
+
+(defun with-document-context (body-fn)
+  (buildnode:with-html-document (progn (funcall body-fn) nil)))
 
 (defmacro buildnode-w/doc-test (name (&rest args) &body body)
-  `(buildnode-test ,name (,@args)
-     (buildnode:with-html-document (progn ,@body nil))))
+  `(lisp-unit2:define-test ,name (:tags '(, args)
+                                 :context-provider #'with-document-context
+                                 :package :net.acceleration.buildnode-test-objects)
+    ,@body
+    ))
 
 
-(defun run-tests (&key suites tests (use-debugger T))
-  (let* ((*package* (find-package :buildnode-test))
-         (lisp-unit:*print-failures* t)
-         (lisp-unit:*print-errors* t)
-	 (lisp-unit::*use-debugger* use-debugger)
-	 (tests (append (alexandria:ensure-list tests)
-			(iter (for suite in (alexandria:ensure-list suites))
-                          (appending (get suite :tests)))))
-         (actual-std-out *standard-output*)
-	 (out (with-output-to-string (s)
-		(let ((*standard-output*
-                        (make-broadcast-stream s actual-std-out)))
-                  (if (null tests)
-                      (lisp-unit::%run-all-thunks)
-                      (lisp-unit::%run-thunks tests))))))
-    (format *standard-output*
-     "~&~% ** TEST RESULTS: BUILDNODE ** ~%-----------~%~A~%------ END TEST RESULTS ------~%"
-     out)))
+(defun run-tests (&key suites tests)
+  (let* ((*package* (find-package :net.acceleration.buildnode-test-objects)))
+    (lisp-unit2:with-summary (:name :buildnode )
+      (lisp-unit2:run-tests
+       :tests tests :tags suites
+       :reintern-package :net.acceleration.buildnode-test-objects))))
 
 

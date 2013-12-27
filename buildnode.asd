@@ -47,9 +47,9 @@
   :depends-on (:buildnode :buildnode-xhtml :lisp-unit))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (find-system :buildnode))))
-  (asdf:oos 'asdf:load-op :buildnode-test)
-  (funcall (intern "RUN-TESTS" :buildnode-test)
-	   :use-debugger nil))
+  (asdf:load-system :buildnode-test)
+  (let ((*package* (find-package :buildnode-test)))
+    (eval (read-from-string "(run-tests)"))))
 
 ;; Copyright (c) 2011 Russ Tyndall , Acceleration.net http://www.acceleration.net
 ;; All rights reserved.

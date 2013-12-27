@@ -32,6 +32,7 @@
 		      (setf it (xhtml:div () "target"))))))
 	      (xhtml:span () "span 2" (xhtml:div ()))
 	      (xhtml:span () "span 3"))))
+    (declare (ignore n))
     (iter (for node in-dom-parents it)
 	  (for tag = (tag-sym node))
 	  ;(break "~A:~A" tag node)
