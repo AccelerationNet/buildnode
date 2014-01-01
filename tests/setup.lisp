@@ -41,17 +41,19 @@
 
 (defmacro buildnode-w/doc-test (name (&rest args) &body body)
   `(lisp-unit2:define-test ,name (:tags '(, args)
-                                 :context-provider #'with-document-context
-                                 :package :net.acceleration.buildnode-test-objects)
+                                  :contexts #'with-document-context
+                                  :package :net.acceleration.buildnode-test-objects)
     ,@body
     ))
 
 
 (defun run-tests (&key suites tests)
   (let* ((*package* (find-package :net.acceleration.buildnode-test-objects)))
-    (lisp-unit2:with-summary (:name :buildnode )
-      (lisp-unit2:run-tests
-       :tests tests :tags suites
-       :reintern-package :net.acceleration.buildnode-test-objects))))
+    (lisp-unit2:run-tests
+     :tests tests
+     :tags suites
+     :name :buildnode
+     :reintern-package :net.acceleration.buildnode-test-objects
+     :run-contexts #'lisp-unit2:with-summary-context)))
 
 

@@ -44,7 +44,7 @@
 	    :serial t
 	    :components ((:file "setup")
 			 (:file "basic-tests"))))
-  :depends-on (:buildnode :buildnode-xhtml :lisp-unit))
+  :depends-on (:buildnode :buildnode-xhtml :lisp-unit2))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (find-system :buildnode))))
   (asdf:load-system :buildnode-test)

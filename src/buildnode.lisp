@@ -156,23 +156,25 @@
    (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
 
-(defmethod text-of-dom-snippet (el &optional splice stream)
-  "get all of the textnodes of a dom:element and return that string
-   with splice between each character"
-  (flet ((body (s)
-	   (iter
-	     (with has-written = nil )
-	     (for node in-dom el)
-	     (when (dom:text-node-p node)
-	       (when (and has-written splice)
-		 (princ splice s))
-	       (princ (dom:data node) s)
-	       (setf has-written T)
-	       ))))
-    (if stream
-	(body stream)
-	(with-output-to-string (stream)
-	  (body stream)))))
+(defgeneric text-of-dom-snippet  (el &optional splice stream)
+  (:documentation
+   "get all of the textnodes of a dom:element and return that string
+   with splice between each character")
+  (:method  (el &optional splice stream)
+    (flet ((body (s)
+             (iter
+               (with has-written = nil )
+               (for node in-dom el)
+               (when (dom:text-node-p node)
+                 (when (and has-written splice)
+                   (princ splice s))
+                 (princ (dom:data node) s)
+                 (setf has-written T)
+                 ))))
+      (if stream
+          (body stream)
+          (with-output-to-string (stream)
+            (body stream))))))
 
 (defun join-text (text &key delimiter)
   "Like joins trees of lists strings and dom nodes into a single string possibly with a delimiter
@@ -348,48 +350,53 @@
 (defun attribute-uri (attribute)
   (typecase attribute
     (symbol nil)
-    (string 
+    (string
        (let ((list (cl-ppcre:split ":" attribute)))
 	 (case (length list)
 	   (2 (get-namespace-from-prefix (first list)))
 	   ((0 1) nil)
 	   (T (error "Couldnt parse attribute-name ~a into prefix and name" attribute)))))))
 
-(defmethod get-attribute (elem attribute)
-  "Gets the value of an attribute on an element
+(defgeneric get-attribute (elem attribute)
+  (:documentation
+   "Gets the value of an attribute on an element
    if the attribute does not exist return nil
-  "
-  (when elem
-    (let ((args (list elem
-                      (attribute-uri attribute)
-                      (prepare-attribute-name attribute))))
-      (when (apply #'dom:has-attribute-ns args)
-        (apply #'dom:get-attribute-ns args)))))
+  ")
+  (:method (elem attribute)
+    (when elem
+      (let ((args (list elem
+                        (attribute-uri attribute)
+                        (prepare-attribute-name attribute))))
+        (when (apply #'dom:has-attribute-ns args)
+          (apply #'dom:get-attribute-ns args))))))
 
-(defmethod set-attribute (elem attribute value)
-  "Sets an attribute and passes the elem through, returns the elem. If value is nil, removes the attribute"
-  (iter
-    (with attr = (prepare-attribute-name attribute))
-    (for e in (alexandria:ensure-list elem))
-    (if value
-        (dom:set-attribute-ns e (attribute-uri attribute)
-                              attr (prepare-attribute-value value))
-        (alexandria:when-let ((it (dom:get-attribute-node e attr)))
-          (dom:remove-attribute-node e it))))
-  elem)
+(defgeneric set-attribute (elem attribute value)
+  (:documentation "Sets an attribute and passes the elem through, returns the elem. If value is nil, removes the attribute")
+  (:method (elem attribute value)
+    (iter
+      (with attr = (prepare-attribute-name attribute))
+      (for e in (alexandria:ensure-list elem))
+      (if value
+          (dom:set-attribute-ns e (attribute-uri attribute)
+                                attr (prepare-attribute-value value))
+          (alexandria:when-let ((it (dom:get-attribute-node e attr)))
+            (dom:remove-attribute-node e it))))
+    elem))
 
-(defmethod remove-attribute (elem attribute)
-  "removes an attribute and passes the elem through, returns the elem
+(defgeneric remove-attribute (elem attribute)
+  (:documentation
+   "removes an attribute and passes the elem through, returns the elem
    If the attribute does not exist, simply skip it
-  "
-  ;; throws errors to remove attributes that dont exist
-  ;; dont care about that
-  (iter (for e in (alexandria:ensure-list elem))
-    (let ((uri (attribute-uri attribute))
-          (name (prepare-attribute-name attribute)))
-      (when (dom:has-attribute-ns e uri name)
-        (dom:remove-attribute-ns e uri name))))
-  elem)
+  ")
+  (:method (elem attribute)
+    ;; throws errors to remove attributes that dont exist
+    ;; dont care about that
+    (iter (for e in (alexandria:ensure-list elem))
+      (let ((uri (attribute-uri attribute))
+            (name (prepare-attribute-name attribute)))
+        (when (dom:has-attribute-ns e uri name)
+          (dom:remove-attribute-ns e uri name))))
+    elem))
 
 (defun remove-attributes (elem &rest attributes)
   "removes an attribute and passes the elem through, returns the elem"
@@ -397,42 +404,49 @@
 	(remove-attribute elem attr))
   elem)
 
-(defmethod css-classes ( o )
-  "Returns a list of css classes (space separated names in the 'class' attribute)"
-  (etypecase o
-    (null)
-    (string (split-sequence:split-sequence #\space o :remove-empty-subseqs t))
-    (dom:element (css-classes (get-attribute o :class)))))
+(defgeneric css-classes ( o )
+  (:documentation
+   "Returns a list of css classes (space separated names in the 'class' attribute)")
+  (:method (o)
+    (etypecase o
+      (null)
+      (string (split-sequence:split-sequence #\space o :remove-empty-subseqs t))
+      (dom:element (css-classes (get-attribute o :class))))))
 
-(defmethod add-css-class ((el dom:element) new-class
-                          &aux (new-class (trim-and-nullify new-class)))
-  "Adds a new css class to the element and returns the element"
-  (when new-class
-    (let* ((class-string (get-attribute el :class))
-           (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*"))
-      (unless (cl-ppcre:scan regex class-string)
-        (set-attribute el :class (format nil "~@[~a ~]~a" class-string new-class)))))
-  el)
-
-(defmethod add-css-classes ((comp T) &rest classes)
-  (declare (dynamic-extent classes))
-  (iter (for class in classes) (add-css-class comp class))
-  comp)
-
-(defmethod remove-css-class ((el dom:element) new-class)
-  "Removes a css class from the elements and returns the element"
-  (let* ((class-string (get-attribute el :class))
-         (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*")
-         (new-class-string (trim-and-nullify (cl-ppcre:regex-replace-all regex class-string " "))))
-    (if new-class-string
-	(set-attribute el :class new-class-string)
-	(remove-attribute el :class))
+(defgeneric add-css-class (element new-class)
+  (:documentation
+   "Adds a new css class to the element and returns the element")
+  (:method  ((el dom:element) new-class
+             &aux (new-class (trim-and-nullify new-class)))
+    (when new-class
+      (let* ((class-string (get-attribute el :class))
+             (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*"))
+        (unless (cl-ppcre:scan regex class-string)
+          (set-attribute el :class (format nil "~@[~a ~]~a" class-string new-class)))))
     el))
 
-(defmethod remove-css-classes ((comp T) &rest classes)
-  (declare (dynamic-extent classes))
-  (iter (for class in classes) (remove-css-class comp class))
-  comp)
+(defgeneric add-css-classes (comp &rest classes)
+  (:method (comp &rest classes)
+    (declare (dynamic-extent classes))
+    (iter (for class in classes) (add-css-class comp class))
+    comp))
+
+(defgeneric remove-css-class (el new-class)
+  (:documentation "Removes a css class from the elements and returns the element")
+  (:method ((el dom:element) new-class)
+    (let* ((class-string (get-attribute el :class))
+           (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*")
+           (new-class-string (trim-and-nullify (cl-ppcre:regex-replace-all regex class-string " "))))
+      (if new-class-string
+          (set-attribute el :class new-class-string)
+          (remove-attribute el :class))
+      el)))
+
+(defgeneric remove-css-classes ( comp &rest classes)
+  (:method (comp &rest classes)
+    (declare (dynamic-extent classes))
+    (iter (for class in classes) (remove-css-class comp class))
+    comp))
 
 (defun push-new-attribute (elem attribute value)
   "if the attribute is not on the element then put it there with the specified value,
@@ -542,13 +556,14 @@ possibly a html-compatibility-sink if *html-compatibility-mode* is set"
   (let ((sink (make-output-sink octet-stream :char-p nil)))
     (write-normalized-document-to-sink document sink)))
 
-(defmethod html-output? (doc)
-  (let ((dt (dom:doctype doc)))
-    (or *html-compatibility-mode*
-	(and
-         dt
-         (string-equal "html" (dom:name dt))
-         (not (search "xhtml" (dom:system-id dt) :test #'string-equal))))))
+(defgeneric html-output? (doc)
+  (:method (doc)
+    (let ((dt (dom:doctype doc)))
+      (or *html-compatibility-mode*
+          (and
+           dt
+           (string-equal "html" (dom:name dt))
+           (not (search "xhtml" (dom:system-id dt) :test #'string-equal)))))))
 
 (defun write-document (document &optional (out-stream *standard-output*))
   "Write the document to the designated out-stream, or *standard-ouput* by default."
@@ -696,12 +711,13 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
   `(let ((*html-compatibility-mode* T))
      (document-to-string (with-html5-document ,@body))))
 
-(defmethod remove-all-children ((it dom:element))
-  ;; should be a touch faster than removing one at a time
-  (iter (for n in-dom-children it)
-    (setf (slot-value n 'rune-dom::parent) nil))
-  (setf (slot-value it 'rune-dom::children) (rune-dom::make-node-list))
-  it)
+(defgeneric remove-all-children (el)
+  (:method ((it dom:element))
+    ;; should be a touch faster than removing one at a time
+    (iter (for n in-dom-children it)
+      (setf (slot-value n 'rune-dom::parent) nil))
+    (setf (slot-value it 'rune-dom::children) (rune-dom::make-node-list))
+    it))
 
 (defvar *snippet-output-stream* nil)
 
