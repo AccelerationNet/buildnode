@@ -153,8 +153,13 @@
   (let ((xhtml1-transitional.dtd
           (asdf:system-relative-pathname
            :buildnode "src/xhtml1-transitional.dtd")))
-   (cxml:make-extid "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		   (puri:uri #?|file://${xhtml1-transitional.dtd}|))))
+   (cxml:make-extid
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    (puri:uri
+     (cl-ppcre:regex-replace-all
+      " "
+      #?|file://${xhtml1-transitional.dtd}|
+      "%20")))))
 
 (defgeneric text-of-dom-snippet  (el &optional splice stream)
   (:documentation
