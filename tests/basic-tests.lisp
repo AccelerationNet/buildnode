@@ -291,7 +291,7 @@
 	 (tree `("3" ("2" ("1" ,doc) "1") "2" "3")))
     (assert-equal "3 2 1 test 1 2 3" (join-text tree :delimiter " "))))
 
-(buildnode-w/doc-test test-add/remove-class (dom-manipulation)
+(buildnode-w/doc-test test-add/remove-class (dom-manipulation css)
   (let ((node (xhtml:div '(:class "class1")))
         (n2 (xhtml:div '())))
     (add-css-classes node "class2" nil "class3" )
@@ -307,5 +307,11 @@
     (assert-equal "class1 class2" (get-attribute n2 :class))
     (remove-css-class n2 "class1")
     (assert-equal "class2" (get-attribute n2 :class))))
+
+(buildnode-w/doc-test test-add/remove-class-2 (dom-manipulation css)
+  (let ((node (xhtml:div '(:class "class1"))))
+    (add-css-class node (list (list "class0" '("class2 class1") "class4")  nil "class3 class2" "class2"))
+    (assert-equal "class0 class1 class2 class3 class4" (get-attribute node :class))
+    ))
 
 

@@ -14,6 +14,7 @@
    #:set-attribute
    #:get-attribute
    #:add-css-class
+   #:add-css-class-helper
    #:add-css-classes
    #:remove-css-class
    #:remove-css-classes
@@ -59,6 +60,7 @@
    #:def-tag-node
    #:remove-all-children
    #:with-html-snippet
+   #:with-html5-snippet
    #:with-xhtml-snippet
    #:write-doc-to-file))
 

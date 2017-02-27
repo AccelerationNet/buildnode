@@ -10,14 +10,22 @@
 (defun trim-whitespace (s)
   (string-trim +common-white-space-trimbag+ s))
 
+(defmacro trim-and-nullify! (&rest places)
+  `(setf
+    ,@(iter (for p in places)
+        (collect p) (collect `(trim-and-nullify ,p)))))
+
 (defun trim-and-nullify (s)
   "trims the whitespace from a string returning nil
-   if trimming produces an empty string or the string 'nil' "
-  (when s
-    (let ((s (trim-whitespace s)))
-      (cond ((zerop (length s)) nil)
-	    ((string-equal s "nil") nil)
-	    (T s)))))
+   if trimming produces an empty string or the string 'nil' "  
+  (typecase s
+    (null nil)
+    (list (mapcar #'trim-and-nullify s))
+    (string
+     (let ((s (trim-whitespace s)))
+       (cond ((zerop (length s)) nil)
+             ((string-equal s "nil") nil)
+             (T s))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar *document* ()
@@ -418,22 +426,38 @@
       (string (split-sequence:split-sequence #\space o :remove-empty-subseqs t))
       (dom:element (css-classes (get-attribute o :class))))))
 
+(defun add-css-class-helper (&rest new-classes)
+  (sort
+   (remove-duplicates
+    (collectors:with-appender-output (them)
+      (labels ((%help (it)
+                 (typecase it
+                   (null nil)
+                   (string
+                    (trim-and-nullify! it)
+                    (when it
+                      (them (cl-ppcre:split #?r"\s+" it))))
+                   (list (mapc #'%help it)))))
+        (%help new-classes)))
+    :test #'string=)
+   #'string-lessp))
+
 (defgeneric add-css-class (element new-class)
   (:documentation
    "Adds a new css class to the element and returns the element")
-  (:method  ((el dom:element) new-class
-             &aux (new-class (trim-and-nullify new-class)))
+  (:method  ((el dom:element) new-class)
+    (trim-and-nullify! new-class)
     (when new-class
-      (let* ((class-string (get-attribute el :class))
-             (regex #?r"(?:$|^|\s)*${new-class}(?:$|^|\s)*"))
-        (unless (cl-ppcre:scan regex class-string)
-          (set-attribute el :class (format nil "~@[~a ~]~a" class-string new-class)))))
+      (set-attribute
+       el :class
+       (format nil "~{~a~^ ~}"
+               (add-css-class-helper (get-attribute el :class) new-class))))
     el))
 
 (defgeneric add-css-classes (comp &rest classes)
   (:method (comp &rest classes)
     (declare (dynamic-extent classes))
-    (iter (for class in classes) (add-css-class comp class))
+    (add-css-class comp classes)
     comp))
 
 (defgeneric remove-css-class (el new-class)
@@ -757,25 +781,30 @@ This sets the doctype to be html5 compatible <!DOCTYPE html>."
 
 (defmacro %with-snippet ((type &optional stream sink) &body body)
   "helper to define with-html-snippet and with-xhtml-snippet"
-  (assert (member type '(with-html-document with-xhtml-document)))
+  (assert (member type '(with-html-document with-html5-document with-xhtml-document)))
   (alexandria:with-unique-names (result)
-  `(let ((*html-compatibility-mode* ,(eql type 'with-html-document))
-         ,result)
-    (,type
-     (progn
-       (setf
-        ,result
-        (multiple-value-list
-         (buffer-xml-output (,stream ,sink)
-           (let ((content (flatten-children (progn ,@body))))
-             (iter (for n in content)
-               (buildnode::dom-walk cxml::*sink* n))))))
-       nil))
-    (apply #'values ,result))))
+    `(let ((*html-compatibility-mode*
+            ',(member type '(with-html-document with-html5-document) ))
+           ,result)
+      (,type
+       (progn
+         (setf
+          ,result
+          (multiple-value-list
+           (buffer-xml-output (,stream ,sink)
+             (let ((content (flatten-children (progn ,@body))))
+               (iter (for n in content)
+                 (buildnode::dom-walk cxml::*sink* n))))))
+         nil))
+      (apply #'values ,result))))
 
 (defmacro with-html-snippet ((&optional stream sink) &body body)
   "builds a little piece of html-dom and renders that to a string / stream"
   `(%with-snippet (with-html-document ,stream ,sink) ,@body))
+
+(defmacro with-html5-snippet ((&optional stream sink) &body body)
+  "builds a little piece of html-dom and renders that to a string / stream"
+  `(%with-snippet (with-html5-document ,stream ,sink) ,@body))
 
 (defmacro with-xhtml-snippet ((&optional stream sink) &body body)
   "builds a little piece of xhtml-dom and renders that to a string / stream"
